@@ -1,0 +1,7 @@
+.DS_Store
+__pycache__
+*.parquet
+data.txt
+day.txt
+store_code.txt
+.claude/
