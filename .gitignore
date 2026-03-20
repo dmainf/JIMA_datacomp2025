@@ -6,6 +6,7 @@ day.txt
 store_code.txt
 data/
 data.csv
+*.swp
 *.png
 *.pptx
 .claude/
