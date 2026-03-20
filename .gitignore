@@ -4,4 +4,8 @@ __pycache__
 data.txt
 day.txt
 store_code.txt
+data/
+data.csv
+*.png
+*.pptx
 .claude/
