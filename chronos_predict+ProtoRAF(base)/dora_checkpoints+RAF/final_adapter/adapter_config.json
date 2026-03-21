@@ -32,15 +32,15 @@
   "rank_pattern": {},
   "revision": null,
   "target_modules": [
-    "v",
+    "o",
+    "wi",
     "output_layer",
     "q",
-    "o",
-    "residual_layer",
-    "k",
     "hidden_layer",
     "wo",
-    "wi"
+    "k",
+    "v",
+    "residual_layer"
   ],
   "target_parameters": null,
   "task_type": null,
