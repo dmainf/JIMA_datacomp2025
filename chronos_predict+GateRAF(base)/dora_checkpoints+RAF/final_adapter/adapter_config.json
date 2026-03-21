@@ -24,7 +24,10 @@
   "lora_dropout": 0.0,
   "megatron_config": null,
   "megatron_core": "megatron.core",
-  "modules_to_save": null,
+  "modules_to_save": [
+    "scale_mlp",
+    "gate_mlp"
+  ],
   "peft_type": "LORA",
   "peft_version": "0.18.1",
   "qalora_group_size": 16,
@@ -33,18 +36,18 @@
   "revision": null,
   "target_modules": [
     "gate_mlp.2",
-    "output_layer",
-    "k",
-    "v",
+    "gate_mlp.0",
     "hidden_layer",
-    "residual_layer",
+    "scale_mlp.2",
     "q",
     "scale_mlp.0",
+    "residual_layer",
     "wi",
-    "wo",
-    "scale_mlp.2",
     "o",
-    "gate_mlp.0"
+    "output_layer",
+    "k",
+    "wo",
+    "v"
   ],
   "target_parameters": null,
   "task_type": null,

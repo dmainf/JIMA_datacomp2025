@@ -98,10 +98,11 @@ class TimeSeriesRetriever:
                 continue
             windows = windows[valid_mask]
             end_dates = end_dates[valid_mask]
-            scales = np.mean(np.abs(windows), axis=1, keepdims=True) + 1.0
-            normalized_windows = windows / scales
+            means = np.mean(windows, axis=1, keepdims=True)
+            stds = np.std(windows, axis=1, keepdims=True) + 1e-5
+            normalized_windows = (windows - means) / stds
             vectors_list.append(normalized_windows)
-            scales_list.append(scales.flatten())
+            scales_list.append(stds.flatten())
             timestamps_list.extend(end_dates)
         if not vectors_list:
             print("No vectors created.")
@@ -132,8 +133,9 @@ class TimeSeriesRetriever:
 
         faiss.omp_set_num_threads(1)
 
-        scales = np.mean(np.abs(query_batch), axis=1, keepdims=True) + 1.0
-        normalized_queries = (query_batch / scales).astype('float32')
+        means = np.mean(query_batch, axis=1, keepdims=True)
+        stds = np.std(query_batch, axis=1, keepdims=True) + 1e-5
+        normalized_queries = ((query_batch - means) / stds).astype('float32')
         normalized_queries = np.ascontiguousarray(normalized_queries)
 
         search_k = min(k * 5 + 10, self.index.ntotal)
@@ -167,7 +169,7 @@ class TimeSeriesRetriever:
                 retrieved_scale = self.scales_store[idx]
                 raf_ctx[j] = vec * retrieved_scale
                 raf_msk[j] = True
-                raf_ratio[j] = retrieved_scale / query_scales[i]
+                raf_ratio[j] = retrieved_scale / stds[i, 0]
 
             raf_contexts.append(raf_ctx)
             raf_masks.append(raf_msk)
@@ -211,7 +213,7 @@ class ChronosBoltFiDDataset(Dataset):
                 if retriever:
                     use_len = min(len(query), retrieval_length)
                     query_slice = query[-use_len:]
-                    query_scale = np.mean(np.abs(query_slice)) + 1.0
+                    query_scale = np.std(query_slice) + 1e-5
                     if use_len < retrieval_length:
                         query_slice = np.pad(query_slice, (retrieval_length - use_len, 0), 'constant')
 
@@ -244,7 +246,7 @@ class ChronosBoltFiDDataset(Dataset):
                     if retriever:
                         q_start = max(0, i - retrieval_length)
                         query_slice = series[q_start:i]
-                        query_scale = np.mean(np.abs(query_slice)) + 1.0
+                        query_scale = np.std(query_slice) + 1e-5
                         if len(query_slice) < retrieval_length:
                             query_slice = np.pad(query_slice, (retrieval_length - len(query_slice), 0), 'constant')
 

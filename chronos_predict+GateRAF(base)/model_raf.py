@@ -31,7 +31,7 @@ class ChronosBoltFiDModel(ChronosBoltModelForForecasting):
                     module.weight.data.normal_(mean=0.0, std=0.02)
                     if module.bias is not None:
                         if sub is self.gate_mlp and module is self.gate_mlp[2]:
-                            module.bias.data.fill_(-3.0)
+                            module.bias.data.fill_(-1.0)
                         else:
                             module.bias.data.zero_()
                 return
@@ -93,7 +93,7 @@ class ChronosBoltFiDModel(ChronosBoltModelForForecasting):
                 if raf_scale_ratio is not None:
                     scale_input = torch.log(raf_scale_ratio.clamp(min=1e-6)).unsqueeze(-1).to(dtype=raf_hidden.dtype, device=raf_hidden.device)
                     scale_emb = self.scale_mlp(scale_input)
-                    raf_hidden = raf_hidden + scale_emb.unsqueeze(2)
+                    raf_hidden = raf_hidden * torch.sigmoid(scale_emb.unsqueeze(2))
 
                 raf_hidden = raf_hidden.view(batch_size, K * L_patches, D)
                 raf_attn_mask = raf_attn_mask.view(batch_size, K * L_patches)

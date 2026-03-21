@@ -6,7 +6,7 @@ from func_chronos_bolt_raf import *
 ALL_PREDICT = True
 DO_TRAIN = True
 ZERO_SHOT = False
-USE_RAF = False
+USE_RAF = True
 
 
 def main():

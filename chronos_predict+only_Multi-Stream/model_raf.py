@@ -83,7 +83,7 @@ class ChronosBoltFiDModel(ChronosBoltModelForForecasting):
                 if raf_scale_ratio is not None:
                     scale_input = torch.log(raf_scale_ratio.clamp(min=1e-6)).unsqueeze(-1).to(dtype=raf_hidden.dtype, device=raf_hidden.device)
                     scale_emb = self.scale_mlp(scale_input)
-                    raf_hidden = raf_hidden + scale_emb.unsqueeze(2)
+                    raf_hidden = raf_hidden * torch.sigmoid(scale_emb.unsqueeze(2))
 
                 raf_hidden = raf_hidden.view(batch_size, K * L_patches, D)
                 raf_attn_mask = raf_attn_mask.view(batch_size, K * L_patches)
