@@ -71,6 +71,9 @@ class ChronosBoltFiDModel(ChronosBoltModelForForecasting):
         hidden_states = local_hidden
 
         if raf_context is not None and raf_context.dim() == 3:
+            K = raf_context.size(1)
+            L_ret = raf_context.size(2)
+
             has_valid = raf_mask.any(dim=-1).any(dim=-1) if raf_mask is not None else ~torch.isnan(raf_context).all(dim=-1).all(dim=-1)
 
             if has_valid.any():
