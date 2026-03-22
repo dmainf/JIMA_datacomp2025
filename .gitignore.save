@@ -1,12 +1,11 @@
 .DS_Store
 __pycache__
 data/
-!chronos_predict/data/
 data.txt
+data.csv
 day.txt
 store_code.txt
-*.csv
-*.parquet
+!chronos_predict/data/
 *.swp
 *.png
 *.pptx
