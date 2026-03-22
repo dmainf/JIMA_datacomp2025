@@ -1,0 +1,19 @@
+flowchart TB
+    ctx["Context"]
+
+    subgraph ENC["Chronos Bolt Encoder  [DoRA]"]
+        inorm["Instance Normalization"]
+        patch["Patch Embedding"]
+        t5enc["T5 Encoder"]
+    end
+
+    subgraph DEC["Chronos Bolt Decoder  [DoRA]"]
+        t5dec["T5 Decoder\ncross-attn(query=input_embeds, key/value=h)"]
+        outproj["Output Patch Projection"]
+        invnorm["Inverse Instance Normalization"]
+    end
+
+    ctx --> inorm --> patch --> t5enc
+    patch -. "input_embeds" .-> t5dec
+    t5enc -- "hidden_states" --> t5dec
+    t5dec --> outproj --> invnorm --> out["Quantile Forecasts"]
