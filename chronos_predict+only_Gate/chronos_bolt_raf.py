@@ -43,7 +43,7 @@ def main():
             print(f"Adapter not found at {possible_path}. Falling back to zero-shot inference.")
 
     gate_suffix = "(zero-shot)" if not adapter_path else ""
-    base_name = f"Gate-RAF{gate_suffix}" if CONFIG["use_raf"] else f"noRAF{gate_suffix}"
+    base_name = f"only-Gate{gate_suffix}" if CONFIG["use_raf"] else f"noRAF{gate_suffix}"
     CONFIG["output_dir"] = base_name
 
     print(f"\n=== Starting Inference ===")
