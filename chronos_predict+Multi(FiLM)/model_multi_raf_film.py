@@ -9,16 +9,16 @@ class ChronosBoltFiDModel(ChronosBoltModelForForecasting):
         super().__init__(config)
         d_model = config.d_model
 
-        self.scale_mlp = nn.Sequential(
+        self.film_mlp = nn.Sequential(
             nn.Linear(1, d_model),
             nn.SiLU(),
             nn.Linear(d_model, d_model * 2)
         )
 
     def _init_weights(self, module):
-        if module in [self.scale_mlp]:
+        if module in [self.film_mlp]:
             return
-        for sub in [self.scale_mlp]:
+        for sub in [self.film_mlp]:
             if module in list(sub.modules()):
                 if isinstance(module, nn.Linear):
                     module.weight.data.normal_(mean=0.0, std=0.02)
@@ -82,7 +82,7 @@ class ChronosBoltFiDModel(ChronosBoltModelForForecasting):
 
                 if raf_scale_ratio is not None:
                     scale_input = torch.log(raf_scale_ratio.clamp(min=1e-6)).unsqueeze(-1).to(dtype=raf_hidden.dtype, device=raf_hidden.device)
-                    scale_emb = self.scale_mlp(scale_input)
+                    scale_emb = self.film_mlp(scale_input)
                     gamma, beta = scale_emb.chunk(2, dim=-1)
                     raf_hidden = raf_hidden * (1.0 + gamma.unsqueeze(2)) + beta.unsqueeze(2)
 

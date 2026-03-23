@@ -11,7 +11,7 @@ import warnings
 import logging
 
 import faiss
-from model_gate_raf import ChronosBoltFiDModel
+from model_multi_raf_film import ChronosBoltFiDModel
 
 warnings.filterwarnings("ignore")
 logging.getLogger("pytorch_lightning").setLevel(logging.ERROR)
@@ -25,8 +25,8 @@ CONFIG = {
     "context_length": 128,
     "retrieval_length": 128,
     "batch_size": 16,
-    "output_dir": "Gate-RAF-noscale",
-    "lora_output_dir": "gate_raf_noscale_checkpoints",
+    "output_dir": "Multi-RAF(FiLM)",
+    "lora_output_dir": "multi_raf_film_checkpoints",
     "learning_rate": 1e-5,
     "grad_accum_steps": 4,
     "num_steps": 10000,
@@ -49,7 +49,7 @@ PEFT_CONFIG = LoraConfig(
     lora_dropout=0.0,
     target_modules="all-linear",
     use_dora=True,
-    modules_to_save=["gate_mlp"],
+    modules_to_save=["film_mlp"],
 )
 
 
@@ -306,7 +306,7 @@ class ChronosFiDTrainer(Trainer):
     def create_optimizer(self):
         mlp_params, mlp_param_ids = [], set()
         for name, param in self.model.named_parameters():
-            if "gate_mlp" in name and param.requires_grad:
+            if "scale_mlp" in name and param.requires_grad:
                 mlp_params.append(param)
                 mlp_param_ids.add(id(param))
         base_params = [p for p in self.model.parameters() if id(p) not in mlp_param_ids and p.requires_grad]

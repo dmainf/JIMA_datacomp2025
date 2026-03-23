@@ -11,7 +11,7 @@ import warnings
 import logging
 
 import faiss
-from model_gate_raf import ChronosBoltFiDModel
+from model_gate_raf_film import ChronosBoltFiDModel
 
 warnings.filterwarnings("ignore")
 logging.getLogger("pytorch_lightning").setLevel(logging.ERROR)
@@ -25,8 +25,8 @@ CONFIG = {
     "context_length": 128,
     "retrieval_length": 128,
     "batch_size": 16,
-    "output_dir": "Gate-RAF",
-    "lora_output_dir": "gate_raf_checkpoints",
+    "output_dir": "Gate-RAF(FiLM)",
+    "lora_output_dir": "gate_raf_film_checkpoints",
     "learning_rate": 1e-5,
     "grad_accum_steps": 4,
     "num_steps": 10000,
@@ -49,7 +49,7 @@ PEFT_CONFIG = LoraConfig(
     lora_dropout=0.0,
     target_modules="all-linear",
     use_dora=True,
-    modules_to_save=["scale_mlp", "gate_mlp"],
+    modules_to_save=["film_mlp", "gate_mlp"],
 )
 
 

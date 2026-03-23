@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-from func_multi_raf import *
+from func_multi_raf_film import *
 
 ALL_PREDICT = True
 DO_TRAIN = True
@@ -8,7 +8,7 @@ ZERO_SHOT = False
 
 
 def main():
-    CONFIG["lora_output_dir"] = "multi_raf_noscale_checkpoints"
+    CONFIG["lora_output_dir"] = "multi_raf_film_checkpoints"
 
     print("=== Loading Data ===")
     required_cols = ['書名', '日付', 'POS販売冊数']
@@ -36,7 +36,7 @@ def main():
             print(f"Adapter not found at {possible_path}. Falling back to zero-shot inference.")
 
     suffix = "(zero-shot)" if not adapter_path else ""
-    CONFIG["output_dir"] = f"Multi-noscale{suffix}"
+    CONFIG["output_dir"] = f"Multi-RAF(FiLM){suffix}"
 
     print(f"\n=== Starting Inference ===")
     decile_books = extract_decile_books(df)
