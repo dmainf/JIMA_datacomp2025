@@ -1,50 +1,44 @@
 flowchart TB
-    ctx["Local Context"]
-    ret["Retrieved Series\n(FAISS top-K)"]
-    sratio["Scale Ratio\ns = σ_ret / σ_query"]
+    classDef io    fill:#f8fafc,stroke:#64748b,color:#0f172a
+    classDef lenc  fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef renc  fill:#fef9c3,stroke:#ca8a04,color:#713f12
+    classDef scale fill:#ffedd5,stroke:#ea580c,color:#7c2d12
+    classDef gate  fill:#fdf4ff,stroke:#c026d3,color:#701a75
+    classDef fuse  fill:#f3e8ff,stroke:#9333ea,color:#3b0764
+    classDef dec   fill:#dcfce7,stroke:#16a34a,color:#14532d
 
-    subgraph LENC["Local Stream  [DoRA]"]
-        enc_l["Encode(x)\nh_local"]
-        summary["Token-avg Pooling\nh_summary"]
-    end
+    x(["Input  x"])
+    r(["Retrieved  r₁…rₖ"])
+    s(["s = σ_r / σ_x"])
 
-    subgraph RENC["Retrieved Stream  [DoRA, shared weights]"]
-        fold["Fold batch × K"]
-        enc_r["Encode(retrieved)"]
-        unfold["Unfold → h_raf"]
-    end
-
-    subgraph SCALE["Scale Modulation  [trained ×10 lr]"]
-        smlp["scale_mlp\nlog(s) → Linear → SiLU → Linear → scale_emb"]
-        smul["h_raf × sigmoid(scale_emb)\nh_raf_scaled"]
-    end
-
-    subgraph GATE["Gating  [trained ×10 lr]"]
-        reshape["Reshape h_raf_scaled"]
-        expand["Expand h_summary → match h_raf_scaled"]
-        gcat["Concatenate\n[h_summary_exp ; h_raf_scaled]"]
-        gmlp["gate_mlp\nLinear → SiLU → Linear → Sigmoid\ng (token-wise gate)"]
-        gmul["h_raf_scaled × g\nh_filtered"]
-    end
+    enc_l["Local Encoder  (DoRA)"]
+    pool["Avg. Pooling"]
+    enc_r["Retrieved Encoder  (DoRA, shared ×K)"]
+    scale["Scale Modulation\nα = MLP(log s)\nh_raf ⊙ σ(α)"]
+    gate["Adaptive Gate\ng = σ(MLP([h_sum ; h_scaled]))\nh_scaled ⊙ g"]
 
     subgraph FUSE["Fusion"]
-        concat["Concatenate\n[h_local ; h_filtered]"]
+        cat["Concatenate  [ h_local ; h_filtered ]"]
     end
 
-    subgraph DEC["Chronos Bolt Decoder  [DoRA]"]
-        t5dec["T5 Decoder\ncross-attn to concatenated hidden"]
-        outproj["Output Patch Projection"]
-        invnorm["Inverse Instance Normalization"]
-    end
+    dec["Decoder  (DoRA)"]
 
-    ctx --> enc_l --> summary --> expand
-    ret --> fold --> enc_r --> unfold --> smul
-    sratio --> smlp --> smul
-    smul --> reshape --> gcat
-    expand --> gcat --> gmlp --> gmul
-    reshape --> gmul
-    gmul --> concat
-    enc_l --> concat
-    concat -- "hidden_states" --> t5dec
-    enc_l -. "input_embeds" .-> t5dec
-    t5dec --> outproj --> invnorm --> out["Quantile Forecasts"]
+    x     --> enc_l --> pool
+    r     --> enc_r
+    enc_r -- "h_raf"      --> scale
+    s     -->                scale
+    pool  -- "h_sum"      --> gate
+    scale -- "h_scaled"   --> gate
+    enc_l -- "h_local"    --> cat
+    gate  -- "h_filtered" --> cat
+    cat   -- "h_fused"    --> dec
+    enc_l -. "query"      .-> dec
+    dec   --> y(["Quantile Forecasts  ŷ"])
+
+    class x,r,s,y io
+    class enc_l,pool lenc
+    class enc_r renc
+    class scale scale
+    class gate gate
+    class cat fuse
+    class dec dec

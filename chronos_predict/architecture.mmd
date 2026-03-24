@@ -1,19 +1,29 @@
 flowchart TB
-    ctx["Context"]
+    classDef io     fill:#f8fafc,stroke:#64748b,color:#0f172a
+    classDef enc    fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef dec    fill:#dcfce7,stroke:#16a34a,color:#14532d
 
-    subgraph ENC["Chronos Bolt Encoder  [DoRA]"]
-        inorm["Instance Normalization"]
-        patch["Patch Embedding"]
-        t5enc["T5 Encoder"]
+    x(["Input  x"])
+
+    subgraph ENC["Encoder  (DoRA)"]
+        inorm["Instance Norm"]
+        patch["Patch Embed"]
+        t5e["T5 Encoder"]
+        inorm --> patch --> t5e
     end
 
-    subgraph DEC["Chronos Bolt Decoder  [DoRA]"]
-        t5dec["T5 Decoder\ncross-attn(query=input_embeds, key/value=h)"]
-        outproj["Output Patch Projection"]
-        invnorm["Inverse Instance Normalization"]
+    subgraph DEC["Decoder  (DoRA)"]
+        t5d["T5 Decoder"]
+        proj["Projection Head"]
+        invn["Inv. Instance Norm"]
+        t5d --> proj --> invn
     end
 
-    ctx --> inorm --> patch --> t5enc
-    patch -. "input_embeds" .-> t5dec
-    t5enc -- "hidden_states" --> t5dec
-    t5dec --> outproj --> invnorm --> out["Quantile Forecasts"]
+    x --> inorm
+    patch -. "query" .-> t5d
+    t5e -- "h" --> t5d
+    invn --> y(["Quantile Forecasts  ŷ"])
+
+    class x,y io
+    class inorm,patch,t5e enc
+    class t5d,proj,invn dec

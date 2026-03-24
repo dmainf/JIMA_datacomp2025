@@ -1,31 +1,32 @@
 flowchart TB
-    ctx["Local Context"]
-    ret["Retrieved Series\n(FAISS top-K)"]
+    classDef io   fill:#f8fafc,stroke:#64748b,color:#0f172a
+    classDef lenc fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef renc fill:#fef9c3,stroke:#ca8a04,color:#713f12
+    classDef fuse fill:#f3e8ff,stroke:#9333ea,color:#3b0764
+    classDef dec  fill:#dcfce7,stroke:#16a34a,color:#14532d
 
-    subgraph LENC["Local Stream  [DoRA]"]
-        enc_l["Encode(x)\nh_local"]
+    x(["Input  x"])
+    r(["Retrieved  r₁…rₖ"])
+
+    enc_l["Local Encoder  (DoRA)"]
+    enc_r["Retrieved Encoder  (DoRA, shared ×K)"]
+
+    subgraph FUSE["Fusion"]
+        cat["Concatenate  [ h_local ; h_raf ]"]
     end
 
-    subgraph RENC["Retrieved Stream  [DoRA, shared weights]"]
-        fold["Fold batch × K"]
-        enc_r["Encode(retrieved)"]
-        unfold["Unfold → h_raf"]
-    end
+    dec["Decoder  (DoRA)"]
 
-    subgraph FUSE["Fusion  (no gate, no scale)"]
-        concat["Concatenate\n[h_local ; h_raf]"]
-    end
+    x     --> enc_l
+    r     --> enc_r
+    enc_l -- "h_local" --> cat
+    enc_r -- "h_raf"   --> cat
+    cat   -- "h_fused" --> dec
+    enc_l -. "query"   .-> dec
+    dec   --> y(["Quantile Forecasts  ŷ"])
 
-    subgraph DEC["Chronos Bolt Decoder  [DoRA]"]
-        t5dec["T5 Decoder\ncross-attn to concatenated hidden"]
-        outproj["Output Patch Projection"]
-        invnorm["Inverse Instance Normalization"]
-    end
-
-    ctx --> enc_l
-    ret --> fold --> enc_r --> unfold
-    enc_l --> concat
-    unfold --> concat
-    concat -- "hidden_states" --> t5dec
-    enc_l -. "input_embeds" .-> t5dec
-    t5dec --> outproj --> invnorm --> out["Quantile Forecasts"]
+    class x,r,y io
+    class enc_l lenc
+    class enc_r renc
+    class cat fuse
+    class dec dec

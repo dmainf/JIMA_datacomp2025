@@ -1,27 +1,27 @@
 flowchart TB
-    ctx["Local Context"]
-    ret["Retrieved Series\n(FAISS top-K)"]
+    classDef io   fill:#f8fafc,stroke:#64748b,color:#0f172a
+    classDef ret  fill:#fef9c3,stroke:#ca8a04,color:#713f12
+    classDef enc  fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef dec  fill:#dcfce7,stroke:#16a34a,color:#14532d
 
-    subgraph FUSE["Context Extension"]
-        flat["Flatten Retrieved Series"]
-        cat["Concatenate\n[retrieved ; local context]"]
+    x(["Input  x"])
+    r(["Retrieved  r₁…rₖ"])
+
+    subgraph CTX["Context Extension"]
+        cat["Concatenate  [ r₁ ⊕ … ⊕ rₖ ⊕ x ]"]
     end
 
-    subgraph ENC["Chronos Bolt Encoder  [DoRA]"]
-        inorm["Instance Normalization"]
-        patch["Patch Embedding"]
-        t5enc["T5 Encoder"]
-    end
+    enc["Encoder  (DoRA)"]
+    dec["Decoder  (DoRA)"]
 
-    subgraph DEC["Chronos Bolt Decoder  [DoRA]"]
-        t5dec["T5 Decoder\ncross-attn to encoder hidden"]
-        outproj["Output Patch Projection"]
-        invnorm["Inverse Instance Normalization"]
-    end
+    x   --> cat
+    r   --> cat
+    cat --> enc
+    enc -. "query" .-> dec
+    enc -- "h"     --> dec
+    dec --> y(["Quantile Forecasts  ŷ"])
 
-    ctx --> cat
-    ret --> flat --> cat
-    cat --> inorm --> patch --> t5enc
-    patch -. "input_embeds" .-> t5dec
-    t5enc -- "hidden_states" --> t5dec
-    t5dec --> outproj --> invnorm --> out["Quantile Forecasts"]
+    class x,r,y io
+    class cat ret
+    class enc enc
+    class dec dec
