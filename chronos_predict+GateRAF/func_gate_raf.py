@@ -49,7 +49,7 @@ PEFT_CONFIG = LoraConfig(
     lora_dropout=0.0,
     target_modules="all-linear",
     use_dora=True,
-    modules_to_save=["scale_mlp", "gate_mlp"],
+    modules_to_save=["gate_mlp"],
 )
 
 
@@ -306,7 +306,7 @@ class ChronosFiDTrainer(Trainer):
     def create_optimizer(self):
         mlp_params, mlp_param_ids = [], set()
         for name, param in self.model.named_parameters():
-            if ("scale_mlp" in name or "gate_mlp" in name) and param.requires_grad:
+            if "gate_mlp" in name and param.requires_grad:
                 mlp_params.append(param)
                 mlp_param_ids.add(id(param))
         base_params = [p for p in self.model.parameters() if id(p) not in mlp_param_ids and p.requires_grad]

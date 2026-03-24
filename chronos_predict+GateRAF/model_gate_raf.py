@@ -9,12 +9,6 @@ class ChronosBoltFiDModel(ChronosBoltModelForForecasting):
         super().__init__(config)
         d_model = config.d_model
 
-        self.scale_mlp = nn.Sequential(
-            nn.Linear(1, d_model),
-            nn.SiLU(),
-            nn.Linear(d_model, d_model)
-        )
-
         self.gate_mlp = nn.Sequential(
             nn.Linear(d_model * 2, d_model),
             nn.SiLU(),
@@ -23,9 +17,9 @@ class ChronosBoltFiDModel(ChronosBoltModelForForecasting):
         )
 
     def _init_weights(self, module):
-        if module in [self.scale_mlp, self.gate_mlp]:
+        if module in [self.gate_mlp]:
             return
-        for sub in [self.scale_mlp, self.gate_mlp]:
+        for sub in [self.gate_mlp]:
             if module in list(sub.modules()):
                 if isinstance(module, nn.Linear):
                     module.weight.data.normal_(mean=0.0, std=0.02)
@@ -89,11 +83,6 @@ class ChronosBoltFiDModel(ChronosBoltModelForForecasting):
 
                 raf_hidden = raf_hidden_folded.view(batch_size, K, L_patches, D)
                 raf_attn_mask = raf_attn_mask_folded.view(batch_size, K, L_patches)
-
-                if raf_scale_ratio is not None:
-                    scale_input = torch.log(raf_scale_ratio.clamp(min=1e-6)).unsqueeze(-1).to(dtype=raf_hidden.dtype, device=raf_hidden.device)
-                    scale_emb = self.scale_mlp(scale_input)
-                    raf_hidden = raf_hidden * torch.sigmoid(scale_emb.unsqueeze(2))
 
                 raf_hidden = raf_hidden.view(batch_size, K * L_patches, D)
                 raf_attn_mask = raf_attn_mask.view(batch_size, K * L_patches)

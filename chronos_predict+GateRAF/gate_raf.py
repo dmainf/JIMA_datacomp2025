@@ -8,7 +8,7 @@ ZERO_SHOT = False
 
 
 def main():
-    CONFIG["lora_output_dir"] = "gate_raf_checkpoints"
+    CONFIG["lora_output_dir"] = "gate_raf_noscale_checkpoints"
 
     print("=== Loading Data ===")
     required_cols = ['書名', '日付', 'POS販売冊数']
@@ -36,7 +36,7 @@ def main():
             print(f"Adapter not found at {possible_path}. Falling back to zero-shot inference.")
 
     suffix = "(zero-shot)" if not adapter_path else ""
-    CONFIG["output_dir"] = f"Gate-RAF{suffix}"
+    CONFIG["output_dir"] = f"Gate-RAF-noscale{suffix}"
 
     print(f"\n=== Starting Inference ===")
     decile_books = extract_decile_books(df)

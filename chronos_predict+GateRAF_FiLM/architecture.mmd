@@ -1,0 +1,50 @@
+flowchart TB
+    ctx["Local Context"]
+    ret["Retrieved Series\n(FAISS top-K)"]
+    sratio["Scale Ratio\ns = σ_ret / σ_query"]
+
+    subgraph LENC["Local Stream  [DoRA]"]
+        enc_l["Encode(x)\nh_local"]
+        summary["Token-avg Pooling\nh_summary"]
+    end
+
+    subgraph RENC["Retrieved Stream  [DoRA, shared weights]"]
+        fold["Fold batch × K"]
+        enc_r["Encode(retrieved)"]
+        unfold["Unfold → h_raf"]
+    end
+
+    subgraph SCALE["Scale Modulation  [trained ×10 lr]"]
+        smlp["film_mlp\nlog(s) → Linear → SiLU → Linear → γ, β\n(d_model×2 output, chunked)"]
+        smul["FiLM: h_raf × (1 + γ) + β\nh_raf_scaled"]
+    end
+
+    subgraph GATE["Gating  [trained ×10 lr]"]
+        reshape["Reshape h_raf_scaled"]
+        expand["Expand h_summary → match h_raf_scaled"]
+        gcat["Concatenate\n[h_summary_exp ; h_raf_scaled]"]
+        gmlp["gate_mlp\nLinear → SiLU → Linear → Sigmoid\ng (token-wise gate)"]
+        gmul["h_raf_scaled × g\nh_filtered"]
+    end
+
+    subgraph FUSE["Fusion"]
+        concat["Concatenate\n[h_local ; h_filtered]"]
+    end
+
+    subgraph DEC["Chronos Bolt Decoder  [DoRA]"]
+        t5dec["T5 Decoder\ncross-attn to concatenated hidden"]
+        outproj["Output Patch Projection"]
+        invnorm["Inverse Instance Normalization"]
+    end
+
+    ctx --> enc_l --> summary --> expand
+    ret --> fold --> enc_r --> unfold --> smul
+    sratio --> smlp --> smul
+    smul --> reshape --> gcat
+    expand --> gcat --> gmlp --> gmul
+    reshape --> gmul
+    gmul --> concat
+    enc_l --> concat
+    concat -- "hidden_states" --> t5dec
+    enc_l -. "input_embeds" .-> t5dec
+    t5dec --> outproj --> invnorm --> out["Quantile Forecasts"]

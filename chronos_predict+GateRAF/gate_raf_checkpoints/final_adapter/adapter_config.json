@@ -25,7 +25,6 @@
   "megatron_config": null,
   "megatron_core": "megatron.core",
   "modules_to_save": [
-    "scale_mlp",
     "gate_mlp"
   ],
   "peft_type": "LORA",
@@ -35,19 +34,17 @@
   "rank_pattern": {},
   "revision": null,
   "target_modules": [
-    "o",
-    "hidden_layer",
-    "residual_layer",
-    "q",
-    "output_layer",
-    "scale_mlp.2",
-    "gate_mlp.2",
-    "scale_mlp.0",
     "v",
     "wi",
+    "q",
+    "k",
     "wo",
+    "hidden_layer",
+    "residual_layer",
+    "o",
+    "gate_mlp.2",
     "gate_mlp.0",
-    "k"
+    "output_layer"
   ],
   "target_parameters": null,
   "task_type": null,

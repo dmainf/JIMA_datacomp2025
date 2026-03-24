@@ -302,18 +302,6 @@ class ChronosFiDTrainer(Trainer):
             loss = outputs.loss
         return (loss.detach(), None, None)
 
-    def create_optimizer(self):
-        mlp_params, mlp_param_ids = [], set()
-        for name, param in self.model.named_parameters():
-            if "scale_mlp" in name and param.requires_grad:
-                mlp_params.append(param)
-                mlp_param_ids.add(id(param))
-        base_params = [p for p in self.model.parameters() if id(p) not in mlp_param_ids and p.requires_grad]
-        self.optimizer = torch.optim.AdamW([
-            {"params": base_params, "lr": self.args.learning_rate, "weight_decay": self.args.weight_decay},
-            {"params": mlp_params, "lr": self.args.learning_rate * 10, "weight_decay": self.args.weight_decay},
-        ])
-        return self.optimizer
 
 
 def save_loss_plot(log_history, output_dir, filename="loss_curve.png"):
