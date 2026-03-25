@@ -6,6 +6,7 @@ day.txt
 store_code.txt
 !chronos_predict/data/
 *.csv
+!**/predictions_all.csv
 *.parquet
 *.swp
 *.png
