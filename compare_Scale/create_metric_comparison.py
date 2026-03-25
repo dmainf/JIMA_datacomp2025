@@ -30,7 +30,7 @@ def compute_series_total(df):
     df['series_total'] = df['book_name'].map(total_per_book)
     return df
 
-def plot_spike_diff(df, quantile_col, model_name, output_dir):
+def plot_scale_diff(df, quantile_col, model_name, output_dir):
     df = compute_series_total(df.copy())
     df['diff'] = df[quantile_col] - df['actual']
     df = df[np.isfinite(df['diff'])]
@@ -50,13 +50,13 @@ def plot_spike_diff(df, quantile_col, model_name, output_dir):
     ax.legend(fontsize=10)
     ax.grid(alpha=0.3, linestyle='--')
     plt.tight_layout()
-    plt.savefig(f'{output_dir}/{model_name}_spike_diff.png', dpi=300, bbox_inches='tight')
+    plt.savefig(f'{output_dir}/{model_name}_scale_diff.png', dpi=300, bbox_inches='tight')
     plt.close()
-    print(f"Saved: {output_dir}/{model_name}_spike_diff.png")
+    print(f"Saved: {output_dir}/{model_name}_scale_diff.png")
 
 color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
-def plot_spike_diff_all(dfs, quantile_col, models, output_dir):
+def plot_scale_diff_all(dfs, quantile_col, models, output_dir):
     fig, ax = plt.subplots(figsize=(10, 7))
     for i, (df, model_name) in enumerate(zip(dfs, models)):
         df = compute_series_total(df.copy())
@@ -72,11 +72,11 @@ def plot_spike_diff_all(dfs, quantile_col, models, output_dir):
     ax.legend(fontsize=9, markerscale=2)
     ax.grid(alpha=0.3, linestyle='--')
     plt.tight_layout()
-    plt.savefig(f'{output_dir}/all_models_spike_diff.png', dpi=300, bbox_inches='tight')
+    plt.savefig(f'{output_dir}/all_models_scale_diff.png', dpi=300, bbox_inches='tight')
     plt.close()
-    print(f"Saved: {output_dir}/all_models_spike_diff.png")
+    print(f"Saved: {output_dir}/all_models_scale_diff.png")
 
-def plot_spike_diff_grid(dfs, quantile_col, models, output_dir):
+def plot_scale_diff_grid(dfs, quantile_col, models, output_dir):
     ncols = 3
     nrows = (len(models) + ncols - 1) // ncols
     fig, axes = plt.subplots(nrows, ncols, figsize=(7 * ncols, 5 * nrows))
@@ -97,17 +97,17 @@ def plot_spike_diff_grid(dfs, quantile_col, models, output_dir):
         axes[j].axis('off')
     plt.suptitle(f'All Models  [{quantile_col}]', fontsize=14, fontweight='bold')
     plt.tight_layout()
-    plt.savefig(f'{output_dir}/grid_spike_diff.png', dpi=300, bbox_inches='tight')
+    plt.savefig(f'{output_dir}/grid_scale_diff.png', dpi=300, bbox_inches='tight')
     plt.close()
-    print(f"Saved: {output_dir}/grid_spike_diff.png")
+    print(f"Saved: {output_dir}/grid_scale_diff.png")
 
 for quantile in QUANTILES:
-    spike_dir = f'metric_comparison/{quantile}'
-    os.makedirs(spike_dir, exist_ok=True)
+    scale_dir = f'metric_comparison/{quantile}'
+    os.makedirs(scale_dir, exist_ok=True)
     for model_name, df in zip(models, pred_dfs):
-        plot_spike_diff(df, quantile, model_name, spike_dir)
-    plot_spike_diff_all(pred_dfs, quantile, models, spike_dir)
-    plot_spike_diff_grid(pred_dfs, quantile, models, spike_dir)
+        plot_scale_diff(df, quantile, model_name, scale_dir)
+    plot_scale_diff_all(pred_dfs, quantile, models, scale_dir)
+    plot_scale_diff_grid(pred_dfs, quantile, models, scale_dir)
     print()
 
 print("Done.")
