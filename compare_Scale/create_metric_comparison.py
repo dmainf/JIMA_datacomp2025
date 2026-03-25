@@ -1,7 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-import matplotlib
 import os
 import glob
 
@@ -12,138 +11,103 @@ plt.rcParams['font.size'] = 11
 
 base_path = '.'
 
-marker_pool = ['p', 'D', 'o', 's', '^', 'v', 'X', 'P']
-
-def get_color(name):
-    return '#d6336c'
-
 csv_files = sorted(glob.glob(f'{base_path}/*/predictions_all.csv'))
 
-ANOMALY_THRESHOLD = 1e6
 QUANTILES = ['q0.1', 'q0.5', 'q0.9']
-raw_metrics = ['MAE', 'RMSE']
+ZSCORE_THRESHOLD = 2.0
 
-label_map = {'MAE': r'MAE', 'RMSE': r'RMSE'}
-metric_direction = {m: 'lower' for m in raw_metrics}
-
-all_models = []
-all_colors = []
-all_markers = []
-all_pred_dfs = []
-for i, csv_path in enumerate(csv_files):
+models = []
+pred_dfs = []
+for csv_path in csv_files:
     dir_name = os.path.basename(os.path.dirname(csv_path))
-    all_models.append(dir_name)
-    all_colors.append(get_color(dir_name))
-    all_markers.append(marker_pool[i % len(marker_pool)])
+    models.append(dir_name)
     df = pd.read_csv(csv_path).rename(columns={'書名': 'book_name'})
-    all_pred_dfs.append(df)
+    pred_dfs.append(df)
 
-groups = {
-    'Gate': [(m, c, mk, df) for m, c, mk, df in zip(all_models, all_colors, all_markers, all_pred_dfs) if m.startswith('Gate')],
-    'Multi': [(m, c, mk, df) for m, c, mk, df in zip(all_models, all_colors, all_markers, all_pred_dfs) if m.startswith('Multi')],
-}
-
-def compute_metrics(df, quantile_col):
+def compute_series_total(df):
     df = df.copy()
-    df['ae'] = (df['actual'] - df[quantile_col]).abs()
-    df['se'] = (df['actual'] - df[quantile_col]) ** 2
-    bad_books = set(df.loc[~np.isfinite(df['ae']) | (df['ae'] > ANOMALY_THRESHOLD), 'book_name'])
-    df = df[~df['book_name'].isin(bad_books)]
-    return {'MAE': df['ae'].mean(), 'RMSE': np.sqrt(df['se'].mean())}
+    total_per_book = df.groupby('book_name')['actual'].sum()
+    df['series_total'] = df['book_name'].map(total_per_book)
+    return df
 
-def plot_single(metric, values, models, colors, markers, output_dir):
-    fig, ax = plt.subplots(figsize=(7, 6))
-    x = np.arange(len(models))
-    bars = ax.bar(x, values, color=colors, alpha=0.7, width=0.6)
-    for xj, val, marker, color in zip(x, values, markers, colors):
-        ax.plot(xj, val, marker=marker, color=color, markersize=12,
-                markeredgecolor='black', markeredgewidth=1.5)
-    if metric_direction[metric] == 'lower':
-        best_idx = np.argmin(values)
-    else:
-        best_idx = np.argmax(values)
-    y_range = max(values) - min(values) if max(values) != min(values) else max(values)
-    for bar, value in zip(bars, values):
-        y_offset = bar.get_height() + y_range * 0.05
-        ax.text(bar.get_x() + bar.get_width()/2., y_offset,
-                f'{value:.4f}', ha='center', va='bottom', fontsize=22)
-    y_min, y_max = ax.get_ylim()
-    ax.set_ylim(y_min, y_max + y_range * 0.25)
-    ax.set_xlabel('Model', fontsize=26, fontweight='bold')
-    ax.set_ylabel(label_map[metric], fontsize=26, fontweight='bold')
-    ax.set_xticks(x)
-    ax.set_xticklabels(models, fontsize=22)
-    ax.tick_params(axis='y', labelsize=22)
-    for idx, label in enumerate(ax.get_xticklabels()):
-        if idx == best_idx:
-            label.set_fontweight('bold')
-    ax.grid(axis='y', alpha=0.3, linestyle='--')
+def plot_spike_diff(df, quantile_col, model_name, output_dir):
+    df = compute_series_total(df.copy())
+    df['diff'] = df[quantile_col] - df['actual']
+    df = df[np.isfinite(df['diff'])]
+    fig, ax = plt.subplots(figsize=(8, 6))
+    ax.scatter(df['series_total'], df['diff'], alpha=0.3, s=10, color='#d6336c')
+    ax.axhline(y=0.0, color='black', linestyle='--', linewidth=1.0, label='error = 0')
+    ax.set_xlabel('total actual (per series)', fontsize=13)
+    ax.set_ylabel('error = predicted - actual', fontsize=13)
+    ax.set_title(f'{model_name}  [{quantile_col}]', fontsize=14, fontweight='bold')
+    stats = df['diff'].describe()
+    textstr = (f"n={int(stats['count'])}  mean={stats['mean']:.3f}  "
+               f"std={stats['std']:.3f}  median={stats['50%']:.3f}")
+    ax.text(0.98, 0.98, textstr, transform=ax.transAxes, fontsize=10,
+            verticalalignment='top', horizontalalignment='right',
+            bbox=dict(boxstyle='round', facecolor='white', alpha=0.7))
+    ax.set_yscale('symlog')
+    ax.legend(fontsize=10)
+    ax.grid(alpha=0.3, linestyle='--')
     plt.tight_layout()
-    plt.savefig(f'{output_dir}/{metric}.png', dpi=300, bbox_inches='tight')
+    plt.savefig(f'{output_dir}/{model_name}_spike_diff.png', dpi=300, bbox_inches='tight')
     plt.close()
-    print(f"Saved: {output_dir}/{metric}.png")
+    print(f"Saved: {output_dir}/{model_name}_spike_diff.png")
 
-def plot_combined(all_means, raw_metrics, models, colors, markers, output_dir):
-    n = len(raw_metrics)
-    ncols = 2
-    nrows = (n + ncols - 1) // ncols
+color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
+
+def plot_spike_diff_all(dfs, quantile_col, models, output_dir):
+    fig, ax = plt.subplots(figsize=(10, 7))
+    for i, (df, model_name) in enumerate(zip(dfs, models)):
+        df = compute_series_total(df.copy())
+        df['diff'] = df[quantile_col] - df['actual']
+        df = df[np.isfinite(df['diff'])]
+        ax.scatter(df['series_total'], df['diff'], alpha=0.2, s=5,
+                   color=color_cycle[i % len(color_cycle)], label=model_name)
+    ax.axhline(y=0.0, color='black', linestyle='--', linewidth=1.0, label='error = 0')
+    ax.set_yscale('symlog')
+    ax.set_xlabel('total actual (per series)', fontsize=13)
+    ax.set_ylabel('error = predicted - actual', fontsize=13)
+    ax.set_title(f'All Models  [{quantile_col}]', fontsize=14, fontweight='bold')
+    ax.legend(fontsize=9, markerscale=2)
+    ax.grid(alpha=0.3, linestyle='--')
+    plt.tight_layout()
+    plt.savefig(f'{output_dir}/all_models_spike_diff.png', dpi=300, bbox_inches='tight')
+    plt.close()
+    print(f"Saved: {output_dir}/all_models_spike_diff.png")
+
+def plot_spike_diff_grid(dfs, quantile_col, models, output_dir):
+    ncols = 3
+    nrows = (len(models) + ncols - 1) // ncols
     fig, axes = plt.subplots(nrows, ncols, figsize=(7 * ncols, 5 * nrows))
     axes = np.array(axes).flatten()
-    for i, metric in enumerate(raw_metrics):
+    for i, (df, model_name) in enumerate(zip(dfs, models)):
         ax = axes[i]
-        values = [means[i] for means in all_means]
-        x = np.arange(len(models))
-        bars = ax.bar(x, values, color=colors, alpha=0.7, width=0.6)
-        for xj, val, marker, color in zip(x, values, markers, colors):
-            ax.plot(xj, val, marker=marker, color=color, markersize=10,
-                    markeredgecolor='black', markeredgewidth=1.5)
-        if metric_direction[metric] == 'lower':
-            best_idx = np.argmin(values)
-        else:
-            best_idx = np.argmax(values)
-        y_range = max(values) - min(values) if max(values) != min(values) else max(values)
-        for bar, value in zip(bars, values):
-            y_offset = bar.get_height() + y_range * 0.05
-            ax.text(bar.get_x() + bar.get_width()/2., y_offset,
-                    f'{value:.4f}', ha='center', va='bottom', fontsize=8)
-        y_min, y_max = ax.get_ylim()
-        ax.set_ylim(y_min, y_max + y_range * 0.15)
-        ax.set_xlabel('Model', fontsize=11)
-        ax.set_ylabel(label_map[metric], fontsize=11)
-        ax.set_title(f'{label_map[metric]}', fontsize=12)
-        ax.set_xticks(x)
-        ax.set_xticklabels(models, fontsize=10)
-        for idx, label in enumerate(ax.get_xticklabels()):
-            if idx == best_idx:
-                label.set_fontweight('bold')
-        ax.grid(axis='y', alpha=0.3, linestyle='--')
-    for i in range(len(raw_metrics), len(axes)):
-        axes[i].axis('off')
-    legend_elements = [
-        plt.Line2D([0], [0], marker=markers[i], color='w', markerfacecolor=colors[i],
-                   markersize=10, label=models[i], markeredgecolor='black', markeredgewidth=1.5)
-        for i in range(len(models))
-    ]
-    fig.legend(handles=legend_elements, loc='lower right', fontsize=10,
-               frameon=True, edgecolor='black', ncol=4, bbox_to_anchor=(0.98, 0.02))
-    plt.suptitle('Comparison of All Metrics Across Models', fontsize=16, fontweight='bold', y=0.995)
-    plt.tight_layout(rect=[0, 0.03, 1, 0.99])
-    plt.savefig(f'{output_dir}/all_metrics_combined.png', dpi=300, bbox_inches='tight')
+        df = compute_series_total(df.copy())
+        df['diff'] = df[quantile_col] - df['actual']
+        df = df[np.isfinite(df['diff'])]
+        ax.scatter(df['series_total'], df['diff'], alpha=0.3, s=5, color='#d6336c')
+        ax.axhline(y=0.0, color='black', linestyle='--', linewidth=1.0)
+        ax.set_yscale('symlog')
+        ax.set_title(f'{model_name}', fontsize=12, fontweight='bold')
+        ax.set_xlabel('total actual (per series)', fontsize=10)
+        ax.set_ylabel('predicted - actual', fontsize=10)
+        ax.grid(alpha=0.3, linestyle='--')
+    for j in range(len(models), len(axes)):
+        axes[j].axis('off')
+    plt.suptitle(f'All Models  [{quantile_col}]', fontsize=14, fontweight='bold')
+    plt.tight_layout()
+    plt.savefig(f'{output_dir}/grid_spike_diff.png', dpi=300, bbox_inches='tight')
     plt.close()
-    print(f"Combined plot saved: {output_dir}/all_metrics_combined.png")
+    print(f"Saved: {output_dir}/grid_spike_diff.png")
 
-for group_name, group_items in groups.items():
-    models, colors, markers, pred_dfs = zip(*group_items)
-    models, colors, markers, pred_dfs = list(models), list(colors), list(markers), list(pred_dfs)
-    for quantile in QUANTILES:
-        output_dir = f'metric_comparison/{group_name}/{quantile}'
-        os.makedirs(output_dir, exist_ok=True)
-        all_metrics = [compute_metrics(df, quantile) for df in pred_dfs]
-        all_means = [[m[metric] for metric in raw_metrics] for m in all_metrics]
-        for i, metric in enumerate(raw_metrics):
-            values = [means[i] for means in all_means]
-            plot_single(metric, values, models, colors, markers, output_dir)
-        plot_combined(all_means, raw_metrics, models, colors, markers, output_dir)
-        print()
+for quantile in QUANTILES:
+    spike_dir = f'metric_comparison/{quantile}'
+    os.makedirs(spike_dir, exist_ok=True)
+    for model_name, df in zip(models, pred_dfs):
+        plot_spike_diff(df, quantile, model_name, spike_dir)
+    plot_spike_diff_all(pred_dfs, quantile, models, spike_dir)
+    plot_spike_diff_grid(pred_dfs, quantile, models, spike_dir)
+    print()
 
 print("Done.")

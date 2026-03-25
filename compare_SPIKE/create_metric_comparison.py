@@ -24,22 +24,20 @@ for csv_path in csv_files:
     df = pd.read_csv(csv_path).rename(columns={'書名': 'book_name'})
     pred_dfs.append(df)
 
-def compute_global_zscore(df):
-    mean = df['actual'].mean()
-    std = df['actual'].std()
+def compute_series_std(df):
     df = df.copy()
-    df['zscore'] = (df['actual'] - mean) / std if std > 0 else 0.0
+    std_per_book = df.groupby('book_name')['actual'].std()
+    df['series_std'] = df['book_name'].map(std_per_book)
     return df
 
 def plot_spike_diff(df, quantile_col, model_name, output_dir):
-    df = compute_global_zscore(df.copy())
-    df = df.copy()
+    df = compute_series_std(df.copy())
     df['diff'] = df[quantile_col] - df['actual']
     df = df[np.isfinite(df['diff'])]
     fig, ax = plt.subplots(figsize=(8, 6))
-    ax.scatter(df['zscore'], df['diff'], alpha=0.3, s=10, color='#d6336c')
+    ax.scatter(df['series_std'], df['diff'], alpha=0.3, s=10, color='#d6336c')
     ax.axhline(y=0.0, color='black', linestyle='--', linewidth=1.0, label='error = 0')
-    ax.set_xlabel('z-score of actual', fontsize=13)
+    ax.set_xlabel('std of actual (per series)', fontsize=13)
     ax.set_ylabel('error = predicted - actual', fontsize=13)
     ax.set_title(f'{model_name}  [{quantile_col}]', fontsize=14, fontweight='bold')
     stats = df['diff'].describe()
@@ -61,14 +59,14 @@ color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
 def plot_spike_diff_all(dfs, quantile_col, models, output_dir):
     fig, ax = plt.subplots(figsize=(10, 7))
     for i, (df, model_name) in enumerate(zip(dfs, models)):
-        df = compute_global_zscore(df.copy())
+        df = compute_series_std(df.copy())
         df['diff'] = df[quantile_col] - df['actual']
         df = df[np.isfinite(df['diff'])]
-        ax.scatter(df['zscore'], df['diff'], alpha=0.2, s=5,
+        ax.scatter(df['series_std'], df['diff'], alpha=0.2, s=5,
                    color=color_cycle[i % len(color_cycle)], label=model_name)
     ax.axhline(y=0.0, color='black', linestyle='--', linewidth=1.0, label='error = 0')
     ax.set_yscale('symlog')
-    ax.set_xlabel('z-score of actual', fontsize=13)
+    ax.set_xlabel('std of actual (per series)', fontsize=13)
     ax.set_ylabel('error = predicted - actual', fontsize=13)
     ax.set_title(f'All Models  [{quantile_col}]', fontsize=14, fontweight='bold')
     ax.legend(fontsize=9, markerscale=2)
@@ -85,14 +83,14 @@ def plot_spike_diff_grid(dfs, quantile_col, models, output_dir):
     axes = np.array(axes).flatten()
     for i, (df, model_name) in enumerate(zip(dfs, models)):
         ax = axes[i]
-        df = compute_global_zscore(df.copy())
+        df = compute_series_std(df.copy())
         df['diff'] = df[quantile_col] - df['actual']
         df = df[np.isfinite(df['diff'])]
-        ax.scatter(df['zscore'], df['diff'], alpha=0.3, s=5, color='#d6336c')
+        ax.scatter(df['series_std'], df['diff'], alpha=0.3, s=5, color='#d6336c')
         ax.axhline(y=0.0, color='black', linestyle='--', linewidth=1.0)
         ax.set_yscale('symlog')
         ax.set_title(f'{model_name}', fontsize=12, fontweight='bold')
-        ax.set_xlabel('z-score of actual', fontsize=10)
+        ax.set_xlabel('std of actual (per series)', fontsize=10)
         ax.set_ylabel('predicted - actual', fontsize=10)
         ax.grid(alpha=0.3, linestyle='--')
     for j in range(len(models), len(axes)):
@@ -104,7 +102,7 @@ def plot_spike_diff_grid(dfs, quantile_col, models, output_dir):
     print(f"Saved: {output_dir}/grid_spike_diff.png")
 
 for quantile in QUANTILES:
-    spike_dir = f'spike_diff_plots/{quantile}'
+    spike_dir = f'metric_comparison/{quantile}'
     os.makedirs(spike_dir, exist_ok=True)
     for model_name, df in zip(models, pred_dfs):
         plot_spike_diff(df, quantile, model_name, spike_dir)
