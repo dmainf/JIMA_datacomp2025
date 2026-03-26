@@ -3,7 +3,7 @@ import pandas as pd
 from func_lstm import *
 
 ALL_PREDICT = True
-DO_TRAIN = False
+DO_TRAIN = True
 
 
 def main():

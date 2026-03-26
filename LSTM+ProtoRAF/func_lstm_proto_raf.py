@@ -1,3 +1,5 @@
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 import pandas as pd
 import numpy as np
 import torch
@@ -8,6 +10,8 @@ from transformers import get_linear_schedule_with_warmup
 import os
 from tqdm import tqdm
 import warnings
+import faiss
+from model_lstm_proto_raf import LSTMForecaster
 
 warnings.filterwarnings("ignore")
 plt.rcParams['font.family'] = ['Hiragino Sans', 'sans-serif']
@@ -16,6 +20,9 @@ plt.rcParams['axes.unicode_minus'] = False
 CONFIG = {
     "prediction_length": 64,
     "context_length": 128,
+    "retrieval_length": 128,
+    "top_k": 3,
+    "index_step": 10,
     "batch_size": 64,
     "hidden_size": 256,
     "num_layers": 2,
@@ -24,8 +31,8 @@ CONFIG = {
     "epochs": 100,
     "warmup_ratio": 0.05,
     "patience": 5,
-    "output_dir": "LSTM-noRAF",
-    "checkpoint_path": "lstm_checkpoints/best_model.pt",
+    "output_dir": "LSTM-ProtoRAF",
+    "checkpoint_path": "lstm_proto_raf_checkpoints/best_model.pt",
     "quantiles": [0.1, 0.5, 0.9],
 }
 
@@ -53,14 +60,117 @@ def extract_decile_books(df):
     return deciles
 
 
+class TimeSeriesRetriever:
+    def __init__(self, context_length, retrieval_length):
+        self.context_length = context_length
+        self.retrieval_length = retrieval_length
+        self.index = None
+        self.timestamps = None
+        self.vectors_store = None
+        self.scales_store = None
+
+    def build_index(self, df, step=30):
+        print(f"=== Building Vector Index (len={self.retrieval_length}, step={step}) ===")
+        timestamps_list = []
+        vectors_list = []
+        scales_list = []
+        for _, group in tqdm(df.groupby('書名', observed=True)):
+            series = group.sort_values('日付')['POS販売冊数'].values.astype(np.float32)
+            dates = group['日付'].values
+            if len(series) < self.retrieval_length:
+                continue
+            windows = np.lib.stride_tricks.sliding_window_view(series, self.retrieval_length)[::step]
+            end_dates = dates[self.retrieval_length - 1:][::step]
+            valid_mask = np.sum(np.abs(windows), axis=1) > 0
+            if not np.any(valid_mask):
+                continue
+            windows = windows[valid_mask]
+            end_dates = end_dates[valid_mask]
+            means = np.mean(windows, axis=1, keepdims=True)
+            stds = np.std(windows, axis=1, keepdims=True) + 1e-5
+            normalized_windows = (windows - means) / stds
+            vectors_list.append(normalized_windows)
+            scales_list.append(stds.flatten())
+            timestamps_list.extend(end_dates)
+        if not vectors_list:
+            print("No vectors created.")
+            return
+        all_vectors = np.concatenate(vectors_list).astype('float32')
+        all_scales = np.concatenate(scales_list).astype('float32')
+        self.vectors_store = all_vectors
+        self.scales_store = all_scales
+        self.timestamps = pd.to_datetime(timestamps_list).values
+        self.index = faiss.IndexFlatL2(self.retrieval_length)
+        self.index.add(all_vectors)
+        print(f"Index built: {self.index.ntotal} vectors of dim {self.retrieval_length}.")
+
+    def search_batch(self, query_batch, query_dates, query_scales, k=1):
+        N = len(query_batch)
+        empty_raf = np.full((k, self.retrieval_length), np.nan, dtype=np.float32)
+        empty_mask = np.zeros((k, self.retrieval_length), dtype=bool)
+        empty_ratio = np.ones(k, dtype=np.float32)
+
+        if self.index is None:
+            return [empty_raf.copy() for _ in range(N)], [empty_mask.copy() for _ in range(N)], [empty_ratio.copy() for _ in range(N)]
+
+        faiss.omp_set_num_threads(1)
+
+        means = np.mean(query_batch, axis=1, keepdims=True)
+        stds = np.std(query_batch, axis=1, keepdims=True) + 1e-5
+        normalized_queries = ((query_batch - means) / stds).astype('float32')
+        normalized_queries = np.ascontiguousarray(normalized_queries)
+
+        search_k = min(k * 5 + 10, self.index.ntotal)
+        D, I = self.index.search(normalized_queries, search_k)
+
+        found_dates = self.timestamps[I]
+        query_dates_vec = pd.to_datetime(query_dates).values.reshape(-1, 1)
+        valid_mask = found_dates < query_dates_vec
+
+        raf_contexts = []
+        raf_masks = []
+        raf_scale_ratios = []
+
+        for i in range(N):
+            valid_indices = I[i][valid_mask[i]]
+            if len(valid_indices) == 0:
+                raf_contexts.append(empty_raf.copy())
+                raf_masks.append(empty_mask.copy())
+                raf_scale_ratios.append(empty_ratio.copy())
+                continue
+
+            top_indices = valid_indices[:k]
+
+            raf_ctx = np.full((k, self.retrieval_length), np.nan, dtype=np.float32)
+            raf_msk = np.zeros((k, self.retrieval_length), dtype=bool)
+            raf_ratio = np.ones(k, dtype=np.float32)
+
+            for j, idx in enumerate(top_indices):
+                vec = self.vectors_store[idx]
+                retrieved_scale = self.scales_store[idx]
+                raf_ctx[j] = vec * retrieved_scale
+                raf_msk[j] = True
+                raf_ratio[j] = retrieved_scale / stds[i, 0]
+
+            raf_contexts.append(raf_ctx)
+            raf_masks.append(raf_msk)
+            raf_scale_ratios.append(raf_ratio)
+
+        return raf_contexts, raf_masks, raf_scale_ratios
+
+
 class LSTMDataset(Dataset):
     def __init__(self, df, prediction_length, context_length, mode="train",
-                 split_ratio=0.9, decile_books=None, all_predict=True):
+                 split_ratio=0.9, decile_books=None, all_predict=True,
+                 retriever=None, top_k=3):
         self.samples = []
         self.metadata = []
+        sample_info = []
+        retrieval_length = retriever.retrieval_length if retriever else context_length
 
         for book_name, group in tqdm(df.groupby('書名', observed=True), desc=f"Processing ({mode})"):
             series = group.sort_values('日付')['POS販売冊数'].values.astype(np.float32)
+            dates = group['日付'].values
             total_len = len(series)
 
             if mode == "inference":
@@ -75,19 +185,28 @@ class LSTMDataset(Dataset):
                     continue
                 query = series[:-prediction_length]
                 target = series[-prediction_length:]
+                query_date = dates[len(query) - 1]
 
                 local_ctx = query[-context_length:]
                 scale = np.mean(np.abs(local_ctx)) + 1.0
                 ctx_scaled = local_ctx / scale
 
-                self.samples.append({
-                    "context": torch.tensor(ctx_scaled, dtype=torch.float32),
-                    "scale": scale,
-                })
-                self.metadata.append({
-                    "id": book_name,
-                    "target": target,
-                    "query": query,
+                use_len = min(len(query), retrieval_length)
+                query_slice = query[-use_len:]
+                query_scale = np.std(query_slice) + 1e-5
+                if use_len < retrieval_length:
+                    query_slice = np.pad(query_slice, (retrieval_length - use_len, 0), 'constant')
+
+                sample_info.append({
+                    'is_inference': True,
+                    'ctx_scaled': ctx_scaled,
+                    'scale': scale,
+                    'query_slice': query_slice,
+                    'query_scale': query_scale,
+                    'query_date': query_date,
+                    'target': target,
+                    'query_raw': query,
+                    'book_name': book_name,
                 })
             else:
                 train_val_series = series[:-prediction_length]
@@ -108,11 +227,61 @@ class LSTMDataset(Dataset):
                     scale = np.mean(np.abs(ctx)) + 1.0
                     ctx_scaled = ctx / scale
                     target_scaled = target / scale
-                    self.samples.append({
-                        "context": torch.tensor(ctx_scaled, dtype=torch.float32),
-                        "target": torch.tensor(target_scaled, dtype=torch.float32),
-                        "scale": scale,
+
+                    query_slice = ctx
+                    query_scale = np.std(query_slice) + 1e-5
+                    if len(query_slice) < retrieval_length:
+                        query_slice = np.pad(query_slice, (retrieval_length - len(query_slice), 0), 'constant')
+                    query_date = dates[i + context_length - 1] if i + context_length - 1 < len(dates) else dates[-1]
+
+                    sample_info.append({
+                        'is_inference': False,
+                        'ctx_scaled': ctx_scaled,
+                        'scale': scale,
+                        'target_scaled': target_scaled,
+                        'query_slice': query_slice,
+                        'query_scale': query_scale,
+                        'query_date': query_date,
                     })
+
+        if retriever and retriever.index is not None and len(sample_info) > 0:
+            query_matrix = np.stack([info['query_slice'] for info in sample_info])
+            query_dates_arr = np.array([info['query_date'] for info in sample_info])
+            query_scales_arr = np.array([info['query_scale'] for info in sample_info])
+            print(f"Batch searching {len(query_matrix)} samples...")
+            raf_contexts, raf_masks, _ = retriever.search_batch(
+                query_matrix, query_dates_arr, query_scales_arr, k=top_k
+            )
+        else:
+            raf_contexts = [np.full((top_k, retrieval_length), np.nan, dtype=np.float32) for _ in sample_info]
+            raf_masks = [np.zeros((top_k, retrieval_length), dtype=bool) for _ in sample_info]
+
+        for idx, info in enumerate(tqdm(sample_info, desc="Building Samples")):
+            scale = info['scale']
+            raf_ctx = raf_contexts[idx] / scale
+            raf_msk = raf_masks[idx]
+
+            raf_context_tensor = torch.tensor(raf_ctx, dtype=torch.float32)
+            raf_mask_tensor = torch.tensor(raf_msk, dtype=torch.bool)
+            raf_context_tensor = torch.nan_to_num(raf_context_tensor, nan=0.0)
+
+            sample = {
+                "context": torch.tensor(info['ctx_scaled'], dtype=torch.float32),
+                "scale": scale,
+                "raf_context": raf_context_tensor,
+                "raf_mask": raf_mask_tensor,
+            }
+
+            if info['is_inference']:
+                self.metadata.append({
+                    "id": info['book_name'],
+                    "target": info['target'],
+                    "query": info['query_raw'],
+                })
+            else:
+                sample["target"] = torch.tensor(info['target_scaled'], dtype=torch.float32)
+
+            self.samples.append(sample)
 
     def __len__(self):
         return len(self.samples)
@@ -125,37 +294,12 @@ def collate_fn(batch):
     result = {
         "context": torch.stack([b["context"] for b in batch]),
         "scale": torch.tensor([b["scale"] for b in batch], dtype=torch.float32),
+        "raf_context": torch.stack([b["raf_context"] for b in batch]),
+        "raf_mask": torch.stack([b["raf_mask"] for b in batch]),
     }
     if "target" in batch[0]:
         result["target"] = torch.stack([b["target"] for b in batch])
     return result
-
-
-class LSTMForecaster(nn.Module):
-    def __init__(self, context_length, prediction_length, hidden_size, num_layers, dropout, num_quantiles=3):
-        super().__init__()
-        self.context_length = context_length
-        self.prediction_length = prediction_length
-        self.num_quantiles = num_quantiles
-
-        self.lstm = nn.LSTM(
-            input_size=1,
-            hidden_size=hidden_size,
-            num_layers=num_layers,
-            batch_first=True,
-            dropout=dropout if num_layers > 1 else 0.0,
-        )
-        self.head = nn.Sequential(
-            nn.Linear(hidden_size, hidden_size),
-            nn.ReLU(),
-            nn.Linear(hidden_size, prediction_length * num_quantiles),
-        )
-
-    def forward(self, context):
-        x = context.unsqueeze(-1)
-        _, (h, _) = self.lstm(x)
-        out = self.head(h[-1])
-        return out.view(-1, self.num_quantiles, self.prediction_length)
 
 
 def pinball_loss(preds, targets, quantiles):
@@ -166,13 +310,18 @@ def pinball_loss(preds, targets, quantiles):
     return total / len(quantiles)
 
 
-def train_model(df):
-    print("\n=== Training LSTM ===")
+def train_model(df, retriever):
+    print("\n=== Training LSTM+ProtoRAF ===")
     device = get_device()
     print(f"Device: {device}")
 
-    train_ds = LSTMDataset(df, CONFIG["prediction_length"], CONFIG["context_length"], mode="train")
-    val_ds = LSTMDataset(df, CONFIG["prediction_length"], CONFIG["context_length"], mode="val")
+    common_args = {
+        "df": df, "prediction_length": CONFIG["prediction_length"],
+        "context_length": CONFIG["context_length"],
+        "retriever": retriever, "top_k": CONFIG["top_k"],
+    }
+    train_ds = LSTMDataset(mode="train", **common_args)
+    val_ds = LSTMDataset(mode="val", **common_args)
     print(f"Train: {len(train_ds)}, Val: {len(val_ds)}")
 
     train_loader = DataLoader(train_ds, batch_size=CONFIG["batch_size"], shuffle=True, collate_fn=collate_fn)
@@ -204,7 +353,9 @@ def train_model(df):
         for batch in tqdm(train_loader, desc=f"Epoch {epoch+1}/{CONFIG['epochs']} [Train]", leave=False):
             ctx = batch["context"].to(device)
             tgt = batch["target"].to(device)
-            preds = model(ctx)
+            raf_ctx = batch["raf_context"].to(device)
+            raf_msk = batch["raf_mask"].to(device)
+            preds = model(ctx, raf_context=raf_ctx, raf_mask=raf_msk)
             loss = pinball_loss(preds, tgt, quantiles)
             optimizer.zero_grad()
             loss.backward()
@@ -221,7 +372,9 @@ def train_model(df):
             for batch in val_loader:
                 ctx = batch["context"].to(device)
                 tgt = batch["target"].to(device)
-                preds = model(ctx)
+                raf_ctx = batch["raf_context"].to(device)
+                raf_msk = batch["raf_mask"].to(device)
+                preds = model(ctx, raf_context=raf_ctx, raf_mask=raf_msk)
                 val_loss += pinball_loss(preds, tgt, quantiles).item()
         val_loss /= len(val_loader)
         val_losses.append(val_loss)
@@ -260,13 +413,14 @@ def load_model(checkpoint_path=None):
     return model
 
 
-def run_inference(df, decile_books, all_predict, checkpoint_path):
+def run_inference(df, decile_books, all_predict, checkpoint_path, retriever):
     model = load_model(checkpoint_path)
 
     infer_ds = LSTMDataset(
         df=df, prediction_length=CONFIG["prediction_length"],
         context_length=CONFIG["context_length"],
-        mode="inference", decile_books=decile_books, all_predict=all_predict
+        mode="inference", decile_books=decile_books, all_predict=all_predict,
+        retriever=retriever, top_k=CONFIG["top_k"],
     )
     print(f"Prepared {len(infer_ds)} valid samples for inference.")
 
@@ -279,7 +433,9 @@ def run_inference(df, decile_books, all_predict, checkpoint_path):
         for batch in tqdm(loader):
             ctx = batch["context"].to(device)
             scales = batch["scale"].to(device)
-            preds = model(ctx)
+            raf_ctx = batch["raf_context"].to(device)
+            raf_msk = batch["raf_mask"].to(device)
+            preds = model(ctx, raf_context=raf_ctx, raf_mask=raf_msk)
             preds_unscaled = preds * scales.unsqueeze(1).unsqueeze(2)
             forecasts.extend(list(preds_unscaled.cpu()))
     return infer_ds.metadata, forecasts
