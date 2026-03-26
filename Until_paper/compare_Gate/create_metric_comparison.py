@@ -12,7 +12,7 @@ plt.rcParams['font.size'] = 11
 
 base_path = '.'
 
-highlight_model = 'Gate-RAF'
+highlight_model = 'GateRAF'
 color_highlight = '#d6336c'
 color_default = '#999999'
 marker_pool = ['p', 'D', 'o', 's', '^', 'v', 'X', 'P']
