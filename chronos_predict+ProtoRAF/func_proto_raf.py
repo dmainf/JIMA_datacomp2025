@@ -25,7 +25,7 @@ CONFIG = {
     "context_length": 128,
     "retrieval_length": 128,
     "batch_size": 16,
-    "output_dir": "Proto-RAF",
+    "output_dir": "ProtoRAF",
     "lora_output_dir": "proto_raf_checkpoints",
     "learning_rate": 1e-5,
     "grad_accum_steps": 4,

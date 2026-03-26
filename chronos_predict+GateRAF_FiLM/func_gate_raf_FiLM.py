@@ -25,7 +25,7 @@ CONFIG = {
     "context_length": 128,
     "retrieval_length": 128,
     "batch_size": 16,
-    "output_dir": "Gate-RAF_FiLM",
+    "output_dir": "GateRAF_FiLM",
     "lora_output_dir": "gate_raf_FiLM_checkpoints",
     "learning_rate": 1e-5,
     "grad_accum_steps": 4,

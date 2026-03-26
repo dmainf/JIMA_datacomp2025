@@ -36,7 +36,7 @@ def main():
             print(f"Adapter not found at {possible_path}. Falling back to zero-shot inference.")
 
     suffix = "(zero-shot)" if not adapter_path else ""
-    CONFIG["output_dir"] = f"Gate-RAF-noscale{suffix}"
+    CONFIG["output_dir"] = f"GateRAF-noscale{suffix}"
 
     print(f"\n=== Starting Inference ===")
     decile_books = extract_decile_books(df)
