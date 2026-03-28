@@ -253,6 +253,199 @@ def plot_f1(all_metrics, models, colors, markers, quantile_col, output_dir):
     print(f"Saved: {output_dir}/spike_detection_F1.png")
 
 
+COLOR_MAP = {
+    'GateRAF':  '#e63946',
+    'Multi-RAF':'#2a9d8f',
+    'ProtoRAF': '#f4a261',
+    'noRAF':    '#457b9d',
+}
+LS_MAP = {
+    'GateRAF':  '-',
+    'Multi-RAF':'--',
+    'ProtoRAF': '-.',
+    'noRAF':    ':',
+}
+
+
+def prepare_df(df, quantile_col, spike_z):
+    df = df.copy()
+    ae = (df['actual'] - df[quantile_col]).abs()
+    bad_books = set(df.loc[~np.isfinite(ae) | (ae > ANOMALY_THRESHOLD), 'book_name'])
+    df = df[~df['book_name'].isin(bad_books)].copy()
+    stats = df.groupby('book_name')['actual'].agg(['mean', 'std'])
+    df = df.join(stats, on='book_name')
+    df['zscore'] = np.where(df['std'] > 0, (df['actual'] - df['mean']) / df['std'], 0.0)
+    df['is_spike'] = df['zscore'] > spike_z
+    df['interval_width'] = df['q0.9'] - df['q0.1']
+    df['spike_threshold'] = df['mean'] + spike_z * df['std']
+    df['pred_spike'] = df[quantile_col] > df['spike_threshold']
+    df['series_cv'] = df['std'] / df['mean'].replace(0, np.nan)
+    return df
+
+
+def plot_interval_calibration(pred_dfs, models, quantile_col, spike_z, output_dir):
+    N_BINS = 10
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+    for ax, ylabel, key in zip(
+        axes,
+        ['Spike rate (actual z>{})'.format(spike_z), 'Mean actual z-score'],
+        ['spike_rate', 'mean_zscore'],
+    ):
+        for model_name, df in zip(models, pred_dfs):
+            dfw = prepare_df(df, quantile_col, spike_z)
+            dfw = dfw[np.isfinite(dfw['interval_width']) & (dfw['interval_width'] >= 0)]
+            dfw['iw_bin'] = pd.qcut(dfw['interval_width'], q=N_BINS, labels=False, duplicates='drop')
+            grp = dfw.groupby('iw_bin').agg(
+                bin_center=('interval_width', 'median'),
+                spike_rate=('is_spike', 'mean'),
+                mean_zscore=('zscore', 'mean'),
+            ).reset_index()
+            ax.plot(grp['bin_center'], grp[key],
+                    marker='o', linewidth=1.8,
+                    linestyle=LS_MAP.get(model_name, '-'),
+                    color=COLOR_MAP.get(model_name, None),
+                    label=model_name)
+        ax.set_xlabel('Prediction interval width (q0.9 − q0.1)', fontsize=12)
+        ax.set_ylabel(ylabel, fontsize=12)
+        ax.set_title(f'A1: {ylabel}\nby interval width  [z>{spike_z}, {quantile_col}]',
+                     fontsize=11, fontweight='bold')
+        ax.legend(fontsize=9)
+        ax.grid(alpha=0.3, linestyle='--')
+    plt.tight_layout()
+    fname = f'{output_dir}/A1_interval_calibration.png'
+    plt.savefig(fname, dpi=300, bbox_inches='tight')
+    plt.close()
+    print(f"Saved: {fname}")
+    print(f"  [A1 corr interval_width vs spike_flag / zscore]")
+    for model_name, df in zip(models, pred_dfs):
+        dfw = prepare_df(df, quantile_col, spike_z)
+        dfw = dfw[np.isfinite(dfw['interval_width']) & (dfw['interval_width'] >= 0)]
+        r1 = np.corrcoef(dfw['interval_width'], dfw['is_spike'].astype(float))[0, 1]
+        r2 = np.corrcoef(dfw['interval_width'], dfw['zscore'])[0, 1]
+        print(f"    {model_name:<12} corr(iw,spike)={r1:.4f}  corr(iw,zscore)={r2:.4f}")
+
+
+def plot_temporal_proximity(pred_dfs, models, quantile_col, spike_z, output_dir):
+    K = 10
+    bins = np.arange(-K - 0.5, K + 1.5, 1)
+    bin_centers = np.arange(-K, K + 1)
+    fig_tp, ax_tp = plt.subplots(figsize=(10, 5))
+    fig_fp, ax_fp = plt.subplots(figsize=(10, 5))
+    fig_fn, ax_fn = plt.subplots(figsize=(10, 5))
+    print(f"  [A2] z>{spike_z} {quantile_col}")
+    for model_name, df in zip(models, pred_dfs):
+        dfw = prepare_df(df, quantile_col, spike_z)
+        tp_dists, fp_dists, fn_dists = [], [], []
+        for book, grp in dfw.groupby('book_name'):
+            grp = grp.sort_values('day').reset_index(drop=True)
+            actual_arr = np.where(grp['is_spike'].values)[0]
+            pred_arr   = np.where(grp['pred_spike'].values)[0]
+            if len(actual_arr) == 0 or len(pred_arr) == 0:
+                continue
+            for pi in pred_arr:
+                dists = actual_arr - pi
+                nearest = dists[np.argmin(np.abs(dists))]
+                if grp.loc[pi, 'is_spike']:
+                    tp_dists.append(nearest)
+                else:
+                    fp_dists.append(nearest)
+            for ai in actual_arr:
+                if grp.loc[ai, 'pred_spike']:
+                    continue
+                dists = pred_arr - ai
+                nearest = dists[np.argmin(np.abs(dists))]
+                fn_dists.append(nearest)
+        color = COLOR_MAP.get(model_name, None)
+        ls = LS_MAP.get(model_name, '-')
+        for ax, arr, label_suffix in [
+            (ax_tp, tp_dists, 'TP'),
+            (ax_fp, fp_dists, 'FP'),
+            (ax_fn, fn_dists, 'FN'),
+        ]:
+            arr = np.array(arr)
+            if len(arr) == 0:
+                continue
+            hist, _ = np.histogram(np.clip(arr, -K, K), bins=bins)
+            norm = hist / hist.sum()
+            ax.plot(bin_centers, norm, marker='o', linewidth=1.6, markersize=5,
+                    linestyle=ls, color=color, label=f'{model_name} (n={len(arr)})')
+        near3_tp = (np.abs(np.array(tp_dists)) <= 3).mean() if tp_dists else float('nan')
+        near3_fp = (np.abs(np.array(fp_dists)) <= 3).mean() if fp_dists else float('nan')
+        near3_fn = (np.abs(np.array(fn_dists)) <= 3).mean() if fn_dists else float('nan')
+        print(f"    {model_name:<12} TP±3={near3_tp:.3f}  FP±3={near3_fp:.3f}  FN±3={near3_fn:.3f}"
+              f"  (nTP={len(tp_dists)}, nFP={len(fp_dists)}, nFN={len(fn_dists)})")
+    for ax, title, xlabel in [
+        (ax_tp, f'A2-TP: Days from predicted spike to nearest actual spike\n[z>{spike_z}, {quantile_col}]',
+         'Δdays (actual spike − predicted spike day)'),
+        (ax_fp, f'A2-FP: Days from false-alarm prediction to nearest actual spike\n[z>{spike_z}, {quantile_col}]',
+         'Δdays (nearest actual spike − false-alarm day)'),
+        (ax_fn, f'A2-FN: Days from missed actual spike to nearest predicted spike\n[z>{spike_z}, {quantile_col}]',
+         'Δdays (nearest pred_spike − missed spike day)'),
+    ]:
+        ax.axvline(0, color='black', linestyle='--', linewidth=1.2)
+        ax.set_xlabel(xlabel, fontsize=11)
+        ax.set_ylabel('Fraction of predictions', fontsize=11)
+        ax.set_title(title, fontsize=11, fontweight='bold')
+        ax.legend(fontsize=9)
+        ax.grid(alpha=0.3, linestyle='--')
+    fig_tp.tight_layout(); fig_fp.tight_layout(); fig_fn.tight_layout()
+    for fig, tag in [(fig_tp, 'tp'), (fig_fp, 'fp'), (fig_fn, 'fn')]:
+        fname = f'{output_dir}/A2_proximity_{tag}.png'
+        fig.savefig(fname, dpi=300, bbox_inches='tight')
+        print(f"Saved: {fname}")
+    plt.close('all')
+
+
+def plot_cv_vs_f1(pred_dfs, models, quantile_col, spike_z, output_dir):
+    CV_BINS   = [0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, np.inf]
+    CV_LABELS = ['<0.5', '0.5-1', '1-1.5', '1.5-2', '2-2.5', '2.5-3', '3+']
+    records = []
+    for model_name, df in zip(models, pred_dfs):
+        dfw = prepare_df(df, quantile_col, spike_z)
+        for book, grp in dfw.groupby('book_name'):
+            tp = (grp['is_spike'] & grp['pred_spike']).sum()
+            fp = (~grp['is_spike'] & grp['pred_spike']).sum()
+            fn = (grp['is_spike'] & ~grp['pred_spike']).sum()
+            prec = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+            rec  = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+            f1   = 2 * prec * rec / (prec + rec) if (prec + rec) > 0 else 0.0
+            cv   = grp['series_cv'].iloc[0]
+            records.append({'model': model_name, 'cv': cv, 'f1': f1,
+                            'precision': prec, 'recall': rec,
+                            'n_spike': int(grp['is_spike'].sum())})
+    ps_df = pd.DataFrame(records)
+    ps_df = ps_df[np.isfinite(ps_df['cv'])]
+    ps_df['cv_bin'] = pd.cut(ps_df['cv'], bins=CV_BINS, labels=CV_LABELS, right=False)
+    fig, axes = plt.subplots(1, 3, figsize=(18, 5))
+    for ax, metric, ylabel in zip(axes,
+                                  ['f1', 'precision', 'recall'],
+                                  ['F1', 'Precision', 'Recall']):
+        for model_name in models:
+            sub = ps_df[(ps_df['model'] == model_name) & (ps_df['n_spike'] >= 1)]
+            grp = sub.groupby('cv_bin', observed=True)[metric].mean().reset_index()
+            ax.plot(grp['cv_bin'], grp[metric],
+                    marker='o', linewidth=1.8,
+                    linestyle=LS_MAP.get(model_name, '-'),
+                    color=COLOR_MAP.get(model_name, None),
+                    label=model_name)
+        ax.set_xlabel('Per-series CV (std / mean)', fontsize=12)
+        ax.set_ylabel(f'Mean {ylabel}', fontsize=12)
+        ax.set_title(f'A3: {ylabel} vs series CV  [z>{spike_z}, {quantile_col}]',
+                     fontsize=11, fontweight='bold')
+        ax.legend(fontsize=10)
+        ax.grid(alpha=0.3, linestyle='--')
+        plt.setp(ax.get_xticklabels(), rotation=30)
+    plt.tight_layout()
+    fname = f'{output_dir}/A3_cv_vs_f1.png'
+    plt.savefig(fname, dpi=300, bbox_inches='tight')
+    plt.close()
+    print(f"Saved: {fname}")
+    pivot = ps_df[ps_df['n_spike'] >= 1].groupby(
+        ['model', 'cv_bin'], observed=True)['f1'].mean().unstack()
+    print(f"  [A3] Mean F1 per CV bin (z>{spike_z}, {quantile_col}, series with >=1 spike):")
+    print(pivot.to_string())
+
+
 for spike_z in SPIKE_ZSCORES:
     for quantile in QUANTILES:
         out_dir = f'metric_comparison/z{spike_z}/{quantile}'
@@ -277,4 +470,16 @@ for spike_z in SPIKE_ZSCORES:
                   f"{improv:>+8.1f}% {m['Precision']:>7.3f} {m['Recall']:>7.3f} {m['F1']:>7.3f}")
     print()
 
-print("Done.")
+CHAR_Z = 2.0
+print("\n" + "=" * 60)
+print("Characterization analyses (A1/A2/A3)")
+print("=" * 60)
+for quantile in QUANTILES:
+    char_dir = f'metric_comparison/z{CHAR_Z}/{quantile}/characterization'
+    os.makedirs(char_dir, exist_ok=True)
+    print(f"\n--- {quantile} ---")
+    plot_interval_calibration(pred_dfs, models, quantile, CHAR_Z, char_dir)
+    plot_temporal_proximity(pred_dfs, models, quantile, CHAR_Z, char_dir)
+    plot_cv_vs_f1(pred_dfs, models, quantile, CHAR_Z, char_dir)
+
+print("\nDone.")
