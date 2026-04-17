@@ -1,5 +1,7 @@
 Retrieval_Augmented_Time_Series_Forecasting
 
+
+
 TSFM			Time-Series Foundation Model	e.g. Chronos, Moirai
 
 
@@ -17,6 +19,12 @@ TSFM			Time-Series Foundation Model	e.g. Chronos, Moirai
 
 
 
+
+  pdflatex main.tex
+
+  日本語を使う場合は：
+
+  lualatex main.tex
 
 
 
