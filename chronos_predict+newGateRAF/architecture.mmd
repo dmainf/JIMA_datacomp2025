@@ -1,0 +1,38 @@
+flowchart TB
+    classDef io   fill:#f8fafc,stroke:#64748b,color:#0f172a
+    classDef lenc fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef renc fill:#fef9c3,stroke:#ca8a04,color:#713f12
+    classDef gate fill:#fdf4ff,stroke:#c026d3,color:#701a75
+    classDef fuse fill:#f3e8ff,stroke:#9333ea,color:#3b0764
+    classDef dec  fill:#dcfce7,stroke:#16a34a,color:#14532d
+
+    x(["Input  x"])
+    r(["Retrieved  r₁…rₖ"])
+
+    enc_l["Local Encoder  (DoRA)"]
+    pool["Avg. Pooling"]
+    enc_r["Retrieved Encoder  (DoRA, shared ×K)"]
+    gate["Adaptive Gate\ng = σ(MLP([h_sum ; h_raf]))\nh_raf ⊙ g"]
+
+    subgraph FUSE["Fusion"]
+        cat["Concatenate  [ h_local ; h_filtered ]"]
+    end
+
+    dec["Decoder  (DoRA)"]
+
+    x     --> enc_l --> pool
+    r     --> enc_r
+    pool  -- "h_sum"      --> gate
+    enc_r -- "h_raf"      --> gate
+    enc_l -- "h_local"    --> cat
+    gate  -- "h_filtered" --> cat
+    cat   -- "h_fused"    --> dec
+    enc_l -. "query"      .-> dec
+    dec   --> y(["Quantile Forecasts  ŷ"])
+
+    class x,r,y io
+    class enc_l,pool lenc
+    class enc_r renc
+    class gate gate
+    class cat fuse
+    class dec dec

@@ -1,5 +1,16 @@
 Retrieval_Augmented_Time_Series_Forecasting
 
+* time-series data is inherently dynamic, heterogeneous and context-dependent
+* time-series exhibit complex pattern
+* Euclidean distance within distinct norms is better than cosine similarity
+* Transformer with stride length 1 is good
+* larger models exhibit faster convergence
+
+* on longer-context, l2 and Pearson's correlation is good
+* on shorter-context, cosine similarity and Pearson's correlation is good
+	-> direction is more important than scale
+* normalize separately before being input into the model
+
 
 
 TSFM			Time-Series Foundation Model	e.g. Chronos, Moirai
