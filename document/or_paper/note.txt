@@ -1,36 +1,3 @@
-Retrieval_Augmented_Time_Series_Forecasting
-
-* time-series data is inherently dynamic, heterogeneous and context-dependent
-* time-series exhibit complex pattern
-* Euclidean distance within distinct norms is better than cosine similarity
-* Transformer with stride length 1 is good
-* larger models exhibit faster convergence
-
-* on longer-context, l2 and Pearson's correlation is good
-* on shorter-context, cosine similarity and Pearson's correlation is good
-	-> direction is more important than scale
-* normalize separately before being input into the model
-
-
-
-TSFM			Time-Series Foundation Model	e.g. Chronos, Moirai
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   pdflatex main.tex
 
   日本語を使う場合は：
@@ -38,25 +5,55 @@ TSFM			Time-Series Foundation Model	e.g. Chronos, Moirai
   lualatex main.tex
 
 
+-----------------------------------------------------------------------------------
+//Retrieval_Augmented_Time_Series_Forecasting//
+
+TSFM	Time-Series Foundation Model	e.g. Chronos, Moirai
+That's why use RAF
+* time-series data is inherently dynamic, heterogeneous and context-dependent
+* time-series exhibit complex pattern
+
+
+Rule to make good RAF
+* Euclidean distance within distinct norms is better than cosine similarity
+* Transformer with stride length 1 is good
+* larger models exhibit faster convergence
+* on longer-context, l2 and Pearson's correlation is good
+* on shorter-context, cosine similarity and Pearson's correlation is good
+	-> direction is more important than scale
+* Loss function is WQL(Weighed Quantile Loss) or MASE
+
+
+Methodology of RAF
+1. 20% test, 80% retrieval, embedding series and normalize series
+2. Identify retrieved context, calculating l2 each time-step
+3. Concatenate original and retrieved apply additive offset to enforce continuity
+	retrieved context ＋ retrieved future ＋ original context(un-embedding)
+
+
+Result
+* larger model gain better
+* classic non-attention model yield little and even hurt performance
+* Fine-turning for TSFM added RAF is good
+* On dataset with Gaussian noise and missing-at-random, RAF outperform the baseline
+
+
+-----------------------------------------------------------------------------------
+//TS-RAG: Retrieval-Augmented_Generation_based_Time_Series_Foundation_Models//
 
 
 
-1. はじめに
-  - 書籍市場の背景：再販維持制度 → 多品種少数生産 →
-  過剰返本問題
-  - なぜ需要予測が難しいか：スパイク・スパースデータ
-  - 既存予測モデルの限界：誤差最小化がスパイクを無視
-  - RAFのアイデアと問題点：単純なRAFは時系列の不連続・無  関係な参照の強制採用                                    - 提案：Multi-StreamとGateによる解決                    - 本論文の構成説明（各節の内容を1文で）
 
-2. 分析データ
-2.1 提供データの概要：コンペ由来データ、書籍売上CSVの列構成（書名・day・actual等）                         2.2 スパイクの特性分析：スパイクの発生頻度・規模の記  述統計、可視化                                          2.3 前処理：学習/テスト分割、正規化等
 
-3. 提案手法：Gate付きRAF
-3.1 RAFの基本構成：検索 → 参照系列の結合 → 予測
-3.2 既存RAFの問題点：時系列の不連続性、無関係な参照の強制採用（シンプルRAFがnoRAFより性能低下した実験結果
-  を根拠に
-3.3 Multi-Stream構造：系列の分離による不連続回避
-3.4 Gateによる参照の選別：類似度に基づく参照の重み付  け、数式定義                                            （3.5 ProtoRAFとの比較設計）：必要であれば
+
+
+
+
+
+
+
+
+
 
 4. 数値実験
 4.1 実験設定：比較手法（LSTM, noRAF, ProtoRAF,
