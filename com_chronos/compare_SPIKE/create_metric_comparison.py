@@ -335,13 +335,12 @@ def plot_temporal_proximity(pred_dfs, models, quantile_col, spike_z, output_dir)
     K = 10
     bins = np.arange(-K - 0.5, K + 1.5, 1)
     bin_centers = np.arange(-K, K + 1)
-    fig_tp, ax_tp = plt.subplots(figsize=(10, 5))
     fig_fp, ax_fp = plt.subplots(figsize=(10, 5))
     fig_fn, ax_fn = plt.subplots(figsize=(10, 5))
     print(f"  [temporal proximity] z>{spike_z} {quantile_col}")
     for model_name, df in zip(models, pred_dfs):
         dfw = prepare_df(df, quantile_col, spike_z)
-        tp_dists, fp_dists, fn_dists = [], [], []
+        fp_dists, fn_dists = [], []
         for book, grp in dfw.groupby('book_name'):
             grp = grp.sort_values('day').reset_index(drop=True)
             actual_arr = np.where(grp['is_spike'].values)[0]
@@ -351,23 +350,17 @@ def plot_temporal_proximity(pred_dfs, models, quantile_col, spike_z, output_dir)
             for pi in pred_arr:
                 dists = actual_arr - pi
                 nearest = dists[np.argmin(np.abs(dists))]
-                if grp.loc[pi, 'is_spike']:
-                    tp_dists.append(nearest)
-                else:
+                if not grp.loc[pi, 'is_spike']:
                     fp_dists.append(nearest)
             for ai in actual_arr:
                 if grp.loc[ai, 'pred_spike']:
                     continue
-                dists = pred_arr - ai
+                dists = ai - pred_arr
                 nearest = dists[np.argmin(np.abs(dists))]
                 fn_dists.append(nearest)
         color = COLOR_MAP.get(model_name, None)
         ls = LS_MAP.get(model_name, '-')
-        for ax, arr, label_suffix in [
-            (ax_tp, tp_dists, 'TP'),
-            (ax_fp, fp_dists, 'FP'),
-            (ax_fn, fn_dists, 'FN'),
-        ]:
+        for ax, arr in [(ax_fp, fp_dists), (ax_fn, fn_dists)]:
             arr = np.array(arr)
             if len(arr) == 0:
                 continue
@@ -375,27 +368,21 @@ def plot_temporal_proximity(pred_dfs, models, quantile_col, spike_z, output_dir)
             norm = hist / hist.sum()
             ax.plot(bin_centers, norm, marker='o', linewidth=1.6, markersize=5,
                     linestyle=ls, color=color, label=f'{model_name} (n={len(arr)})')
-        near3_tp = (np.abs(np.array(tp_dists)) <= 3).mean() if tp_dists else float('nan')
         near3_fp = (np.abs(np.array(fp_dists)) <= 3).mean() if fp_dists else float('nan')
         near3_fn = (np.abs(np.array(fn_dists)) <= 3).mean() if fn_dists else float('nan')
-        print(f"    {model_name:<12} TP±3={near3_tp:.3f}  FP±3={near3_fp:.3f}  FN±3={near3_fn:.3f}"
-              f"  (nTP={len(tp_dists)}, nFP={len(fp_dists)}, nFN={len(fn_dists)})")
-    for ax, title, xlabel in [
-        (ax_tp, f'TP: Days from predicted spike to nearest actual spike\n[z>{spike_z}, {quantile_col}]',
-         'Δdays (actual spike − predicted spike day)'),
-        (ax_fp, f'FP: Days from false-alarm prediction to nearest actual spike\n[z>{spike_z}, {quantile_col}]',
-         'Δdays (nearest actual spike − false-alarm day)'),
-        (ax_fn, f'FN: Days from missed actual spike to nearest predicted spike\n[z>{spike_z}, {quantile_col}]',
-         'Δdays (nearest pred_spike − missed spike day)'),
+        print(f"    {model_name:<12} FP±3={near3_fp:.3f}  FN±3={near3_fn:.3f}"
+              f"  (nFP={len(fp_dists)}, nFN={len(fn_dists)})")
+    for ax, xlabel in [
+        (ax_fp, 'Δdays (nearest actual spike day − predicted spike day)'),
+        (ax_fn, 'Δdays (actual spike day − nearest predicted spike day)'),
     ]:
         ax.axvline(0, color='black', linestyle='--', linewidth=1.2)
         ax.set_xlabel(xlabel, fontsize=11)
         ax.set_ylabel('Fraction of predictions', fontsize=11)
-        ax.set_title(title, fontsize=11, fontweight='bold')
         ax.legend(fontsize=9)
         ax.grid(alpha=0.3, linestyle='--')
-    fig_tp.tight_layout(); fig_fp.tight_layout(); fig_fn.tight_layout()
-    for fig, tag in [(fig_tp, 'tp'), (fig_fp, 'fp'), (fig_fn, 'fn')]:
+    fig_fp.tight_layout(); fig_fn.tight_layout()
+    for fig, tag in [(fig_fp, 'fp'), (fig_fn, 'fn')]:
         fname = f'{output_dir}/proximity_{tag}.png'
         fig.savefig(fname, dpi=300, bbox_inches='tight')
         print(f"Saved: {fname}")
@@ -564,10 +551,10 @@ def generate_latex_metric_vs_zscore(all_table, models, quantiles, metric):
 
     col_spec = 'l' + 'r' * n_bins
     lines = []
-    lines.append(r'\begin{table*}[tb]')
-    lines.append(f'    \\caption{{{metric} stratified by within-series z-score of actual sales.}}'
-                 f' \\label{{tab:{metric.lower()}_vs_zscore}}')
-    lines.append(r'    \center')
+    lines.append(r'\begin{table*}[t]')
+    lines.append(f'    \\caption{{{metric} stratified by within-series z-score of actual sales.}}')
+    lines.append(f'    \\label{{tab:{metric.lower()}_vs_zscore}}')
+    lines.append(r'    \centering')
     lines.append(f'    \\begin{{tabular}}{{{col_spec}}}')
     lines.append(r'    \hline')
     lines.append(f'    & \\multicolumn{{{n_bins}}}{{c}}{{Within-series z-score of actual value}} \\\\')
@@ -631,11 +618,12 @@ def plot_temporal_proximity_combined(pred_dfs, models, quantile_col, spike_z, ou
     bins = np.arange(-K - 0.5, K + 1.5, 1)
     bin_centers = np.arange(-K, K + 1)
 
-    fig, axes = plt.subplots(1, 3, figsize=(14, 4))
-
+    table_data = {m: {'fp': np.zeros(len(bin_centers)), 'fn': np.zeros(len(bin_centers))}
+                  for m in models}
+    plot_data = {m: {'fp': [], 'fn': []} for m in models}
     for model_name, df in zip(models, pred_dfs):
         dfw = prepare_df(df, quantile_col, spike_z)
-        tp_dists, fp_dists, fn_dists = [], [], []
+        fp_dists, fn_dists = [], []
         for book, grp in dfw.groupby('book_name'):
             grp = grp.sort_values('day').reset_index(drop=True)
             actual_arr = np.where(grp['is_spike'].values)[0]
@@ -645,97 +633,139 @@ def plot_temporal_proximity_combined(pred_dfs, models, quantile_col, spike_z, ou
             for pi in pred_arr:
                 dists = actual_arr - pi
                 nearest = dists[np.argmin(np.abs(dists))]
-                if grp.loc[pi, 'is_spike']:
-                    tp_dists.append(nearest)
-                else:
+                if not grp.loc[pi, 'is_spike']:
                     fp_dists.append(nearest)
             for ai in actual_arr:
                 if grp.loc[ai, 'pred_spike']:
                     continue
-                dists = pred_arr - ai
+                dists = ai - pred_arr
                 nearest = dists[np.argmin(np.abs(dists))]
                 fn_dists.append(nearest)
 
         color  = COLOR_MAP.get(model_name, '#333333')
         ls     = LS_MAP.get(model_name, '-')
         marker = PAPER_MARKER_MAP.get(model_name, 'o')
-        for ax, arr in zip(axes, [tp_dists, fp_dists, fn_dists]):
-            arr = np.array(arr)
+        for key, arr_list in [('fp', fp_dists), ('fn', fn_dists)]:
+            arr = np.array(arr_list)
             if len(arr) == 0:
                 continue
             hist, _ = np.histogram(np.clip(arr, -K, K), bins=bins)
             norm = hist / hist.sum()
+            table_data[model_name][key] = norm
+            plot_data[model_name][key] = (norm, marker, ls, color, len(arr))
+
+    xlabels = {
+        'fp': r'$\Delta$days (nearest actual spike day $-$ predicted spike day)',
+        'fn': r'$\Delta$days (actual spike day $-$ nearest predicted spike day)',
+    }
+    os.makedirs(output_dir, exist_ok=True)
+    for key in ('fp', 'fn'):
+        fig, ax = plt.subplots(figsize=(6, 4))
+        for model_name in models:
+            entry = plot_data[model_name].get(key)
+            if not entry:
+                continue
+            norm, marker, ls, color, n = entry
             ax.plot(bin_centers, norm, marker=marker, linewidth=1.6, markersize=4,
                     linestyle=ls, color=color, markevery=2,
-                    label=f'{model_name} ($n={len(arr)}$)')
-
-    panel_titles = [
-        r'(a) TP: $\Delta$days (actual $-$ predicted spike)',
-        r'(b) FP: $\Delta$days (nearest actual $-$ false alarm)',
-        r'(c) FN: $\Delta$days (nearest prediction $-$ missed spike)',
-    ]
-    for ax, title in zip(axes, panel_titles):
+                    label=f'{model_name} ($n={n}$)')
         ax.axvline(0, color='black', linestyle='--', linewidth=1.0)
-        ax.set_xlabel(r'$\Delta$days', fontsize=11)
+        ax.set_xlabel(xlabels[key], fontsize=11)
         ax.set_ylabel('Fraction', fontsize=11)
-        ax.set_title(title, fontsize=10, fontweight='bold')
         ax.legend(fontsize=9)
         ax.grid(alpha=0.3, linestyle='--')
+        plt.tight_layout()
+        if quantile_col == 'q0.5':
+            fname_eps = f'{output_dir}/temporal_proximity_{key}_{quantile_col}.eps'
+            plt.savefig(fname_eps, bbox_inches='tight', format='eps')
+            print(f"Saved: {fname_eps}")
+        fname_png = f'{output_dir}/temporal_proximity_{key}_{quantile_col}.png'
+        plt.savefig(fname_png, dpi=300, bbox_inches='tight')
+        print(f"Saved: {fname_png}")
+        plt.close()
+    return bin_centers, table_data
 
-    plt.suptitle(
-        f'Temporal proximity of spike predictions  [$z>{spike_z}$, {quantile_col}]',
-        fontsize=12, fontweight='bold')
-    plt.tight_layout()
-    os.makedirs(output_dir, exist_ok=True)
-    fname = f'{output_dir}/temporal_proximity_{quantile_col}.png'
-    plt.savefig(fname, dpi=300, bbox_inches='tight')
-    plt.close()
-    print(f"Saved: {fname}")
 
-
-def plot_interval_calibration_paper(pred_dfs, models, quantiles, spike_z, output_dir):
-    N_BINS = 10
-    nq = len(quantiles)
+def generate_latex_temporal_proximity_table(bin_centers, table_data_per_q, models, quantiles):
+    model_label = {
+        'GateRAF':   r'\textbf{GateRAF}',
+        'Multi-RAF': r'\textbf{Multi-RAF}',
+        'ProtoRAF':  r'\textbf{ProtoRAF}',
+        'noRAF':     r'\textbf{Baseline}',
+    }
     quantile_label = {'q0.1': r'$\tau=0.1$', 'q0.5': r'$\tau=0.5$', 'q0.9': r'$\tau=0.9$'}
-    fig, axes = plt.subplots(1, nq, figsize=(5.5 * nq, 4.5))
-    if nq == 1:
-        axes = [axes]
-    all_bin_data = {}
-    for qi, quantile in enumerate(quantiles):
-        ax = axes[qi]
-        pool = pd.concat([
-            prepare_df(df, quantile, spike_z).pipe(
-                lambda d: d.loc[np.isfinite(d['interval_width']) & (d['interval_width'] >= 0),
-                                 'interval_width']
-            )
-            for df in pred_dfs
-        ])
-        _, bin_edges = pd.qcut(pool, q=N_BINS, retbins=True, duplicates='drop')
-        bin_centers = [(bin_edges[i] + bin_edges[i + 1]) / 2 for i in range(len(bin_edges) - 1)]
-        n_bins = len(bin_centers)
-        model_zscore = {}
-        for model_name, df in zip(models, pred_dfs):
-            dfw = prepare_df(df, quantile, spike_z)
-            dfw = dfw[np.isfinite(dfw['interval_width']) & (dfw['interval_width'] >= 0)].copy()
-            dfw['iw_bin'] = pd.cut(dfw['interval_width'], bins=bin_edges,
-                                   labels=False, include_lowest=True)
-            grp = dfw.groupby('iw_bin', observed=False).agg(
-                plot_center=('interval_width', 'median'),
-                mean_zscore=('zscore', 'mean'),
-            ).reset_index()
-            model_zscore[model_name] = grp['mean_zscore'].tolist()
-            ax.plot(grp['plot_center'], grp['mean_zscore'],
-                    marker=PAPER_MARKER_MAP.get(model_name, 'o'),
-                    linewidth=1.8, markersize=6,
-                    linestyle=LS_MAP.get(model_name, '-'),
-                    color=COLOR_MAP.get(model_name, '#333333'),
-                    label=model_name)
-        all_bin_data[quantile] = {'bin_centers': bin_centers, 'model_zscore': model_zscore}
-        ax.set_title(quantile_label.get(quantile, quantile), fontsize=11, fontweight='bold')
-        ax.set_xlabel(r'Interval width ($q_{0.9} - q_{0.1}$)', fontsize=10)
-        ax.set_ylabel(r'Mean actual $z$-score', fontsize=10)
-        ax.legend(fontsize=8)
-        ax.grid(alpha=0.3, linestyle='--')
+    n_models = len(models)
+    col_spec = 'r' + 'r' * n_models
+    lines = []
+    ref_q = 'q0.5'
+    lines.append(r'\begin{table*}[t]')
+    lines.append(
+        r'    \caption{Fraction of events by $\Delta$days between predicted and actual spike days'
+        r' ($\tau=0.5$).}'
+    )
+    lines.append(r'    \label{tab:temporal_proximity}')
+    lines.append(r'    \centering')
+    lines.append(f'    \\begin{{tabular}}{{{col_spec}}}')
+    lines.append(r'    \hline')
+    header = r'    \multicolumn{1}{c}{$\Delta$days}'
+    for m in models:
+        header += f' & \\multicolumn{{1}}{{c}}{{{model_label.get(m, m)}}}'
+    header += r' \\'
+    lines.append(header)
+    lines.append(r'    \hline\hline')
+    table_data = table_data_per_q[ref_q]
+    for section_key, section_label in [
+        ('fp', r'Predicted spike, no concurrent actual spike'),
+        ('fn', r'Actual spike, no concurrent predicted spike'),
+    ]:
+        lines.append(f'    \\multicolumn{{{1 + n_models}}}{{l}}{{{section_label}}} \\\\')
+        for bi, day in enumerate(bin_centers):
+            row = f'    {int(day):+d}'
+            for m in models:
+                v = table_data[m][section_key][bi]
+                row += f' & {v:.3f}'
+            row += r' \\'
+            lines.append(row)
+        lines.append(r'    \hline')
+    lines.append(r'    \end{tabular}')
+    lines.append(r'\end{table*}')
+    return '\n'.join(lines)
+
+
+def plot_interval_calibration_paper(pred_dfs, models, spike_z, output_dir):
+    N_BINS = 10
+    REF_Q = 'q0.5'
+    pool = pd.concat([
+        prepare_df(df, REF_Q, spike_z).pipe(
+            lambda d: d.loc[np.isfinite(d['interval_width']) & (d['interval_width'] >= 0),
+                             'interval_width']
+        )
+        for df in pred_dfs
+    ])
+    _, bin_edges = pd.qcut(pool, q=N_BINS, retbins=True, duplicates='drop')
+    bin_centers = [(bin_edges[i] + bin_edges[i + 1]) / 2 for i in range(len(bin_edges) - 1)]
+    fig, ax = plt.subplots(figsize=(7, 5))
+    model_zscore = {}
+    for model_name, df in zip(models, pred_dfs):
+        dfw = prepare_df(df, REF_Q, spike_z)
+        dfw = dfw[np.isfinite(dfw['interval_width']) & (dfw['interval_width'] >= 0)].copy()
+        dfw['iw_bin'] = pd.cut(dfw['interval_width'], bins=bin_edges,
+                               labels=False, include_lowest=True)
+        grp = dfw.groupby('iw_bin', observed=False).agg(
+            plot_center=('interval_width', 'median'),
+            mean_zscore=('zscore', 'mean'),
+        ).reset_index()
+        model_zscore[model_name] = grp['mean_zscore'].tolist()
+        ax.plot(grp['plot_center'], grp['mean_zscore'],
+                marker=PAPER_MARKER_MAP.get(model_name, 'o'),
+                linewidth=1.8, markersize=6,
+                linestyle=LS_MAP.get(model_name, '-'),
+                color=COLOR_MAP.get(model_name, '#333333'),
+                label=model_name)
+    ax.set_xlabel(r'Interval width ($q_{0.9} - q_{0.1}$)', fontsize=12)
+    ax.set_ylabel(r'Mean actual $z$-score', fontsize=12)
+    ax.legend(fontsize=10)
+    ax.grid(alpha=0.3, linestyle='--')
     plt.tight_layout()
     os.makedirs(output_dir, exist_ok=True)
     for ext, kw in [('eps', {'format': 'eps'}), ('png', {'dpi': 300})]:
@@ -743,50 +773,42 @@ def plot_interval_calibration_paper(pred_dfs, models, quantiles, spike_z, output
         plt.savefig(fname, bbox_inches='tight', **kw)
         print(f"Saved: {fname}")
     plt.close()
-    return all_bin_data
+    return {'bin_centers': bin_centers, 'model_zscore': model_zscore}
 
 
-def generate_latex_interval_calibration_table(all_bin_data, models, quantiles):
+def generate_latex_interval_calibration_table(bin_data, models):
     model_label = {
         'GateRAF':   r'\textbf{GateRAF}',
         'Multi-RAF': r'\textbf{Multi-RAF}',
         'ProtoRAF':  r'\textbf{ProtoRAF}',
         'noRAF':     r'\textbf{Baseline}',
     }
-    quantile_label = {
-        'q0.1': r'$\tau=0.1$',
-        'q0.5': r'$\tau=0.5$',
-        'q0.9': r'$\tau=0.9$',
-    }
-    bin_centers = all_bin_data[quantiles[0]]['bin_centers']
+    bin_centers = bin_data['bin_centers']
     n_bins = len(bin_centers)
     col_spec = 'l' + 'r' * n_bins
     lines = []
-    lines.append(r'\begin{table*}[tb]')
+    lines.append(r'\begin{table*}[t]')
     lines.append(
         r'    \caption{Mean actual $z$-score by prediction interval width bin '
-        r'($q_{0.9}-q_{0.1}$, equal-frequency bins).} \label{tab:interval_calibration}'
+        r'($q_{0.9}-q_{0.1}$, equal-frequency bins).}'
     )
-    lines.append(r'    \center')
-    lines.append(f'    \\begin{{tabular}}{{{col_spec}}} \\hline')
+    lines.append(r'    \label{tab:interval_calibration}')
+    lines.append(r'    \centering')
+    lines.append(f'    \\begin{{tabular}}{{{col_spec}}}')
+    lines.append(r'    \hline')
     header = r'    \multicolumn{1}{c}{Model}'
     for bc in bin_centers:
         header += f' & \\multicolumn{{1}}{{c}}{{{bc:.1f}}}'
     header += r' \\'
     lines.append(header)
     lines.append(r'    \hline\hline')
-    for qi, quantile in enumerate(quantiles):
-        if qi > 0:
-            lines.append(r'    \hline')
-        lines.append(f'    \\multicolumn{{{1 + n_bins}}}{{l}}{{{quantile_label[quantile]}}} \\\\')
-        model_zscore = all_bin_data[quantile]['model_zscore']
-        for model_name in models:
-            zscores = model_zscore.get(model_name, [float('nan')] * n_bins)
-            row = f'    \\quad {model_label.get(model_name, model_name)}'
-            for v in zscores:
-                row += f' & {v:.2f}' if np.isfinite(v) else ' & --'
-            row += r' \\'
-            lines.append(row)
+    for model_name in models:
+        zscores = bin_data['model_zscore'].get(model_name, [float('nan')] * n_bins)
+        row = f'    \\quad {model_label.get(model_name, model_name)}'
+        for v in zscores:
+            row += f' & {v:.2f}' if np.isfinite(v) else ' & --'
+        row += r' \\'
+        lines.append(row)
     lines.append(r'    \hline')
     lines.append(r'    \end{tabular}')
     lines.append(r'\end{table*}')
@@ -794,33 +816,57 @@ def generate_latex_interval_calibration_table(all_bin_data, models, quantiles):
 
 
 print("\n" + "=" * 60)
-print("Temporal proximity paper figure")
+print("Temporal proximity paper figure and LaTeX table")
 print("=" * 60)
 paper_dir = 'metric_comparison'
+proximity_table_data = {}
+proximity_bin_centers = None
 for q in QUANTILES:
-    plot_temporal_proximity_combined(pred_dfs, models, q, CHAR_Z, paper_dir)
+    bc, td = plot_temporal_proximity_combined(pred_dfs, models, q, CHAR_Z, paper_dir)
+    proximity_bin_centers = bc
+    proximity_table_data[q] = td
+latex_prox = generate_latex_temporal_proximity_table(
+    proximity_bin_centers, proximity_table_data, models, QUANTILES
+)
+tex_path = f'{paper_dir}/table_temporal_proximity.tex'
+with open(tex_path, 'w') as f:
+    f.write(latex_prox + '\n')
+print(f"LaTeX table saved: {tex_path}")
+with open(f'{paper_dir}/figure_temporal_proximity.tex', 'w') as f:
+    f.write(
+        '\\begin{figure}[t]\n'
+        '\\centering\n'
+        '\\includegraphics[width=\\linewidth]{temporal_proximity_fp_q0.5.eps}\n'
+        '\\caption{キャプション（FP）．}\n'
+        '\\label{Fig:temporal_proximity_fp}\n'
+        '\\end{figure}\n'
+        '\n'
+        '\\begin{figure}[t]\n'
+        '\\centering\n'
+        '\\includegraphics[width=\\linewidth]{temporal_proximity_fn_q0.5.eps}\n'
+        '\\caption{キャプション（FN）．}\n'
+        '\\label{Fig:temporal_proximity_fn}\n'
+        '\\end{figure}\n'
+    )
+print(f"LaTeX figure snippet saved: {paper_dir}/figure_temporal_proximity.tex")
 
 print("\n" + "=" * 60)
 print("Interval calibration paper figure and LaTeX table")
 print("=" * 60)
-a1_bin_data = plot_interval_calibration_paper(
-    pred_dfs, models, QUANTILES, CHAR_Z, paper_dir
-)
-latex_a1 = generate_latex_interval_calibration_table(a1_bin_data, models, QUANTILES)
+a1_bin_data = plot_interval_calibration_paper(pred_dfs, models, CHAR_Z, paper_dir)
+latex_a1 = generate_latex_interval_calibration_table(a1_bin_data, models)
 tex_path = f'{paper_dir}/table_interval_calibration.tex'
 with open(tex_path, 'w') as f:
     f.write(latex_a1 + '\n')
 print(f"LaTeX table saved: {tex_path}")
 with open(f'{paper_dir}/figure_interval_calibration.tex', 'w') as f:
     f.write(
-        '\\begin{figure*}[tb]\n'
-        '\\center\n'
-        '\\includegraphics[width=\\textwidth]{interval_calibration.eps}\n'
-        '\\caption{'
-        'Mean actual $z$-score as a function of prediction interval width '
-        '($q_{0.9}-q_{0.1}$) for each quantile level $\\tau$.}'
-        ' \\label{Fig:interval_calibration}\n'
-        '\\end{figure*}\n'
+        '\\begin{figure}[t]\n'
+        '\\centering\n'
+        '\\includegraphics[width=\\linewidth]{interval_calibration.eps}\n'
+        '\\caption{キャプション．}\n'
+        '\\label{Fig:interval_calibration}\n'
+        '\\end{figure}\n'
     )
 print(f"LaTeX figure snippet saved: {paper_dir}/figure_interval_calibration.tex")
 
