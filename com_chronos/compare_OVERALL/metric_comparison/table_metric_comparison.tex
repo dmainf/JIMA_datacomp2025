@@ -1,0 +1,19 @@
+\begin{table*}[t]
+  \caption{Comparison of MAE and RMSE for each model and quantile level.}
+  \label{tab:metric_comparison}
+  \centering
+  \begin{tabular}{lrrrrrr}
+    \hline
+    & \multicolumn{6}{c}{Quantile} \\
+    \cline{2-3} \cline{4-5} \cline{6-7} 
+    \multicolumn{1}{c}{Model} & \multicolumn{2}{c}{$\tau=0.1$} & \multicolumn{2}{c}{$\tau=0.5$} & \multicolumn{2}{c}{$\tau=0.9$} \\
+    \cline{2-3} \cline{4-5} \cline{6-7} 
+     & \multicolumn{1}{c}{MAE} & \multicolumn{1}{c}{RMSE} & \multicolumn{1}{c}{MAE} & \multicolumn{1}{c}{RMSE} & \multicolumn{1}{c}{MAE} & \multicolumn{1}{c}{RMSE} \\
+    \hline\hline
+    \textbf{GateRAF} & \textbf{3.6339} & \textbf{13.5293} & \textbf{2.7452} & \textbf{12.2025} & 5.0136 & \textbf{13.3030} \\
+    \textbf{Multi-RAF} & 3.7766 & 13.6118 & 2.8117 & 12.2594 & \textbf{4.9745} & 13.3570 \\
+    \textbf{ProtoRAF} & 3.6604 & 13.7593 & 3.0467 & 12.9622 & 6.8549 & 27.0196 \\
+    \textbf{Baseline} & 3.6501 & 13.7476 & 3.0460 & 12.9603 & 6.8512 & 27.0050 \\
+    \hline
+  \end{tabular}
+\end{table*}

@@ -1,0 +1,29 @@
+\begin{table*}[tb]
+    \caption{RMSE stratified by within-series z-score of actual sales.} \label{tab:rmse_vs_zscore}
+    \center
+    \begin{tabular}{lrrrrrrrr}
+    \hline
+    & \multicolumn{8}{c}{Within-series z-score of actual value} \\
+    \cline{2-9}
+    \multicolumn{1}{c}{Model} & \multicolumn{1}{c}{$<$-1} & \multicolumn{1}{c}{-1--0} & \multicolumn{1}{c}{0--0.5} & \multicolumn{1}{c}{0.5--1} & \multicolumn{1}{c}{1--1.5} & \multicolumn{1}{c}{1.5--2} & \multicolumn{1}{c}{2--3} & \multicolumn{1}{c}{$>$3} \\
+    \hline\hline
+    \multicolumn{9}{l}{$\tau=0.1$} \\
+    \quad \textbf{GateRAF} & \textbf{2.88} & 4.57 & \textbf{9.48} & \textbf{11.86} & \textbf{15.81} & \textbf{17.66} & \textbf{39.32} & 63.94 \\
+    \quad \textbf{Multi-RAF} & 3.01 & 4.67 & 9.56 & 12.00 & 15.92 & 17.80 & 39.68 & \textbf{63.94} \\
+    \quad \textbf{ProtoRAF} & 3.09 & 4.39 & 9.79 & 12.22 & 16.47 & 18.36 & 40.54 & 64.37 \\
+    \quad \textbf{Baseline} & 3.08 & \textbf{4.38} & 9.77 & 12.21 & 16.45 & 18.35 & 40.51 & 64.35 \\
+    \hline
+    \multicolumn{9}{l}{$\tau=0.5$} \\
+    \quad \textbf{GateRAF} & \textbf{3.15} & 3.78 & 7.32 & \textbf{9.90} & \textbf{13.12} & \textbf{14.98} & \textbf{35.30} & 61.12 \\
+    \quad \textbf{Multi-RAF} & 3.23 & \textbf{3.77} & \textbf{7.29} & 9.95 & 13.14 & 15.17 & 35.98 & \textbf{61.00} \\
+    \quad \textbf{ProtoRAF} & 6.21 & 5.13 & 8.22 & 10.73 & 13.82 & 15.74 & 36.57 & 62.31 \\
+    \quad \textbf{Baseline} & 6.21 & 5.14 & 8.22 & 10.73 & 13.82 & 15.75 & 36.55 & 62.29 \\
+    \hline
+    \multicolumn{9}{l}{$\tau=0.9$} \\
+    \quad \textbf{GateRAF} & 9.70 & 9.50 & 8.98 & \textbf{10.04} & \textbf{10.64} & \textbf{12.42} & \textbf{30.16} & 55.93 \\
+    \quad \textbf{Multi-RAF} & \textbf{9.64} & \textbf{9.43} & \textbf{8.92} & 10.18 & 10.65 & 12.59 & 31.39 & \textbf{55.86} \\
+    \quad \textbf{ProtoRAF} & 29.11 & 27.12 & 24.03 & 25.13 & 11.83 & 15.07 & 33.12 & 58.00 \\
+    \quad \textbf{Baseline} & 29.17 & 27.09 & 24.02 & 25.16 & 11.83 & 15.08 & 33.15 & 57.99 \\
+    \hline
+    \end{tabular}
+\end{table*}

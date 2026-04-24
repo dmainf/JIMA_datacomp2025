@@ -126,10 +126,12 @@ def plot_combined(all_means, raw_metrics, models, colors, markers, output_dir):
     plt.close()
     print(f"Combined plot saved: {output_dir}/all_metrics_combined.png")
 
+all_quantile_metrics = {}
 for quantile in QUANTILES:
     output_dir = f'metric_comparison/{quantile}'
     os.makedirs(output_dir, exist_ok=True)
     all_metrics = [compute_metrics(df, quantile) for df in pred_dfs]
+    all_quantile_metrics[quantile] = all_metrics
     all_means = [[m[metric] for metric in raw_metrics] for m in all_metrics]
     for i, metric in enumerate(raw_metrics):
         values = [means[i] for means in all_means]
@@ -137,4 +139,85 @@ for quantile in QUANTILES:
     plot_combined(all_means, raw_metrics, models, colors, markers, output_dir)
     print()
 
+def generate_latex_table(all_quantile_metrics, models, quantiles, metrics):
+    quantile_label = {'q0.1': r'$\tau=0.1$', 'q0.5': r'$\tau=0.5$', 'q0.9': r'$\tau=0.9$'}
+    model_label = {
+        'GateRAF': r'\textbf{GateRAF}',
+        'Multi-RAF': r'\textbf{Multi-RAF}',
+        'ProtoRAF': r'\textbf{ProtoRAF}',
+        'baseline': r'\textbf{Baseline}',
+    }
+
+    best_vals = {}
+    for q in quantiles:
+        for m in metrics:
+            vals = [all_quantile_metrics[q][i][m] for i in range(len(models))]
+            best_vals[(q, m)] = min(vals)
+
+    ncols = 1 + len(quantiles) * len(metrics)
+    col_spec = 'l' + ''.join(['rr'] * len(quantiles))
+
+    lines = []
+    lines.append(r'\begin{table*}[t]')
+    lines.append(r'  \caption{Comparison of MAE and RMSE for each model and quantile level.}')
+    lines.append(r'  \label{tab:metric_comparison}')
+    lines.append(r'  \centering')
+    lines.append(f'  \\begin{{tabular}}{{{col_spec}}}')
+    lines.append(r'    \hline')
+
+    # Spanning header row: empty cell + "Quantile" spanning all metric columns
+    n_metric_cols = len(quantiles) * len(metrics)
+    lines.append(f'    & \\multicolumn{{{n_metric_cols}}}{{c}}{{Quantile}} \\\\')
+
+    # Quantile sub-headers with cmidrule
+    cmidrule = '    '
+    col_start = 2
+    for q in quantiles:
+        cmidrule += f'\\cline{{{col_start}-{col_start + len(metrics) - 1}}} '
+        col_start += len(metrics)
+    lines.append(cmidrule)
+
+    header_q = r'    \multicolumn{1}{c}{Model}'
+    for q in quantiles:
+        header_q += f' & \\multicolumn{{{len(metrics)}}}{{c}}{{{quantile_label[q]}}}'
+    header_q += r' \\'
+    lines.append(header_q)
+
+    cmidrule2 = '    '
+    col_start = 2
+    for q in quantiles:
+        cmidrule2 += f'\\cline{{{col_start}-{col_start + len(metrics) - 1}}} '
+        col_start += len(metrics)
+    lines.append(cmidrule2)
+
+    header_m = '    '
+    for q in quantiles:
+        for m in metrics:
+            header_m += f' & \\multicolumn{{1}}{{c}}{{{m}}}'
+    header_m += r' \\'
+    lines.append(header_m)
+    lines.append(r'    \hline\hline')
+
+    for i, model in enumerate(models):
+        row = f'    {model_label.get(model, model)}'
+        for q in quantiles:
+            for m in metrics:
+                val = all_quantile_metrics[q][i][m]
+                cell = f'{val:.4f}'
+                if abs(val - best_vals[(q, m)]) < 1e-9:
+                    cell = f'\\textbf{{{cell}}}'
+                row += f' & {cell}'
+        row += r' \\'
+        lines.append(row)
+
+    lines.append(r'    \hline')
+    lines.append(r'  \end{tabular}')
+    lines.append(r'\end{table*}')
+    return '\n'.join(lines)
+
+latex_str = generate_latex_table(all_quantile_metrics, models, QUANTILES, raw_metrics)
+latex_path = 'metric_comparison/table_metric_comparison.tex'
+with open(latex_path, 'w') as f:
+    f.write(latex_str + '\n')
+print(f"LaTeX table saved: {latex_path}")
 print("Done.")
