@@ -1,0 +1,558 @@
+This is e-upTeX, Version 3.141592653-p4.1.2-u2.02-251130-2.6 (utf8.euc) (TeX Live 2026) (preloaded format=platex 2026.3.30)  16 APR 2026 21:18
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**CORSJ_Hinagata.tex
+(./CORSJ_Hinagata.tex
+pLaTeX2e <2023-02-14>+1, based on
+LaTeX2e <2025-11-01>
+L3 programming layer <2026-01-19>
+(/usr/local/texlive/2026/texmf-dist/tex/platex/base/jarticle.cls
+Document Class: jarticle 2020/09/30 v1.8f Standard pLaTeX class
+\c@@paper=\count274
+(/usr/local/texlive/2026/texmf-dist/tex/platex/base/jsize10.clo
+File: jsize10.clo 2020/09/30 v1.8f Standard pLaTeX file (size option)
+)
+\c@part=\count275
+\c@section=\count276
+\c@subsection=\count277
+\c@subsubsection=\count278
+\c@paragraph=\count279
+\c@subparagraph=\count280
+\c@figure=\count281
+\c@table=\count282
+\abovecaptionskip=\skip49
+\belowcaptionskip=\skip50
+\symmincho=\mathgroup4
+LaTeX Font Info:    Overwriting symbol font `mincho' in version `bold'
+(Font)                  JY1/mc/m/n --> JY1/gt/m/n on input line 615.
+\toclineskip=\dimen164
+\@lnumwidth=\dimen165
+\bibindent=\dimen166
+\heisei=\count283
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/amsmath/amsmath.sty
+Package: amsmath 2025/07/09 v2.17z AMS math features
+\@mathmargin=\skip51
+
+For additional information on amsmath, use the `?' option.
+(/usr/local/texlive/2026/texmf-dist/tex/latex/amsmath/amstext.sty
+Package: amstext 2024/11/17 v2.01 AMS text
+
+(/usr/local/texlive/2026/texmf-dist/tex/latex/amsmath/amsgen.sty
+File: amsgen.sty 1999/11/30 v2.0 generic functions
+\@emptytoks=\toks18
+\ex@=\dimen167
+))
+(/usr/local/texlive/2026/texmf-dist/tex/latex/amsmath/amsbsy.sty
+Package: amsbsy 1999/11/29 v1.2d Bold Symbols
+\pmbraise@=\dimen168
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/amsmath/amsopn.sty
+Package: amsopn 2022/04/08 v2.04 operator names
+)
+\inf@bad=\count284
+LaTeX Info: Redefining \frac on input line 233.
+\uproot@=\count285
+\leftroot@=\count286
+LaTeX Info: Redefining \overline on input line 398.
+LaTeX Info: Redefining \colon on input line 409.
+\classnum@=\count287
+\DOTSCASE@=\count288
+LaTeX Info: Redefining \ldots on input line 495.
+LaTeX Info: Redefining \dots on input line 498.
+LaTeX Info: Redefining \cdots on input line 619.
+\Mathstrutbox@=\box70
+\strutbox@=\box71
+LaTeX Info: Redefining \big on input line 721.
+LaTeX Info: Redefining \Big on input line 722.
+LaTeX Info: Redefining \bigg on input line 723.
+LaTeX Info: Redefining \Bigg on input line 724.
+\big@size=\dimen169
+LaTeX Font Info:    Redeclaring font encoding OML on input line 742.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 743.
+\macc@depth=\count289
+LaTeX Info: Redefining \bmod on input line 904.
+LaTeX Info: Redefining \pmod on input line 909.
+LaTeX Info: Redefining \smash on input line 939.
+LaTeX Info: Redefining \relbar on input line 969.
+LaTeX Info: Redefining \Relbar on input line 970.
+\c@MaxMatrixCols=\count290
+\dotsspace@=\muskip17
+\c@parentequation=\count291
+\dspbrk@lvl=\count292
+\tag@help=\toks19
+\row@=\count293
+\column@=\count294
+\maxfields@=\count295
+\andhelp@=\toks20
+\eqnshift@=\dimen170
+\alignsep@=\dimen171
+\tagshift@=\dimen172
+\tagwidth@=\dimen173
+\totwidth@=\dimen174
+\lineht@=\dimen175
+\@envbody=\toks21
+\multlinegap=\skip52
+\multlinetaggap=\skip53
+\mathdisplay@stack=\toks22
+LaTeX Info: Redefining \[ on input line 2950.
+LaTeX Info: Redefining \] on input line 2951.
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/amsfonts/amssymb.sty
+Package: amssymb 2013/01/14 v3.01 AMS font symbols
+
+(/usr/local/texlive/2026/texmf-dist/tex/latex/amsfonts/amsfonts.sty
+Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
+\symAMSa=\mathgroup5
+\symAMSb=\mathgroup6
+LaTeX Font Info:    Redeclaring math symbol \hbar on input line 98.
+LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
+(Font)                  U/euf/m/n --> U/euf/b/n on input line 106.
+))
+(/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/graphicx.sty
+Package: graphicx 2024/12/31 v1.2e Enhanced LaTeX Graphics (DPC,SPQR)
+
+(/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/keyval.sty
+Package: keyval 2022/05/29 v1.15 key=value parser (DPC)
+\KV@toks@=\toks23
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2024/08/06 v1.4g Standard LaTeX Graphics (DPC,SPQR)
+
+(/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/trig.sty
+Package: trig 2023/12/02 v1.11 sin cos tan (DPC)
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: dvips.def on input line 106.
+
+(/usr/local/texlive/2026/texmf-dist/tex/latex/graphics-def/dvips.def
+File: dvips.def 2025/01/21 v3.2a Graphics/color driver for dvips
+))
+\Gin@req@height=\dimen176
+\Gin@req@width=\dimen177
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/nidanfloat/nidanfloat.sty
+Package: nidanfloat 2018/07/28 v2.9 Put double-floats at top/bottom within twoc
+olumn mode
+\c@dblbotnumber=\count296
+\@dblbotroom=\dimen178
+\@dblbotnum=\count297
+\@floatht=\dimen179
+\@fixht=\dimen180
+\@rightfixht=\dimen181
+\@combinebox=\box72
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/natbib/natbib.sty
+Package: natbib 2010/09/13 8.31b (PWD, AO)
+\bibhang=\skip54
+\bibsep=\skip55
+LaTeX Info: Redefining \cite on input line 694.
+\c@NAT@ctr=\count298
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/color.sty
+Package: color 2025/01/14 v1.3e Standard LaTeX Color (DPC)
+
+(/usr/local/texlive/2026/texmf-dist/tex/latex/graphics-cfg/color.cfg
+File: color.cfg 2016/01/02 v1.6 sample color configuration
+)
+Package color Info: Driver file: dvips.def on input line 149.
+
+(/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/dvipsnam.def
+File: dvipsnam.def 2016/06/17 v3.0m Driver-dependent file (DPC,SPQR)
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/mathcolor.ltx))
+(/usr/local/texlive/2026/texmf-dist/tex/latex/url/url.sty
+\Urlmuskip=\muskip18
+Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
+) (./or.sty
+Package: or 2015/08/14 v1.00 for Kokusai Bunken by Standard pLaTeX style file
+\c@secondpage=\count299
+\@offset@amount=\dimen182
+\@offset@margin=\dimen183
+\BaseLine=\dimen184
+\m@BaseLine=\dimen185
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 8.87009pt on input line 183.
+\@titlebox=\box73
+\@newsbox=\box74
+\@Boxht=\dimen186
+\@LineNum=\count300
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 7.88452pt on input line 293.
+LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <9> not available
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 577.
+LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <9> not available
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 577.
+LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
+(Font)              scaled to size 8.87009pt on input line 577.
+\@enLab=\toks24
+\cht=\dimen187
+\cdp=\dimen188
+\dim@gyo=\dimen189
+\adj@boxa=\box75
+\adj@boxb=\box76
+\adj@height=\dimen190
+\jspaceskip=\dimen191
+\bib@adjustheight=\dimen192
+\cap@linewidth=\dimen193
+\cap@hsize=\dimen194
+\cap@prevgraf=\count301
+\cap@box=\box77
+\@interlinegap=\skip56
+\dimen@@=\dimen195
+\@leftcolumnfootnote=\box78
+\@rightcolumnfootnote=\box79
+\Q=\dimen196
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/l3backend/l3backend-dvips.def
+File: l3backend-dvips.def 2025-10-09 L3 backend support: dvips
+\l__pdfannot_backend_content_box=\box80
+\l__pdfannot_backend_model_box=\box81
+\g__pdfannot_backend_int=\count302
+\g__pdfannot_backend_link_int=\count303
+\g__pdfannot_backend_link_sf_int=\count304
+)
+No file CORSJ_Hinagata.aux.
+\openout1 = `CORSJ_Hinagata.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 122.
+LaTeX Font Info:    ... okay on input line 122.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 122.
+LaTeX Font Info:    ... okay on input line 122.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 122.
+LaTeX Font Info:    ... okay on input line 122.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 122.
+LaTeX Font Info:    ... okay on input line 122.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 122.
+LaTeX Font Info:    ... okay on input line 122.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 122.
+LaTeX Font Info:    ... okay on input line 122.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 122.
+LaTeX Font Info:    ... okay on input line 122.
+LaTeX Font Info:    Checking defaults for JY1/mc/m/n on input line 122.
+LaTeX Font Info:    ... okay on input line 122.
+LaTeX Font Info:    Checking defaults for JT1/mc/m/n on input line 122.
+LaTeX Font Info:    ... okay on input line 122.
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 20.44061pt on input line 127.
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 17.03056pt on input line 127.
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 9.85565pt on input line 127.
+LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <10> not available
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 129.
+LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <10> not available
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 129.
+LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
+(Font)              scaled to size 9.85565pt on input line 129.
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 5.91339pt on input line 161.
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 4.92783pt on input line 161.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 161
+.
+(/usr/local/texlive/2026/texmf-dist/tex/latex/amsfonts/umsa.fd
+File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+)
+LaTeX Font Info:    Trying to load font information for U+msb on input line 161
+.
+
+(/usr/local/texlive/2026/texmf-dist/tex/latex/amsfonts/umsb.fd
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+)
+ignored: Infinite glue shrinkage found in box being split [1
+
+
+]
+
+LaTeX Warning: Reference `Sec:Style' on page 2 undefined on input line 213.
+
+
+LaTeX Warning: Reference `Sec:Midashi' on page 2 undefined on input line 213.
+
+
+LaTeX Warning: Reference `Sec:Sansho' on page 2 undefined on input line 213.
+
+LaTeX Font Info:    Font shape `JT1/gt/m/it' in size <9> not available
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 250.
+LaTeX Font Info:    Font shape `JY1/gt/m/it' in size <9> not available
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 250.
+LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
+(Font)              scaled to size 8.87009pt on input line 250.
+
+Package natbib Warning: Citation `Cabinet.web' on page 2 undefined on input lin
+e 265.
+
+
+Package natbib Warning: Citation `JAMSTEC.web' on page 2 undefined on input lin
+e 271.
+
+
+LaTeX Warning: Reference `Fig:RailwayTracks1' on page 2 undefined on input line
+ 280.
+
+
+LaTeX Warning: Reference `Fig:RailwayTracks2' on page 2 undefined on input line
+ 280.
+
+
+LaTeX Warning: Reference `Fig:RailwayTracks2' on page 2 undefined on input line
+ 282.
+
+File: Fig_RailwayTracks.eps Graphic file (type eps)
+<Fig_RailwayTracks.eps>
+LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <8> not available
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 290.
+LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <8> not available
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 290.
+LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
+(Font)              scaled to size 7.88452pt on input line 290.
+File: Fig_RailwayTracks.eps Graphic file (type eps)
+ <Fig_RailwayTracks.eps>
+
+LaTeX Warning: Reference `Fig:RailwayTracks1' on page 2 undefined on input line
+ 297.
+
+
+LaTeX Warning: Reference `Tbl:NemericalResults' on page 2 undefined on input li
+ne 301.
+
+
+LaTeX Warning: Reference `Tbl:ReferencesCategory' on page 2 undefined on input 
+line 301.
+
+
+LaTeX Warning: Reference `Tbl:NemericalResults' on page 2 undefined on input li
+ne 303.
+
+
+ignored: Infinite glue shrinkage found in box being split
+ignored: Infinite glue shrinkage found i
+n box being split [2]
+
+LaTeX Warning: Reference `Fig:RailwayTracks1' on page 3 undefined on input line
+ 336.
+
+
+LaTeX Warning: Reference `Tbl:NemericalResults' on page 3 undefined on input li
+ne 337.
+
+
+LaTeX Warning: Reference `Tbl:ReferencesCategory' on page 3 undefined on input 
+line 337.
+
+
+LaTeX Warning: Reference `Eqn:abc' on page 3 undefined on input line 415.
+
+
+LaTeX Warning: Reference `Eqn:def' on page 3 undefined on input line 416.
+
+
+LaTeX Warning: Reference `Eqn:ghi' on page 3 undefined on input line 416.
+
+
+LaTeX Warning: Reference `Eqn:abc' on page 3 undefined on input line 417.
+
+
+LaTeX Warning: Reference `Eqn:ghi' on page 3 undefined on input line 417.
+
+
+LaTeX Warning: Reference `Tbl:ReferencesCategory' on page 3 undefined on input 
+line 430.
+
+
+Package natbib Warning: Citation `Umetani.2013' on page 3 undefined on input li
+ne 433.
+
+
+Package natbib Warning: Citation `Kenmochi.2009' on page 3 undefined on input l
+ine 433.
+
+
+Package natbib Warning: Citation `Yagiura.2001' on page 3 undefined on input li
+ne 433.
+
+
+Package natbib Warning: Citation `Heinrich.1931' on page 3 undefined on input l
+ine 433.
+
+
+Package natbib Warning: Citation `Mukaidono.2000' on page 3 undefined on input 
+line 433.
+
+
+Package natbib Warning: Citation `Johnson.1997' on page 3 undefined on input li
+ne 433.
+
+
+Package natbib Warning: Citation `Maex.2013' on page 3 undefined on input line 
+433.
+
+
+Package natbib Warning: Citation `Thaler.2009' on page 3 undefined on input lin
+e 433.
+
+
+Package natbib Warning: Citation `Kato.2009' on page 3 undefined on input line 
+433.
+
+
+Package natbib Warning: Citation `Iwama.2007' on page 3 undefined on input line
+ 433.
+
+
+Package natbib Warning: Citation `SMEA.2008' on page 3 undefined on input line 
+433.
+
+
+Package natbib Warning: Citation `Hayashi.web' on page 3 undefined on input lin
+e 433.
+
+
+Package natbib Warning: Citation `Samsung.web' on page 3 undefined on input lin
+e 433.
+
+
+Package natbib Warning: Citation `Umetani.2013' on page 3 undefined on input li
+ne 444.
+
+
+Package natbib Warning: Citation `Kenmochi.2009' on page 3 undefined on input l
+ine 444.
+
+
+Package natbib Warning: Citation `Yagiura.2001' on page 3 undefined on input li
+ne 445.
+
+
+Package natbib Warning: Citation `Heinrich.1931' on page 3 undefined on input l
+ine 445.
+
+
+Package natbib Warning: Citation `Mukaidono.2000' on page 3 undefined on input 
+line 446.
+
+
+Package natbib Warning: Citation `Johnson.1997' on page 3 undefined on input li
+ne 446.
+
+
+Package natbib Warning: Citation `Maex.2013' on page 3 undefined on input line 
+447.
+
+
+Package natbib Warning: Citation `Thaler.2009' on page 3 undefined on input lin
+e 447.
+
+
+Package natbib Warning: Citation `Kato.2009' on page 3 undefined on input line 
+448.
+
+
+Package natbib Warning: Citation `Iwama.2007' on page 3 undefined on input line
+ 448.
+
+
+Package natbib Warning: Citation `SMEA.2008' on page 3 undefined on input line 
+449.
+
+
+Package natbib Warning: Citation `Hayashi.web' on page 3 undefined on input lin
+e 450.
+
+
+Package natbib Warning: Citation `Samsung.web' on page 3 undefined on input lin
+e 450.
+
+
+Package natbib Warning: Citation `Umetani.2013' on page 3 undefined on input li
+ne 457.
+
+
+Package natbib Warning: Citation `Umetani.2013' on page 3 undefined on input li
+ne 458.
+
+
+Package natbib Warning: Citation `Umetani.2013' on page 3 undefined on input li
+ne 459.
+
+
+Package natbib Warning: Citation `Umetani.2013' on page 3 undefined on input li
+ne 460.
+
+
+Package natbib Warning: Citation `Umetani.2013' on page 3 undefined on input li
+ne 462.
+
+
+Package natbib Warning: Citation `Kenmochi.2009' on page 3 undefined on input l
+ine 462.
+
+
+Package natbib Warning: Citation `Yagiura.2001' on page 3 undefined on input li
+ne 463.
+
+
+Package natbib Warning: Citation `Heinrich.1931' on page 3 undefined on input l
+ine 463.
+
+
+Package natbib Warning: Citation `Mukaidono.2000' on page 3 undefined on input 
+line 463.
+
+[3]
+
+Package natbib Warning: Citation `Mukaidono.2000' on page 4 undefined on input 
+line 469.
+
+
+Package natbib Warning: Citation `Umetani.2013' on page 4 undefined on input li
+ne 470.
+
+
+Package natbib Warning: Citation `Kato.2009' on page 4 undefined on input line 
+471.
+
+
+Package natbib Warning: Citation `Heinrich.1931' on page 4 undefined on input l
+ine 476.
+
+
+Package natbib Warning: Citation `Thaler.2009' on page 4 undefined on input lin
+e 477.
+
+
+Package natbib Warning: Citation `Iwama.2007' on page 4 undefined on input line
+ 478.
+
+LaTeX Font Info:    Font shape `JT1/mc/m/it' in size <8> not available
+(Font)              Font shape `JT1/mc/m/n' tried instead on input line 515.
+LaTeX Font Info:    Font shape `JY1/mc/m/it' in size <8> not available
+(Font)              Font shape `JY1/mc/m/n' tried instead on input line 515.
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 7.88452pt on input line 515.
+
+Underfull \hbox (badness 6641) in paragraph at lines 562--567
+\OT1/cmr/m/it/8 Sym-po-sium on Dis-crete Al-go-rithms (SODA'07)\OT1/cmr/m/n/8 ,
+
+ []
+
+[4] (./CORSJ_Hinagata.aux)
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right o
+n input line 586.
+
+ ) 
+Here is how much of TeX's memory you used:
+ 3196 strings out of 468171
+ 45232 string characters out of 5434472
+ 541966 words of memory out of 5000000
+ 32087 multiletter control sequences out of 15000+600000
+ 641682 words of font info for 103 fonts, out of 8000000 for 9000
+ 929 hyphenation exceptions out of 8191
+ 57i,10n,65p,235b,444s stack positions out of 10000i,1000n,20000p,200000b,200000s
+
+Output written on CORSJ_Hinagata.dvi (4 pages, 36620 bytes).
