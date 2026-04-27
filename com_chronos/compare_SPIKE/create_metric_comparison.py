@@ -3,9 +3,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import glob
+import matplotlib.font_manager as _fm
+_fm.fontManager.addfont('/usr/local/texlive/2026/texmf-dist/fonts/truetype/public/ipaex/ipaexm.ttf')
+import matplotlib as _mpl
+_mpl.rc('font', family='IPAexMincho')
 
-plt.rcParams['font.family'] = 'serif'
-plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
 plt.rcParams['mathtext.fontset'] = 'cm'
 plt.rcParams['font.size'] = 11
 
@@ -518,13 +520,13 @@ def plot_mae_vs_zscore(pred_dfs, models, colors, markers, quantiles, output_dir)
             }
         ax.set_xticks(np.arange(len(Z_BIN_LABELS)))
         ax.set_xticklabels(Z_BIN_LABELS, rotation=30, ha='right', fontsize=9)
-        ax.set_xlabel('Within-series z-score of actual value', fontsize=11)
+        ax.set_xlabel(r'実績値の系列内$z$スコア', fontsize=11)
         ax.set_ylabel('MAE', fontsize=11)
         ax.set_title(r'$\tau=' + quantile[1:] + r'$', fontsize=12)
         ax.legend(fontsize=9)
         ax.grid(alpha=0.3, linestyle='--')
 
-    plt.suptitle('MAE by Within-series Z-score of Actual Value',
+    plt.suptitle(r'実績値の系列内$z$スコア別 MAE',
                  fontsize=13, fontweight='bold')
     plt.tight_layout()
     os.makedirs(output_dir, exist_ok=True)
@@ -535,7 +537,7 @@ def plot_mae_vs_zscore(pred_dfs, models, colors, markers, quantiles, output_dir)
     return mae_table, rmse_table
 
 
-def generate_latex_metric_vs_zscore(all_table, models, quantiles, metric):
+def generate_latex_combined_metric_vs_zscore(mae_table, rmse_table, models, quantiles):
     model_label = {
         'GateRAF':  r'\textbf{GateRAF}',
         'Multi-RAF': r'\textbf{Multi-RAF}',
@@ -545,56 +547,76 @@ def generate_latex_metric_vs_zscore(all_table, models, quantiles, metric):
     quantile_label = {'q0.1': r'$\tau=0.1$', 'q0.5': r'$\tau=0.5$', 'q0.9': r'$\tau=0.9$'}
     bin_labels = Z_BIN_LABELS
     n_bins = len(bin_labels)
+    total_cols = 1 + 2 * n_bins
 
     def tex_label(bl):
         return bl.replace('–', '--').replace('<', '$<$').replace('>', '$>$')
 
-    col_spec = 'l' + 'r' * n_bins
+    col_spec = 'l' + 'rr' * n_bins
     lines = []
     lines.append(r'\begin{table*}[t]')
-    lines.append(f'    \\caption{{{metric} stratified by within-series z-score of actual sales.}}')
-    lines.append(f'    \\label{{tab:{metric.lower()}_vs_zscore}}')
+    lines.append(r'    \caption{系列内$z$スコアビン別のMAEおよびRMSE．}')
+    lines.append(r'    \label{tab:mae_rmse_vs_zscore}')
     lines.append(r'    \centering')
+    lines.append(r'    \resizebox{\textwidth}{!}{%')
     lines.append(f'    \\begin{{tabular}}{{{col_spec}}}')
     lines.append(r'    \hline')
-    lines.append(f'    & \\multicolumn{{{n_bins}}}{{c}}{{Within-series z-score of actual value}} \\\\')
-    lines.append(f'    \\cline{{2-{1 + n_bins}}}')
 
-    header = r'    \multicolumn{1}{c}{Model}'
+    bin_header = '    '
     for bl in bin_labels:
-        header += ' & \\multicolumn{1}{c}{' + tex_label(bl) + '}'
-    header += r' \\'
-    lines.append(header)
+        bin_header += f' & \\multicolumn{{2}}{{c}}{{{tex_label(bl)}}}'
+    bin_header += r' \\'
+    lines.append(bin_header)
+    lines.append(f'    \\cline{{2-{total_cols}}}')
+
+    sub_header = r'    \multicolumn{1}{c}{モデル}'
+    for _ in bin_labels:
+        sub_header += r' & MAE & RMSE'
+    sub_header += r' \\'
+    lines.append(sub_header)
     lines.append(r'    \hline\hline')
 
     for qi, quantile in enumerate(quantiles):
         if qi > 0:
             lines.append(r'    \hline')
-        lines.append(f'    \\multicolumn{{{1 + n_bins}}}{{l}}{{{quantile_label[quantile]}}} \\\\')
+        lines.append(f'    \\multicolumn{{{total_cols}}}{{l}}{{{quantile_label[quantile]}}} \\\\')
 
-        best_per_bin = {}
+        best_mae = {}
+        best_rmse = {}
         for bl in bin_labels:
-            vals = [(all_table[quantile].get(m, {}).get(bl, float('nan')), m) for m in models]
-            vals = [(v, m) for v, m in vals if np.isfinite(v)]
-            if vals:
-                best_per_bin[bl] = min(vals, key=lambda x: x[0])[0]
+            mae_vals = [(mae_table[quantile].get(m, {}).get(bl, float('nan')), m) for m in models]
+            mae_vals = [(v, m) for v, m in mae_vals if np.isfinite(v)]
+            if mae_vals:
+                best_mae[bl] = min(mae_vals, key=lambda x: x[0])[0]
+            rmse_vals = [(rmse_table[quantile].get(m, {}).get(bl, float('nan')), m) for m in models]
+            rmse_vals = [(v, m) for v, m in rmse_vals if np.isfinite(v)]
+            if rmse_vals:
+                best_rmse[bl] = min(rmse_vals, key=lambda x: x[0])[0]
 
         for model_name in models:
             row = f'    \\quad {model_label.get(model_name, model_name)}'
             for bl in bin_labels:
-                v = all_table[quantile].get(model_name, {}).get(bl, float('nan'))
-                if np.isfinite(v):
-                    cell = f'{v:.2f}'
-                    if bl in best_per_bin and abs(v - best_per_bin[bl]) < 1e-9:
-                        cell = f'\\textbf{{{cell}}}'
+                mae_v = mae_table[quantile].get(model_name, {}).get(bl, float('nan'))
+                rmse_v = rmse_table[quantile].get(model_name, {}).get(bl, float('nan'))
+                if np.isfinite(mae_v):
+                    mae_cell = f'{mae_v:.2f}'
+                    if bl in best_mae and abs(mae_v - best_mae[bl]) < 1e-9:
+                        mae_cell = f'\\textbf{{{mae_cell}}}'
                 else:
-                    cell = '--'
-                row += f' & {cell}'
+                    mae_cell = '--'
+                if np.isfinite(rmse_v):
+                    rmse_cell = f'{rmse_v:.2f}'
+                    if bl in best_rmse and abs(rmse_v - best_rmse[bl]) < 1e-9:
+                        rmse_cell = f'\\textbf{{{rmse_cell}}}'
+                else:
+                    rmse_cell = '--'
+                row += f' & {mae_cell} & {rmse_cell}'
             row += r' \\'
             lines.append(row)
 
     lines.append(r'    \hline')
-    lines.append(r'    \end{tabular}')
+    lines.append(r'    \end{tabular}%')
+    lines.append(r'    }')
     lines.append(r'\end{table*}')
     return '\n'.join(lines)
 
@@ -606,12 +628,11 @@ zscore_out_dir = 'metric_comparison'
 mae_table_z, rmse_table_z = plot_mae_vs_zscore(
     pred_dfs, models, colors, markers, QUANTILES, zscore_out_dir
 )
-for metric, table in [('MAE', mae_table_z), ('RMSE', rmse_table_z)]:
-    latex_str = generate_latex_metric_vs_zscore(table, models, QUANTILES, metric)
-    tex_path = f'{zscore_out_dir}/table_{metric.lower()}_vs_zscore.tex'
-    with open(tex_path, 'w') as f:
-        f.write(latex_str + '\n')
-    print(f"LaTeX table saved: {tex_path}")
+latex_str = generate_latex_combined_metric_vs_zscore(mae_table_z, rmse_table_z, models, QUANTILES)
+tex_path = f'{zscore_out_dir}/table_mae_rmse_vs_zscore.tex'
+with open(tex_path, 'w') as f:
+    f.write(latex_str + '\n')
+print(f"LaTeX table saved: {tex_path}")
 
 def plot_temporal_proximity_combined(pred_dfs, models, quantile_col, spike_z, output_dir):
     K = 10
@@ -655,8 +676,8 @@ def plot_temporal_proximity_combined(pred_dfs, models, quantile_col, spike_z, ou
             plot_data[model_name][key] = (norm, marker, ls, color, len(arr))
 
     xlabels = {
-        'fp': r'$\Delta$days (nearest actual spike day $-$ predicted spike day)',
-        'fn': r'$\Delta$days (actual spike day $-$ nearest predicted spike day)',
+        'fp': r'$\Delta$日（最近傍の実際スパイク日 $-$ 予測スパイク日）',
+        'fn': r'$\Delta$日（実際スパイク日 $-$ 最近傍の予測スパイク日）',
     }
     os.makedirs(output_dir, exist_ok=True)
     for key in ('fp', 'fn'):
@@ -671,7 +692,7 @@ def plot_temporal_proximity_combined(pred_dfs, models, quantile_col, spike_z, ou
                     label=f'{model_name} ($n={n}$)')
         ax.axvline(0, color='black', linestyle='--', linewidth=1.0)
         ax.set_xlabel(xlabels[key], fontsize=11)
-        ax.set_ylabel('Fraction', fontsize=11)
+        ax.set_ylabel('相対頻度', fontsize=11)
         ax.legend(fontsize=9)
         ax.grid(alpha=0.3, linestyle='--')
         plt.tight_layout()
@@ -762,8 +783,8 @@ def plot_interval_calibration_paper(pred_dfs, models, spike_z, output_dir):
                 linestyle=LS_MAP.get(model_name, '-'),
                 color=COLOR_MAP.get(model_name, '#333333'),
                 label=model_name)
-    ax.set_xlabel(r'Interval width ($q_{0.9} - q_{0.1}$)', fontsize=12)
-    ax.set_ylabel(r'Mean actual $z$-score', fontsize=12)
+    ax.set_xlabel(r'予測区間幅（$q_{0.9} - q_{0.1}$）', fontsize=12)
+    ax.set_ylabel(r'実績値の$z$スコア平均', fontsize=12)
     ax.legend(fontsize=10)
     ax.grid(alpha=0.3, linestyle='--')
     plt.tight_layout()

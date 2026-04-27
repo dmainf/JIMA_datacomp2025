@@ -159,17 +159,15 @@ def generate_latex_table(all_quantile_metrics, models, quantiles, metrics):
 
     lines = []
     lines.append(r'\begin{table*}[t]')
-    lines.append(r'  \caption{Comparison of MAE and RMSE for each model and quantile level.}')
+    lines.append(r'  \caption{各モデルおよび分位点レベルにおける MAE および RMSE の比較．}')
     lines.append(r'  \label{tab:metric_comparison}')
     lines.append(r'  \centering')
     lines.append(f'  \\begin{{tabular}}{{{col_spec}}}')
     lines.append(r'    \hline')
 
-    # Spanning header row: empty cell + "Quantile" spanning all metric columns
     n_metric_cols = len(quantiles) * len(metrics)
-    lines.append(f'    & \\multicolumn{{{n_metric_cols}}}{{c}}{{Quantile}} \\\\')
+    lines.append(f'    & \\multicolumn{{{n_metric_cols}}}{{c}}{{分位点}} \\\\')
 
-    # Quantile sub-headers with cmidrule
     cmidrule = '    '
     col_start = 2
     for q in quantiles:
@@ -177,7 +175,7 @@ def generate_latex_table(all_quantile_metrics, models, quantiles, metrics):
         col_start += len(metrics)
     lines.append(cmidrule)
 
-    header_q = r'    \multicolumn{1}{c}{Model}'
+    header_q = r'    \multicolumn{1}{c}{モデル}'
     for q in quantiles:
         header_q += f' & \\multicolumn{{{len(metrics)}}}{{c}}{{{quantile_label[q]}}}'
     header_q += r' \\'

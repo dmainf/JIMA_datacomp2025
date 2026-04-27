@@ -52,7 +52,10 @@
 %% サブタイトル
 % “特集記事”・“論文・事例研究”・“論文・研究レポート”
 % ・“ORメモランダム”の場合に限り，使用してもよい↓
+
+\begin{comment}
 \jsubtitle{サブタイトル}
+\end{comment}
 
 
 %% 著者名
@@ -97,7 +100,6 @@
 %指導教員：尾有太郎　教授
 %}
 % “特集にあたって”の場合は，なし
-\end{comment}
 
 %% あらまし
 % “特集記事”の場合に限り，必ず使用すること↓
@@ -117,6 +119,7 @@
 特集記事キーワード1，キーワード2，
 キーワードは三つ以上（指定のキーワードは特になし）
 }
+\end{comment}
 
 
 
@@ -139,7 +142,7 @@
 第1の課題は，突発的な需要増加が予測において無視されやすい点である．販売データなどの実データは，従来の単変量モデルでは捉えきれない複雑なパターンや依存関係を示すことが多い．特に，初版の発行や各種イベントに起因する急激で非線形なレジームシフトが発生した場合，線形性や緩やかな構造変化を前提とする既存モデルの仮定は破綻する．さらに，過去のデータに類を見ない稀な事象に対しては，予測性能が著しく低下する．これは，一般的な予測モデルが全体の誤差を最小化するように学習するため，少数の突出した需要とゼロが頻出する需要を平均化してしまい，結果としてスパイクを捉えきれず平坦な予測に陥ってしまうことに起因する．
 第2の課題は，分布が極端に偏ったヘッド部分のデータにおける学習不足（あるいは過学習）である．一般的な予測モデルは，予測対象の系列ごとにパラメータが独立して設定される構造となっている．そのため，データが限られた特定の系列単独では十分な学習が行えず，スパイクを正確に予測することが困難となる．
 
-これらの課題を解決するためのアーキテクチャが，Retrieval-Augmented Forecasting（以下，RAF）である．RAFは，予測対象の系列だけでなく，他の関連する系列のデータを参照・抽出しながら予測を行う手法である．しかし，RAFの枠組みは未だ明確に定義されておらず，理論的な体系化が不十分である．さらに，検索された系列を単純に時系列方向へ結合したり，オフセットを用いてシフトさせたりする既存のアプローチでは，接合部における時系列データの不連続性を生じさせるだけでなく，予測に寄与しない不要なデータの参照を引き起こすという問題が存在する．
+これらの課題を解決するためのアーキテクチャが，Retrieval-Augmented Forecasting（以下，RAF）である．RAFは，予測対象の系列だけでなく，他の関連する系列のデータを参照・抽出しながら予測を行う手法である~\cite{Tire.2024, Ning.2025}．しかし，RAFの枠組みは未だ明確に定義されておらず，理論的な体系化が不十分である．さらに，検索された系列を単純に時系列方向へ結合したり，オフセットを用いてシフトさせたりする既存のアプローチ~\cite{Tire.2024}では，接合部における時系列データの不連続性を生じさせるだけでなく，予測に寄与しない不要なデータの参照を引き起こすという問題が存在する．
 
 そこで本稿の構成として，第2節では実験に使用する提供データの概観について述べ，第3節で既存のRAF手法が抱える問題点を指摘し，それを「Multi Stream」と「Gate」機構の導入により解決する新たなアーキテクチャを提案する．第4節では，多数の系列とスパイクを含む実データに対して提案手法を適用し，全体の予測精度およびスパイクに着目した予測精度の双方から評価・分析を行う．最後に第5節で，本研究の総括を行う．
 
@@ -177,7 +180,7 @@
 \subsection{時系列検索器}
 時系列検索器は，予測対象系列（クエリ）の直前の観測値と形状が類似した過去のウィンドウを，
 全系列を横断するデータベースから高速に取得する機構である．
-検索は，各ウィンドウをz-score正規化することでスケールの違いを吸収し，
+検索は，各ウィンドウを$z$ スコア正規化することでスケールの違いを吸収し，
 正規化後の形状のみに基づく最近傍探索によって行われる．
 これにより，絶対的な販売数量が異なる書籍であっても，
 需要パターンが類似する事例を参照ウィンドウとして利用できる．
@@ -243,6 +246,13 @@ $L_r$ を検索ウィンドウ長とする．各エントリは，形状正規�
         \end{align}
     ここで $Q$ は分位点レベルの集合，$F$ は予測ホライズンであり，
 
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\linewidth]{architecture_ProtoRAF.eps}
+\caption{ProtoRAFのアーキテクチャ概要．$K$件の検索ウィンドウとローカルコンテキスト $x$ を時間軸方向に連結し，単一シーケンスとしてエンコードする．}
+\label{fig:protoraf}
+\end{figure*}
+
 \subsection{コンテキスト拡張型RAFの問題点}
 ProtoRAFには構造に起因する2つの問題点がある．
 
@@ -294,7 +304,9 @@ $x$ と各 $r_k$ をそれぞれ独立にエンコードした後，Gate機構�
     \paragraph{ステップ 2：検索ウィンドウの独立エンコード（Multi Stream）}
     各検索ウィンドウを，ローカルコンテキストと接合せずに同一エンコーダで独立にエンコードする：
         \begin{equation}
-            H^{\mathrm{ret}}_k,\, (\mu_k, \sigma_k) = \mathrm{Encode}(r_k) \in \mathbb{R}^{P \times D}
+            H^{\mathrm{ret}}_k
+            %\, (\mu_k, \sigma_k) 
+            = \mathrm{Encode}(r_k) \in \mathbb{R}^{P \times D}
         \end{equation}
     ここで $k = 1, \ldots, K$ である．
     エンコーダは $r_k$ ごとに独立にインスタンス正規化を適用するが，
@@ -372,8 +384,16 @@ $x$ と各 $r_k$ をそれぞれ独立にエンコードした後，Gate機構�
     デコーダはローカルの文脈を主軸にしながら，ゲートを通過した有益な参照情報のみを補助的に参照して予測を生成する．
 
 
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\linewidth]{architecture_GateRAF.eps}
+\caption{GateRAF（提案手法）のアーキテクチャ概要．ローカルコンテキストと各検索ウィンドウを独立にエンコードし，GateMLP によるスカラーゲートで関連度の低い検索パッチを動的に抑制する．}
+\label{fig:gateraf}
+\end{figure*}
+
 \section{数値実験}
-本節では提案手法とで色々実験するよ
+本節では，提案手法 GateRAF の有効性を多角的に検証する．
+まず4.1節で実験設定を示し，続く4.2節から4.4節では全体的な予測精度，スパイク強度別の誤差，時間近接性，および予測区間の校正品質の観点から比較分析を行う．
 \subsection{実験設定}
 \begin{comment}
     \paragraph{学習目的関数}
@@ -395,34 +415,34 @@ $x$ と各 $r_k$ をそれぞれ独立にエンコードした後，Gate機構�
     ここで $y_t$ は時刻 $t$ の真値，$\hat{y}_{t,q}$ は時刻 $t$ における分位点 $q$ の予測値である．
 \end{comment}
     \paragraph{比較手法}
-    提案手法 GateRAF に対して以下の3手法を比較対象とする．全モデルには事前学習済みモデルである
-    \textbf{Baseline} は検索機構を持たない ChronosBolt を DoRA でファインチューニングしたものであり，
+    提案手法 GateRAF に対して以下の3手法を比較対象とする．全手法は，大規模な時系列データで事前学習されたパッチベースの基盤モデルである ChronosBolt~\cite{Ansari.2024} を DoRA でファインチューニングしたものである．
+    \textbf{Baseline} は検索機構を持たない手法であり，
     RAF機構の有無を検証する基準となる．
     \textbf{ProtoRAF} は $K$ 件の検索ウィンドウを時間軸方向にローカルコンテキストの前に連結した上で
     単一シーケンスとしてエンコードする従来型RAFである（3.2節）．
-    \textbf{Multi-RAF} は GateRAF からゲート機構を除いた手法であり，
-    Multi Streamエンコードのみの効果を単独で評価する．
+    \textbf{Multi-RAF} は GateRAF からゲート機構を除いた手法である．
+    ProtoRAF $\to$ Multi-RAF の比較で Multi Streamエンコードの寄与を，
+    Multi-RAF $\to$ GateRAF の比較で Gate機構の追加効果を段階的に検証する．
     いずれも同一の時系列検索器（3.1節）と，
     LoRAランク $r=8$，DoRA，検索数 $K=3$，
     文脈長 $L_c = L_r = 128$，予測ホライズン $F=64$ の設定を用いる．
 
 \subsection{全体的な予測精度}
 表~\ref{tab:metric_comparison} に，全書名・全予測期間を対象とした MAE および RMSE を示す．
-$\tau=0.1$ および $\tau=0.5$ では GateRAF が全指標で最良であり，検索機構の導入が有効であることが確認できる．
-ProtoRAF と Baseline の差は全 $\tau$ でほぼ見られず，
-検索ウィンドウの時間軸方向への単純連結は精度改善に寄与しないことを示している．
-特に $\tau=0.9$ の RMSE では ProtoRAF が Baseline と同水準であるのに対し GateRAF は大幅に小さく，
-接合部の歪みが上位分位点予測に深刻な影響を与えていることがわかる．
+中位および下位の分位点（$\tau=0.1, 0.5$）において，GateRAF が全指標で最も優れた精度を達成しており，検索機構の導入が有効であることが確認できる．
+一方，従来型の ProtoRAF は Baseline とほぼ同等の精度にとどまっており，検索ウィンドウを時間軸方向へ単純連結するアプローチは予測改善に寄与していない．
+特に上位分位点（$\tau=0.9$）の RMSE に着目すると，ProtoRAF で顕著な精度の悪化が見られる．これは，系列接合部における不連続性や無関係なパターンの混入が，確率的な予測の過剰な上振れを引き起こしていることを示唆している．
+次節では，この全体精度の差がどのような需要パターンの下で生じているのかを明らかにするため，実績値のスパイク強度別に詳細な分析を行う．
 \begin{table*}[t]
   \caption{各モデルおよび分位点レベルにおける MAE および RMSE の比較．}
   \label{tab:metric_comparison}
   \centering
   \begin{tabular}{lrrrrrr}
     \hline
-    & \multicolumn{6}{c}{Quantile} \\
-    \cline{2-3} \cline{4-5} \cline{6-7} 
-    \multicolumn{1}{c}{Model} & \multicolumn{2}{c}{$\tau=0.1$} & \multicolumn{2}{c}{$\tau=0.5$} & \multicolumn{2}{c}{$\tau=0.9$} \\
-    \cline{2-3} \cline{4-5} \cline{6-7} 
+    & \multicolumn{6}{c}{分位点} \\
+    \cline{2-3} \cline{4-5} \cline{6-7}
+    \multicolumn{1}{c}{モデル} & \multicolumn{2}{c}{$\tau=0.1$} & \multicolumn{2}{c}{$\tau=0.5$} & \multicolumn{2}{c}{$\tau=0.9$} \\
+    \cline{2-3} \cline{4-5} \cline{6-7}
      & \multicolumn{1}{c}{MAE} & \multicolumn{1}{c}{RMSE} & \multicolumn{1}{c}{MAE} & \multicolumn{1}{c}{RMSE} & \multicolumn{1}{c}{MAE} & \multicolumn{1}{c}{RMSE} \\
     \hline\hline
     \textbf{GateRAF} & \textbf{3.6339} & \textbf{13.5293} & \textbf{2.7452} & \textbf{12.2025} & 5.0136 & \textbf{13.3030} \\
@@ -436,114 +456,63 @@ ProtoRAF と Baseline の差は全 $\tau$ でほぼ見られず，
 
 
 \subsection{スパイク強度別の予測精度}
-各時点の実績値を系列内 z-score でビン分けし，スパイク強度ごとの予測誤差を分析した（表~\ref{tab:mae_vs_zscore}，\ref{tab:rmse_vs_zscore}）．
-$\tau=0.5$ の MAE では GateRAF がすべての z-score 帯で Baseline を上回り，
-特に需要ゼロ近傍（$z < -1$）では Baseline の 2.66 に対して 1.84 と約31\% の改善が得られた．
-Multi Streamエンコードによってローカルコンテキストの統計量が検索ウィンドウに汚染されず，
-エンコーダが正確なローカルスケールで $x$ を処理できることが，この一貫した改善の要因と考えられる．
-ProtoRAF は $\tau=0.5$ においても Baseline とほぼ同水準にとどまり，
-検索ウィンドウの単純連結が突発需要の予測改善に寄与しないことを数値上も裏付けている．
-
-$\tau=0.9$ の RMSE では ProtoRAF の劣化が顕著であり，
-$z < -1$ の帯で GateRAF の 9.70 に対して ProtoRAF は 29.11 と約3倍の誤差を示す．
-$\tau=0.9$ は販売上限付近を予測する分位点であるため，静穏な時点（$z < -1$）では本来低い値が期待される．
-しかし ProtoRAF では，スパイクを含む検索ウィンドウが連結されることで
-インスタンス正規化パラメータ $(\mu, \sigma)$ が拡張系列全体の統計量に引きずられ，
-エンコーダがローカルコンテキストを歪んだスケールで処理してしまう．
-その結果，需要が静穏な時点でも過大な上位分位点が出力される．
-GateRAF・Multi-RAF では各ストリームが独立にインスタンス正規化されるためこの歪みは生じない．
-\begin{table*}[t]
-    \caption{実績値の系列内 z-score 別 MAE．}
-    \label{tab:mae_vs_zscore}
-    \centering
-    \begin{tabular}{lrrrrrrrr}
-    \hline
-    & \multicolumn{8}{c}{Within-series z-score of actual value} \\
-    \cline{2-9}
-    \multicolumn{1}{c}{Model} & \multicolumn{1}{c}{$<$-1} & \multicolumn{1}{c}{-1--0} & \multicolumn{1}{c}{0--0.5} & \multicolumn{1}{c}{0.5--1} & \multicolumn{1}{c}{1--1.5} & \multicolumn{1}{c}{1.5--2} & \multicolumn{1}{c}{2--3} & \multicolumn{1}{c}{$>$3} \\
-    \hline\hline
-    \multicolumn{9}{l}{$\tau=0.1$} \\
-    \quad \textbf{GateRAF} & \textbf{0.85} & 1.57 & \textbf{4.65} & \textbf{5.98} & \textbf{7.18} & \textbf{8.42} & \textbf{14.72} & \textbf{28.08} \\
-    \quad \textbf{Multi-RAF} & 1.03 & 1.71 & 4.77 & 6.15 & 7.36 & 8.59 & 14.84 & 28.24 \\
-    \quad \textbf{ProtoRAF} & 0.89 & 1.47 & 4.77 & 6.20 & 7.51 & 8.79 & 15.45 & 28.58 \\
-    \quad \textbf{Baseline} & 0.89 & \textbf{1.46} & 4.76 & 6.19 & 7.50 & 8.78 & 15.44 & 28.56 \\
-    \hline
-    \multicolumn{9}{l}{$\tau=0.5$} \\
-    \quad \textbf{GateRAF} & \textbf{1.84} & \textbf{1.21} & \textbf{2.96} & \textbf{3.92} & \textbf{4.94} & \textbf{6.05} & \textbf{11.28} & \textbf{24.76} \\
-    \quad \textbf{Multi-RAF} & 1.94 & 1.26 & 3.01 & 4.03 & 5.07 & 6.19 & 11.47 & 24.84 \\
-    \quad \textbf{ProtoRAF} & 2.66 & 1.40 & 3.14 & 4.22 & 5.39 & 6.50 & 12.42 & 26.26 \\
-    \quad \textbf{Baseline} & 2.66 & 1.40 & 3.13 & 4.22 & 5.39 & 6.50 & 12.41 & 26.25 \\
-    \hline
-    \multicolumn{9}{l}{$\tau=0.9$} \\
-    \quad \textbf{GateRAF} & \textbf{6.19} & 4.52 & 4.47 & 4.74 & 4.56 & 4.89 & \textbf{8.39} & 18.81 \\
-    \quad \textbf{Multi-RAF} & 6.27 & \textbf{4.46} & \textbf{4.41} & \textbf{4.73} & \textbf{4.51} & \textbf{4.88} & 8.57 & \textbf{18.73} \\
-    \quad \textbf{ProtoRAF} & 9.48 & 6.57 & 6.33 & 5.75 & 4.79 & 5.39 & 9.56 & 20.74 \\
-    \quad \textbf{Baseline} & 9.49 & 6.56 & 6.33 & 5.75 & 4.80 & 5.39 & 9.56 & 20.72 \\
-    \hline
-    \end{tabular}
-\end{table*}
-
+各時点の実績値を系列内 $z$ スコアでビン分けし，スパイク強度ごとの予測誤差を比較した（表~\ref{tab:mae_rmse_vs_zscore}）．
+中央値予測（$\tau=0.5$）の MAE において，GateRAF はすべての $z$ スコア帯で Baseline を上回る．特に需要ゼロ近傍（$z < -1$）では約31\%の大幅な誤差削減を実現した．これは，Multi Streamエンコードにより各ストリームが独立して正規化され，ローカルコンテキストのスケールが検索情報に汚染されることなく正確に維持されたためである．
+対照的に，上位分位点（$\tau=0.9$）における ProtoRAF の RMSE は，静穏な時点（$z < -1$）において GateRAF の約3倍まで増大している．ProtoRAF は検索ウィンドウを連結して全体で一括の正規化を行うため，参照したスパイクに引張られて拡張系列全体の統計量が歪む．その結果，需要が平坦な時点においても過大な予測を出力してしまう．
+このように，独立エンコードによるスケール維持が静穏時の誤予測を防ぐことが確認できた．続いて，突発的なスパイクを予測する際の「時間的な正確さ」について検証を進める．
 
 \begin{table*}[t]
-    \caption{実績値の系列内 z-score 別 RMSE．}
-    \label{tab:rmse_vs_zscore}
+    \caption{系列内$z$スコアビン別のMAEおよびRMSE．}
+    \label{tab:mae_rmse_vs_zscore}
     \centering
-    \begin{tabular}{lrrrrrrrr}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{lrrrrrrrrrrrrrrrr}
     \hline
-    & \multicolumn{8}{c}{Within-series z-score of actual value} \\
-    \cline{2-9}
-    \multicolumn{1}{c}{Model} & \multicolumn{1}{c}{$<$-1} & \multicolumn{1}{c}{-1--0} & \multicolumn{1}{c}{0--0.5} & \multicolumn{1}{c}{0.5--1} & \multicolumn{1}{c}{1--1.5} & \multicolumn{1}{c}{1.5--2} & \multicolumn{1}{c}{2--3} & \multicolumn{1}{c}{$>$3} \\
+     & \multicolumn{2}{c}{$<$-1} & \multicolumn{2}{c}{-1--0} & \multicolumn{2}{c}{0--0.5} & \multicolumn{2}{c}{0.5--1} & \multicolumn{2}{c}{1--1.5} & \multicolumn{2}{c}{1.5--2} & \multicolumn{2}{c}{2--3} & \multicolumn{2}{c}{$>$3} \\
+    \cline{2-17}
+    \multicolumn{1}{c}{モデル} & MAE & RMSE & MAE & RMSE & MAE & RMSE & MAE & RMSE & MAE & RMSE & MAE & RMSE & MAE & RMSE & MAE & RMSE \\
     \hline\hline
-    \multicolumn{9}{l}{$\tau=0.1$} \\
-    \quad \textbf{GateRAF} & \textbf{2.88} & 4.57 & \textbf{9.48} & \textbf{11.86} & \textbf{15.81} & \textbf{17.66} & \textbf{39.32} & 63.94 \\
-    \quad \textbf{Multi-RAF} & 3.01 & 4.67 & 9.56 & 12.00 & 15.92 & 17.80 & 39.68 & \textbf{63.94} \\
-    \quad \textbf{ProtoRAF} & 3.09 & 4.39 & 9.79 & 12.22 & 16.47 & 18.36 & 40.54 & 64.37 \\
-    \quad \textbf{Baseline} & 3.08 & \textbf{4.38} & 9.77 & 12.21 & 16.45 & 18.35 & 40.51 & 64.35 \\
+    \multicolumn{17}{l}{$\tau=0.1$} \\
+    \quad \textbf{GateRAF} & \textbf{0.85} & \textbf{2.88} & 1.57 & 4.57 & \textbf{4.65} & \textbf{9.48} & \textbf{5.98} & \textbf{11.86} & \textbf{7.18} & \textbf{15.81} & \textbf{8.42} & \textbf{17.66} & \textbf{14.72} & \textbf{39.32} & \textbf{28.08} & 63.94 \\
+    \quad \textbf{Multi-RAF} & 1.03 & 3.01 & 1.71 & 4.67 & 4.77 & 9.56 & 6.15 & 12.00 & 7.36 & 15.92 & 8.59 & 17.80 & 14.84 & 39.68 & 28.24 & \textbf{63.94} \\
+    \quad \textbf{ProtoRAF} & 0.89 & 3.09 & 1.47 & 4.39 & 4.77 & 9.79 & 6.20 & 12.22 & 7.51 & 16.47 & 8.79 & 18.36 & 15.45 & 40.54 & 28.58 & 64.37 \\
+    \quad \textbf{Baseline} & 0.89 & 3.08 & \textbf{1.46} & \textbf{4.38} & 4.76 & 9.77 & 6.19 & 12.21 & 7.50 & 16.45 & 8.78 & 18.35 & 15.44 & 40.51 & 28.56 & 64.35 \\
     \hline
-    \multicolumn{9}{l}{$\tau=0.5$} \\
-    \quad \textbf{GateRAF} & \textbf{3.15} & 3.78 & 7.32 & \textbf{9.90} & \textbf{13.12} & \textbf{14.98} & \textbf{35.30} & 61.12 \\
-    \quad \textbf{Multi-RAF} & 3.23 & \textbf{3.77} & \textbf{7.29} & 9.95 & 13.14 & 15.17 & 35.98 & \textbf{61.00} \\
-    \quad \textbf{ProtoRAF} & 6.21 & 5.13 & 8.22 & 10.73 & 13.82 & 15.74 & 36.57 & 62.31 \\
-    \quad \textbf{Baseline} & 6.21 & 5.14 & 8.22 & 10.73 & 13.82 & 15.75 & 36.55 & 62.29 \\
+    \multicolumn{17}{l}{$\tau=0.5$} \\
+    \quad \textbf{GateRAF} & \textbf{1.84} & \textbf{3.15} & \textbf{1.21} & 3.78 & \textbf{2.96} & 7.32 & \textbf{3.92} & \textbf{9.90} & \textbf{4.94} & \textbf{13.12} & \textbf{6.05} & \textbf{14.98} & \textbf{11.28} & \textbf{35.30} & \textbf{24.76} & 61.12 \\
+    \quad \textbf{Multi-RAF} & 1.94 & 3.23 & 1.26 & \textbf{3.77} & 3.01 & \textbf{7.29} & 4.03 & 9.95 & 5.07 & 13.14 & 6.19 & 15.17 & 11.47 & 35.98 & 24.84 & \textbf{61.00} \\
+    \quad \textbf{ProtoRAF} & 2.66 & 6.21 & 1.40 & 5.13 & 3.14 & 8.22 & 4.22 & 10.73 & 5.39 & 13.82 & 6.50 & 15.74 & 12.42 & 36.57 & 26.26 & 62.31 \\
+    \quad \textbf{Baseline} & 2.66 & 6.21 & 1.40 & 5.14 & 3.13 & 8.22 & 4.22 & 10.73 & 5.39 & 13.82 & 6.50 & 15.75 & 12.41 & 36.55 & 26.25 & 62.29 \\
     \hline
-    \multicolumn{9}{l}{$\tau=0.9$} \\
-    \quad \textbf{GateRAF} & 9.70 & 9.50 & 8.98 & \textbf{10.04} & \textbf{10.64} & \textbf{12.42} & \textbf{30.16} & 55.93 \\
-    \quad \textbf{Multi-RAF} & \textbf{9.64} & \textbf{9.43} & \textbf{8.92} & 10.18 & 10.65 & 12.59 & 31.39 & \textbf{55.86} \\
-    \quad \textbf{ProtoRAF} & 29.11 & 27.12 & 24.03 & 25.13 & 11.83 & 15.07 & 33.12 & 58.00 \\
-    \quad \textbf{Baseline} & 29.17 & 27.09 & 24.02 & 25.16 & 11.83 & 15.08 & 33.15 & 57.99 \\
+    \multicolumn{17}{l}{$\tau=0.9$} \\
+    \quad \textbf{GateRAF} & \textbf{6.19} & 9.70 & 4.52 & 9.50 & 4.47 & 8.98 & 4.74 & \textbf{10.04} & 4.56 & \textbf{10.64} & 4.89 & \textbf{12.42} & \textbf{8.39} & \textbf{30.16} & 18.81 & 55.93 \\
+    \quad \textbf{Multi-RAF} & 6.27 & \textbf{9.64} & \textbf{4.46} & \textbf{9.43} & \textbf{4.41} & \textbf{8.92} & \textbf{4.73} & 10.18 & \textbf{4.51} & 10.65 & \textbf{4.88} & 12.59 & 8.57 & 31.39 & \textbf{18.73} & \textbf{55.86} \\
+    \quad \textbf{ProtoRAF} & 9.48 & 29.11 & 6.57 & 27.12 & 6.33 & 24.03 & 5.75 & 25.13 & 4.79 & 11.83 & 5.39 & 15.07 & 9.56 & 33.12 & 20.74 & 58.00 \\
+    \quad \textbf{Baseline} & 9.49 & 29.17 & 6.56 & 27.09 & 6.33 & 24.02 & 5.75 & 25.16 & 4.80 & 11.83 & 5.39 & 15.08 & 9.56 & 33.15 & 20.72 & 57.99 \\
     \hline
-    \end{tabular}
+    \end{tabular}%
+    }
 \end{table*}
+
 
         
 \subsection{時間近接性}
-スパイク予測の誤りの質を時間軸上で評価するため，
-誤分類時点と最近傍の実際スパイク時点との時間的距離（$\Delta$日）を分析した
-（$\tau=0.5$，図~\ref{Fig:temporal_proximity_fp}，\ref{Fig:temporal_proximity_fn}）．
-FP（誤検知）において，付近10日以内に実際スパイクが存在しない割合（$|\Delta| \geq 10$）は
-GateRAF で 49.6\%，ProtoRAF で 59.1\% であり，
-GateRAF の FP の約半数が実際スパイクに時間的に近接した「近傍誤検知」であることを示す．
-
-この差はゲート機構の動作から説明できる．
-GateRAF はスパイク形状の類似した検索ウィンドウがある時点でのみゲートが開き，
-予測区間が上方にシフトする傾向があるため，誤検知は実際スパイクの前後に集中する．
-一方，ProtoRAF は無関係な検索ウィンドウも無条件に拡張コンテキストへ連結するため，
-実際スパイクとは無関係な時点でもスパイクパターンが混入してノイズ的な誤検知が増加する．
-FN（見逃し）においても同様に（図~\ref{Fig:temporal_proximity_fn}），
-GateRAF の見逃しは付近で予測スパイクを出しているケースが多く，
-絶対的な誤分類数だけでなく誤りの時間的な質においても GateRAF が優位であることが確認できる．
+スパイク予測の誤りの質を時間軸上で評価するため，誤分類時点と最近傍の実際スパイク時点との時間的距離（$\Delta$日）を分析した（$\tau=0.5$，図~\ref{Fig:temporal_proximity_fp}，\ref{Fig:temporal_proximity_fn}）．なお，実績値または予測値の系列内 $z$ スコアが $2.0$ 以上となる時点をスパイクと定義し，FP・FN の判定を行っている．
+誤検知（FP）のうち，付近10日以内に実際スパイクが存在しない「ノイズ的な誤検知」の割合（$|\Delta| \geq 10$）は，ProtoRAF の 59.1\% に対して GateRAF は 49.6\% と低い．すなわち，GateRAF の誤検知の多くは実際のスパイクに近接した「タイミングのズレ」によるものである．これは，Gate機構がローカル文脈と類似する検索パッチに対してのみ選択的にゲートを開くためである．
+見逃し（FN）の傾向（図~\ref{Fig:temporal_proximity_fn}）も同様であり，GateRAF は実際のスパイク付近で予測を上方修正しようとする挙動が見られる．対して ProtoRAF は，無関係な検索情報を無条件に混入させるため，スパイクとは無縁な時点での突発的な誤検知を誘発している．
+時間的な誤りの分析から，Gate機構が不要な情報の混入を適切に遮断していることがわかった．最後に，この動的な情報選択が予測の不確実性（区間幅）にどう作用するかを評価する．
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{temporal_proximity_fp_q0.5.eps}
-\caption{誤検知（FP）の $\Delta$日分布（$\tau=0.5$）：各FP予測日について，最近傍の実際スパイクまでの符号付き距離のヒストグラム．外側ビン（$|\Delta|\geq10$）は付近10日以内に実際スパイクが存在しないケースを表す．}
+\caption{誤検知（FP）の $\Delta$日分布（$\tau=0.5$）：スパイクは系列内 $z$ スコアが $2.0$ 以上の時点として定義した．各FP予測日について，最近傍の実際スパイクまでの符号付き距離のヒストグラム．外側ビン（$|\Delta|\geq10$）は付近10日以内に実際スパイクが存在しないケースを表す．}
 \label{Fig:temporal_proximity_fp}
 \end{figure}
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{temporal_proximity_fn_q0.5.eps}
-\caption{見逃し（FN）の $\Delta$日分布（$\tau=0.5$）：各FN実際スパイク日について，最近傍の予測スパイクまでの符号付き距離のヒストグラム．}
+\caption{見逃し（FN）の $\Delta$日分布（$\tau=0.5$）：スパイク定義は図~\ref{Fig:temporal_proximity_fp} と同様．各FN実際スパイク日について，最近傍の予測スパイクまでの符号付き距離のヒストグラム．}
 \label{Fig:temporal_proximity_fn}
 \end{figure}
 
@@ -553,33 +522,17 @@ GateRAF の見逃しは付近で予測スパイクを出しているケースが
 
 
 \subsection{予測区間幅の比較}
-予測区間幅（$q_{0.9} - q_{0.1}$）はモデルが表明する不確実性の大きさを表す．
-書籍販売データにおいてスパイク日は真の需要分布が大きく右に裾を引くため，
-よく校正されたモデルは静穏日に区間を絞り，スパイクが予想される日に区間を広げるべきである．
-したがって問題となるのは「区間が広い」こと自体ではなく，
-その幅の広狭が実際のスパイク強度と対応しているかどうか，すなわち不確実性を正しい日に向けられているかどうかである．
-
-この対応を検証するため，予測区間幅（$q_{0.9} - q_{0.1}$）を等頻度ビンに分割し，
-各ビンに属する時点の系列内 z-score 平均を示す（図~\ref{Fig:interval_calibration}）．
-GateRAF は最狭ビン（中央値 0.8）の z-score 平均が $-0.34$，最広ビン（中央値 513.1）では $+0.32$ と，
-区間幅が広がるにつれて z-score が単調に上昇する．Multi-RAF も同様の傾向（$-0.25 \to +0.30$）を示す．
-すなわち GateRAF・Multi-RAF の広い区間は実際にスパイクが生じた日に集中しており，
-不確実性がスパイク危険度と対応している．
-一方，ProtoRAF および Baseline は最狭ビンで $-0.06$，最広ビンで $+0.14$ にとどまり傾きがほぼ平坦であり，
-区間幅がスパイク強度の情報をほぼ持っていないことを示す．
-
-この差はゲートの動的選択から説明できる．
-GateRAF ではスパイク形状の検索ウィンドウがある時点でのみゲートが開き，
-デコーダへ供給される参照情報が増加して予測分布の裾が広がる一方，
-静穏な時点では類似ウィンドウが少なくゲートが閉じるため予測区間が絞られる．
-Baseline は検索機構を持たず文脈依存の幅調整ができない．
-ProtoRAF は無関係な検索ウィンドウを常に混入させるため区間幅全体が一様に底上げされ，
-スパイク強度との対応関係が薄れてしまう．
+予測区間幅（$\tau_{0.9} - \tau_{0.1}$）は，モデルが表明する不確実性の大きさを表す．
+スパイクを含む需要分布は右に強い裾を持つため，適切に校正されたモデルは静穏日に区間を絞り，スパイクが予想される危険日に区間を広げる挙動を示すべきである．
+予測区間幅を等頻度ビンに分割し，各ビンに属する時点の系列内 $z$ スコア平均を算出した（図~\ref{Fig:interval_calibration}）．
+GateRAF および Multi-RAF は，区間幅が広がるにつれて $z$ スコアが単調に上昇（$-0.34 \to +0.32$）している．つまり，広い予測区間が実際のスパイク発生日に集中しており，不確実性が正しくスパイク危険度と対応付けられている．
+一方で ProtoRAF は傾きがほぼ平坦（$-0.06 \to +0.14$）であり，区間幅と実際の需要変動との連動性が失われている．
+この対比は，GateRAF が静穏時にはゲートを閉じて区間を絞り，スパイクの兆候を捉えた際にのみ参照情報を透過させて予測分布の裾を広げるという，文脈に応じた動的な不確実性の制御を実現していることを明確に裏付けている．
 
 \begin{figure}[tb]
 \center
 \includegraphics[width=\linewidth]{interval_calibration.eps}
-\caption{予測区間幅（$q_{0.9}-q_{0.1}$）を等頻度10ビンに分割した際の実績値 z-score 平均．傾きが正であるほど，区間幅の広い時点に実際スパイクが集中していることを示す．} \label{Fig:interval_calibration}
+\caption{予測区間幅（$q_{0.9}-q_{0.1}$）を等頻度10ビンに分割した際の実績値 $z$ スコア平均．傾きが正であるほど，区間幅の広い時点に実際スパイクが集中していることを示す．} \label{Fig:interval_calibration}
 \end{figure}
 
 
@@ -602,466 +555,31 @@ ProtoRAF は無関係な検索ウィンドウを常に混入させるため区�
 
 
 
-\section{}
-\section{}
-\section{}
-\section{}
-\section{総則}
-このひな形が利用可能な記事の種類は，
-“特集にあたって”・“特集記事”・“論文・事例研究”
-・“論文・研究レポート”・“ORメモランダム”
-・“学生論文賞受賞論文”である．
-
-記述言語は日本語とする．
-
-記事は2段組で記述する．
-原稿の長さについて，
-“特集にあたって”・“特集記事”・“ORメモランダム”
-・“学生論文賞受賞論文”の場合は，執筆依頼状などで指定された枚数とする．
-“論文・事例研究”・“論文・研究レポート”の場合は，
-投稿規定などで指定された枚数とする．
-なお，図表が入る場合は，刷り上がりの大きさを考えて字数を調整する．
-1ページを文字に換算すると，2段組，1段45行，1行24字で2,160字に相当する
-（1ページ目について，“特集記事”の場合は，約1,300字となり，
-“論文・事例研究”・“論文・研究レポート”の場合は，約1,600字となる）．
-
-原稿ファイルの文字コードは，
-日本語に対応する主要な文字コードのうちどれを使用してもよいが，
-機種依存文字の使用は避けることを推奨する．
-このひな形は，Windows環境（Shift-JIS，改行はCR+LF）で作成している．
-
-このひな形の指示のうち，
-“…を原則とする”，“…を推奨する”，“…を標準とする”と記載している部分は，
-著者の意向がある場合は，そちらを優先してもよい．
-ただし，一編の記事のなかで，できるだけ体裁や記述のぶれがないように努めること．
-
-
-
-\section{最初のページ}
-\subsection{全般的な体裁・書式}
-“特集記事”の場合は，このひな形に従う．
-その他の種類の記事の場合は，
-このひな形の\LaTeXe ソースファイルのコメントに従い
-プリアンブルを変更しコンパイルすると，対応するひな形が出力される．
-直近の発行済み記事も参考にすること．
-
-
-\subsection{著者の所属}
-\subsubsection{記載位置}
-“特集にあたって”の場合は，著者名の横にかっこ書きで記載する．
-“特集記事”・“論文・事例研究”・“論文・研究レポート”
-・“ORメモランダム”の場合は，
-このひな形のように，左下に記載する．
-なお，“論文・事例研究”・“論文・研究レポート”は，
-所属の下に，論文受付・採録に関係する日付が記載される．
-“学生論文賞受賞論文”の場合は，
-著者名の下に，1行ずつ順に，
-論文提出時の所属，かっこ書きで現所属，指導教員を記載する．
-
-\subsubsection{記載範囲}
-“特集にあたって”の場合は，
-大学名または企業名のみを記載することを標準とする．
-“特集記事”・“論文・事例研究”・“論文・研究レポート”
-・“ORメモランダム”・“学生論文賞受賞論文”の場合は，
-各著者について，
-所属が大学であれば学部・研究科レベルまで，
-企業であれば部レベルまで記載することを標準とする．
-法人の種類は，紙面スペースの都合上，
-大学などの場合は記載しないが，
-株式会社の場合は“（株）”，
-公益社団法人の場合は“（公社）”などと，
-法人の種類に対応する漢字略語で記載することを推奨する．
-なお，所属の掲載を希望しない場合は，事務局に連絡する．
-
-
-\subsection{著者の読みがな・住所・メールアドレス}
-“特集記事”・“論文・事例研究”・“論文・研究レポート”
-・“ORメモランダム”の場合に限り，
-全著者について，読みがな（非漢字圏の著者はカタカナ）と，
-住所・メールアドレスの両方，または，どちらか一方を記載する．
-なお，住所とメールアドレスの両方の掲載を希望しない場合は，事務局に連絡する．
-
-
-
-\section{記事のスタイル} \label{Sec:Style}
-\subsection{見出し} \label{Sec:Midashi}
-\subsubsection{階層数} 
-見出しの階層は3段階までを標準とする．
-
-\subsubsection{参照} \label{Sec:Sansho}
-見出し番号を参照する際は，
-\ref{Sec:Style}~節，\ref{Sec:Midashi}~節，\ref{Sec:Sansho}~節と
-記載することを推奨する．
-
-
-\subsection{句読点}
-句点は“．”（全角ピリオド），読点は“，”（全角コンマ）を使用する．
-
-
-\subsection{全角・半角の使用}
-原則として，
-ひらがな・カタカナ・漢字は全角を使用し，
-数字・欧文文字・“\%”などのASCIIコードで表せる記号は半角を使用する．
-数字は1桁であっても，半角とする．
-
-かっこの使用については，以下のルールを標準とする．
-\begin{itemize}
-\item 線形計画法（せんけいけいかくほう）のように，全角とする
-\item かっこ内が半角の語句であっても，
-      線形計画法（Linear Programming）のように，全角とする
-\item 半角の語句中の一部にかっこがある場合は，
-      Linear Programming~(LP)のように，半角とする
-\end{itemize}
-
-
-\subsection{数字の桁区切り}
-数字は，“1,234,567.899999”というように，
-整数部分の3桁ごとに“,”（半角カンマ）の桁区切りを挿入し，
-小数点を表す“.”（半角ピリオド）以降には
-桁区切りを挿入しないことを原則とする．
-
-
-\subsection{中黒の使用}
-ひらがな・カタカナ・漢字というように，
-同種のものを並列に区切るときには中黒（“・”）を用いることを推奨する．
-
-
-\subsection{語句の強調}
-語句を強調する際は，“語句”，「語句」，\emph{語句}などと
-表記することを推奨する．
-同じ程度の強調をしたい二つの語句は，同じ強調のさせ方を用いる．
-
-
-\subsection{漢字表記・かな表記・数字表記}
-たとえば，
-“様々な”という記述は，
-漢字で表記するよりも，
-“さまざまな”とひらがなで表記することを推奨する．
-推奨する表記の例を別表に示す．
-この表は編集委員会で継続して整備していくので，最新のものを参照すること．
-
-
-\subsection{外来語の表記}
-外来語の表記は，\citet{Cabinet.web}に従うことを推奨する．
-たとえば，長音符（“ー”）については，
-“コンピューター”，“サーバー”，“シミュレーター”，“メモリー”
-などと表記する．
-ただし，この告示内でも触れられているように，
-“コンピュータ”などと，慣用に応じて“ー”を省くことができる．
-“地球シミュレータ”~\cite{JAMSTEC.web}などの固有名詞は，
-固有名詞の表記に従うこととし，
-その場合は，一般名詞を“シミュレータ”などとして表記を合わせてもよい．
-また，“トラヒック”など，
-当該分野で慣用となっている表記は，それに従ってもよい．
-
-
-\subsection{図表}
-\subsubsection{図}
-図の例を図~\ref{Fig:RailwayTracks1}, \ref{Fig:RailwayTracks2}に示す．
-小さいと読みにくい図は，
-図~\ref{Fig:RailwayTracks2}のように2段ぶち抜きにしてもよい．
-グレースケールで印刷されるので，
-その場合でも図やグラフ内の項目が識別できるように，
-線種や塗りつぶしを設定すること．
-% 図の例（1段の幅以内におさめる場合）
-\begin{figure}[tb]
-\center
-\includegraphics[scale=0.15]{Fig_RailwayTracks.eps}
-\caption{図のキャプション} \label{Fig:RailwayTracks1}
-\end{figure}
-% 図の例（2段ぶち抜きにする場合）
-\begin{figure*}[tb]
-\center
-\includegraphics[scale=0.20]{Fig_RailwayTracks.eps}
-\caption{図~\ref{Fig:RailwayTracks1}を
-    拡大して2段ぶち抜きにしたもの} \label{Fig:RailwayTracks2}
-\end{figure*}
-
-\subsubsection{表}
-表の例を表~\ref{Tbl:NemericalResults}, \ref{Tbl:ReferencesCategory}に示す．
-内容が多い表は，
-表~\ref{Tbl:NemericalResults}のように2段ぶち抜きにしてもよい．
-表の罫線は横方向のみとし，表の上下に1本線を，
-ヘッダー行の下に2本線を引くことを標準とする．
-ヘッダー行の各セルは中央寄せとし，
-データ行の各セルは，
-文字列であれば左寄せ，数値であれば右寄せを標準とする．
-数値の場合は，縦に並ぶ項目の桁の位置が合うよう，
-有効桁数をそろえることを推奨する．
-% 表の例（2段ぶち抜きにする場合）
-\begin{table*}[tb]
-\center
-\caption{表のキャプション} \label{Tbl:NemericalResults}
-\begin{tabular}{lrrl} \hline
-\multicolumn{1}{c}{手法} 
-    & \multicolumn{1}{c}{目的関数値} 
-    & \multicolumn{1}{c}{計算時間（秒）} 
-    & \multicolumn{1}{c}{備考} \\ \hline\hline
-A法  &  1,111.1 & 22.2222 & 解は最適解 \\
-BC法 & 33,333.3 &  4.4444 & メモリーの使用量はA法の1/55 \\ \hline
-\end{tabular}
-\end{table*}
-
-\subsubsection{図・表に共通すること}
-図表は，原則として著者の用意したものから版下を作成し印刷するので，
-できるだけ高品質の電子ファイルを提出する．
-原稿提出時は別ファイルでもかまわないが，必ず本文中に挿入箇所を指定する．
-ファイルがない場合は，写真製版するため，
-表面が滑らかな紙に高品位印刷したものを事務局に送付する．
-拡大縮小は製版のときに自由にできるが，
-その場合は，図表の文字の大きさは，刷り上がりの大きさを考えて設定する．
-
-すべての図表を必ず本文で参照すること．
-参照する際は，
-“図~\ref{Fig:RailwayTracks1}”，
-“表~\ref{Tbl:NemericalResults}, \ref{Tbl:ReferencesCategory}”，
-“図~3--5”などと表記する．
-また，図表の説明は，
-図表のキャプションの一部としてではなく，本文に記載することを推奨する．
-
-
-\subsection{箇条書き}
-番号なしの箇条書きは，以下のように記載することを標準とする．
-% 番号なし箇条書きの例
-\begin{itemize}
-\item あああ
-\item いいい
-    \begin{itemize}
-    \item ききき
-        \begin{itemize}
-        \item ししし
-        \end{itemize}
-    \end{itemize}
-\item ううう
-\end{itemize}
-
-番号付きの箇条書きは，以下のように記載することを標準とする．
-% 番号付き箇条書きの例
-\begin{enumerate}
-\item ははは
-\item ひひひ
-    \begin{enumerate}
-    \item みみみ
-        \begin{enumerate}
-        \item いいい
-        \end{enumerate}
-    \end{enumerate}
-\item ふふふ
-\end{enumerate}
-
-番号なしと番号付きの箇条書きを組み合わせる場合は，
-以下のように記載することを標準とする．
-% 番号なし箇条書きと番号付き箇条書きが混在する例
-\begin{itemize}
-\item あああ
-\item いいい
-    \begin{enumerate}
-    \item ひひひ
-    \end{enumerate}
-\item ううう
-    \begin{enumerate}
-    \item ふふふ
-    \end{enumerate}
-\end{itemize}
-
-箇条書きの入れ子は，
-番号なしまたは番号付きを単独で用いる場合は三つまで，
-番号なしと番号付きを組み合わせる場合は二つまでを標準とする．
-
-
-\subsection{脚注}
-脚注~\footnote{書物などの本文の下に付された注のこと．}は，
-このひな形の例のように記載する．
-
-
-\subsection{数式}
-文中の数式は$a=b+c$などと記載する．
-独立した段落として記述する数式について，
-数式番号を付与しない場合は，以下のように，中央寄せで記載することを標準とする．
-% 段落数式の例（数式番号なし，1行）
-\begin{equation*}
-a=b+c
-\end{equation*}
-数式番号を付与する場合は，
-以下のように，数式は中央寄せで，数式番号は右端に記載することを標準とする．
-% 段落数式の例（数式番号あり，複数行）
-\begin{align}
-a &= b + c \label{Eqn:abc} \\ 
-d &= e + f \label{Eqn:def} \\
-g &= h + i \label{Eqn:ghi} 
-\end{align}
-
-数式を参照する際は，
-“式~\eqref{Eqn:abc}”，
-“式~\eqref{Eqn:def}, \eqref{Eqn:ghi}”，
-“式~\eqref{Eqn:abc}--\eqref{Eqn:ghi}”
-などと表記することを推奨する．
-番号を付与した数式は，必ず本文または図表で参照すること．
-
-Tire, K., Taga, E. O., Ildiz, M. E., & Oymak, S. (2024). Retrieval augmented time series forecasting. arXiv preprint arXiv:2411.08249.
-
-\subsection{参考文献}
-\subsubsection{リストと書式}
-記事の末尾に，参考文献リストを記載する．
-リストに記載した文献は，必ず本文または図表で参照し，
-本文または図表での表出順に\mbox{[1]}から番号を付与する．
-
-参考文献は，文献の種類に応じた書式で表記する．
-参考文献の種類と対応する文献，各文献の表記方法を
-表~\ref{Tbl:ReferencesCategory}と
-参考文献欄~\cite{Umetani.2013, Kenmochi.2009, Yagiura.2001, Heinrich.1931, 
-    Mukaidono.2000, Johnson.1997, Maex.2013, Thaler.2009, Kato.2009, 
-    Iwama.2007, SMEA.2008, Hayashi.web, Samsung.web}に示す．
-大学の紀要・Discussion Paper・Working Paper・企業の技報は学術誌として，
-学位論文は書籍としてそれぞれ扱うことを標準する．
-% 表の例（1段の幅以内におさめる場合）
-\begin{table}[tb]
-\center
-\caption{参考文献の種類と文献の例} \label{Tbl:ReferencesCategory}
-\begin{tabular}{lll} \hline
-\multicolumn{1}{c}{種類} 
-    & \multicolumn{1}{c}{和文} 
-    & \multicolumn{1}{c}{欧文} \\ \hline\hline
-学術誌               & \cite{Umetani.2013}           & \cite{Kenmochi.2009} \\
-書籍                 & \cite{Yagiura.2001}           & \cite{Heinrich.1931} \\
-書籍の一部           & \cite{Mukaidono.2000}         & \cite{Johnson.1997}  \\
-翻訳書               & \cite{Maex.2013, Thaler.2009} &                      \\
-議事録               & \cite{Kato.2009}              & \cite{Iwama.2007}    \\
-官公庁発行物         & \cite{SMEA.2008}              &                      \\
-インターネットページ & \cite{Hayashi.web}            & \cite{Samsung.web}   \\
-    \hline
-\end{tabular}
-\end{table}
-
-\subsubsection{参照}
-参考文献を本文で参照する際は，
-“…に関する文献~\cite{Umetani.2013}”，
-“…に関する研究~\cite{Umetani.2013}”，
-“…という研究が行われている~\cite{Umetani.2013}．”，
-“\citet{Umetani.2013}は…，”などと表記する．
-複数の文献を同時に参照する場合は，
-“文献~\cite{Umetani.2013, Kenmochi.2009}”，
-“文献~\cite{Yagiura.2001, Heinrich.1931, Mukaidono.2000}”，
-などと表記する．
-
-著者名と文献番号で参照する場合について，
-文献が日本語の場合は
-\begin{itemize}
-\item 著者が1人ならば，“\citet{Mukaidono.2000}は，…”
-\item 著者が2人ならば，“\citet{Umetani.2013}は，…”
-\item 著者が3人以上ならば，“\citet{Kato.2009}は，…”
-\end{itemize}
-などと表記し，
-文献が欧文の場合は
-\begin{itemize}
-\item 著者が1人ならば，“\citet{Heinrich.1931}は，…”
-\item 著者が2人ならば，“\citet{Thaler.2009}は，…”
-\item 著者が3人以上ならば，“\citet{Iwama.2007}は，…”
-\end{itemize}
-などと表記するのを標準とする．
-ただし，すべての著者名を列挙したほうがよい場合は，そうしてもよい．
-
-
 
 %% 謝辞
 \shaji
-謝辞がある場合は，この位置に記載する．
-
 
 
 %%%%%%%% 参考文献 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{thebibliography}{99}
-\bibitem[平成三年内閣告示第二号(2015)]{Cabinet.web}
-平成三年内閣告示第二号，
-「外来語の表記」，
-\url{http://www.mext.go.jp/b_menu/hakusho/nc/k19910628002/k19910628002.html}
-（2015年7月9日閲覧）
 
-\bibitem[海洋研究開発機構(2015)]{JAMSTEC.web}
-海洋研究開発機構，
-「地球シミュレータ」，
-\url{https://www.jamstec.go.jp/es/jp/}
-（2015年7月9日閲覧）
+\bibitem[Ansari~et~al.(2024)]{Ansari.2024}
+A.~F.~Ansari, L.~Stella, C.~Turkmen, X.~Zhang, P.~Mercado, H.~Shen, O.~Shchur,
+S.~S.~Rangapuram, S.~P.~Arango, S.~Kapoor, J.~Zschiegner, D.~C.~Maddix,
+H.~Wang, M.~W.~Mahoney, K.~Torkkola, A.~G.~Wilson, M.~Bohlke-Schneider and Y.~Wang,
+``Chronos: Learning the Language of Time Series,''
+arXiv:2403.07815, 2024.
 
-\bibitem[梅谷と柳浦(2013)]{Umetani.2013}
-梅谷俊治，柳浦睦憲，
-“メタヒューリスティクス事始め---まずは局所探索法から---，”
-オペレーションズ・リサーチ，
-\textbf{58}，pp.~689--694，2013．
+\bibitem[Tire~et~al.(2024)]{Tire.2024}
+K.~Tire, E.~O.~Taga, M.~E.~Ildiz and S.~Oymak,
+``Retrieval Augmented Time Series Forecasting,''
+arXiv:2411.08249, 2024.
 
-\bibitem[Kenmochi~et~al.(2009)]{Kenmochi.2009}
-M.~Kenmochi, T.~Imamichi, K.~Nonobe, M.~Yagiura and H.~Nagamochi, 
-``Exact algorithms for the two-dimensional strip packing problem 
-    with and without rotations," 
-\textit{European Journal of Operational Research}, 
-\textbf{198}, pp.~73--83, 2009.
+\bibitem[Ning~et~al.(2025)]{Ning.2025}
+K.~Ning, Z.~Pan, Y.~Liu, Y.~Jiang, J.~Y.~Zhang, K.~Rasul, A.~Schneider, L.~Ma, Y.~Nevmyvaka and D.~Song,
+``TS-RAG: Retrieval-Augmented Generation based Time Series Foundation Models are Stronger Zero-Shot Forecaster,''
+arXiv:2503.07649, 2025.
 
-\bibitem[柳浦と茨木(2001)]{Yagiura.2001}
-柳浦睦憲，茨木俊秀，
-『組合せ最適化---メタ戦略を中心として---』，
-朝倉書店，2001．
-
-\bibitem[Heinrich(1931)]{Heinrich.1931}
-H.~W.~Heinrich, 
-\textit{Industrial Accident Prevention: A Scientific Approach}, 
-McGraw-Hill, 1931.
-
-\bibitem[向殿(2000)]{Mukaidono.2000}
-向殿政男，
-“ファジィ論理，”
-『ファジィとソフトコンピューティングハンドブック』，
-日本ファジィ学会（編），
-共立出版，pp.~27--50，2000．
-
-
-\bibitem[Johnson and McGeoch(1997)]{Johnson.1997}
-D.~S.~Johnson and L.~A.~McGeoch, 
-``The traveling salesman problem: a case study in local optimization," 
-\textit{Local Search in Combinatorial Optimization}, 
-E.~H.~L.~Aarts and J.~K.~Lenstra~(eds.), 
-John Wiley \& Sons, pp.~215--310, 1997.
-
-\bibitem[マークスとブラウン(2013)]{Maex.2013}
-ディミトリ・マークス，ポール・ブラウン（馬渕邦美監修，小林啓倫訳），
-『データ・サイエンティストに学ぶ「分析力」』，日経BP社，2013．
-
-\bibitem[Thaler and Sunstein(2009)]{Thaler.2009}
-R.~H.~Thaler and C.~R.~Sunstein, 
-\textit{Nudge: Improving Decisions About Health, Wealth, and Happiness}, 
-Penguin Books, 2009. 
-（遠藤真美訳，
-『実践　行動経済学　健康、富、幸福への聡明な選択』，
-日経BP社，2009．）
-
-\bibitem[加藤ら(2009)]{Kato.2009}
-加藤怜，佐藤圭介，福村直登，
-“乗務員基地最適配置決定アルゴリズム，”
-日本オペレーションズ・リサーチ学会2009年秋期研究発表会アブストラクト集，
-pp.~239--240，2009．
-
-\bibitem[Iwama~et~al.(2007)]{Iwama.2007}
-K.~Iwama, S.~Miyazaki and N.~Yamauchi, 
-``A 1.875 approximation algorithm for the stable marriage problem," 
-In \textit{Proceedings of the 18th Annual ACM-SIAM Symposium 
-    on Discrete Algorithms~(SODA'07)}, 
-pp.~288--297, 2007.
-
-\bibitem[中小企業庁(2008)]{SMEA.2008}
-中小企業庁，
-中小企業BCP（事業継続計画）ガイド，
-2008．
-
-\bibitem[林(2014)]{Hayashi.web}
-林雅之，
-「2013年ビッグデータビジネスとデータサイエンティストのまとめ」，
-\url{http://blogs.itmedia.co.jp/business20/2013/12/2013-084c.html}
-（2014年7月29日閲覧）
-
-\bibitem[SAMSUNG(2015)]{Samsung.web}
-SAMSUNG, 
-Wearable Tech, 
-\url{http://www.samsung.com/us/mobile/wearable-tech}
-（2015年7月9日閲覧）
 \end{thebibliography}
 
 \end{document}
