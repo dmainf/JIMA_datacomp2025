@@ -1,0 +1,19 @@
+\begin{table*}[t]
+  \caption{各モデルおよび分位点レベルにおける DTW 距離・時間ずれ・形状乖離の比較．}
+  \label{tab:dtw_comparison}
+  \centering
+  \begin{tabular}{lrrrrrrrrr}
+    \hline
+    & \multicolumn{9}{c}{分位点} \\
+    \cline{2-4} \cline{5-7} \cline{8-10} 
+    \multicolumn{1}{c}{モデル} & \multicolumn{3}{c}{$\tau=0.1$} & \multicolumn{3}{c}{$\tau=0.5$} & \multicolumn{3}{c}{$\tau=0.9$} \\
+    \cline{2-4} \cline{5-7} \cline{8-10} 
+     & \multicolumn{1}{c}{DTW} & \multicolumn{1}{c}{Temporal} & \multicolumn{1}{c}{Shape} & \multicolumn{1}{c}{DTW} & \multicolumn{1}{c}{Temporal} & \multicolumn{1}{c}{Shape} & \multicolumn{1}{c}{DTW} & \multicolumn{1}{c}{Temporal} & \multicolumn{1}{c}{Shape} \\
+    \hline\hline
+    \textbf{GateRAF} & \textbf{44.7852} & 13.9658 & 0.4273 & \textbf{36.8735} & \textbf{6.6738} & \textbf{0.3930} & \textbf{44.7959} & 13.7504 & \textbf{0.4393} \\
+    \textbf{Multi-RAF} & 45.8433 & \textbf{12.9552} & 0.4373 & 37.5086 & 7.0293 & 0.3982 & 44.8827 & \textbf{13.2300} & 0.4451 \\
+    \textbf{ProtoRAF} & 46.1331 & 16.3236 & \textbf{0.4225} & 39.8532 & 9.5829 & 0.4091 & 58.8638 & 15.1862 & 0.5908 \\
+    noRAF & 46.0829 & 16.3294 & 0.4228 & 39.8367 & 9.5757 & 0.4087 & 58.8479 & 15.1802 & 0.5905 \\
+    \hline
+  \end{tabular}
+\end{table*}

@@ -634,7 +634,7 @@ with open(tex_path, 'w') as f:
     f.write(latex_str + '\n')
 print(f"LaTeX table saved: {tex_path}")
 
-def plot_temporal_proximity_combined(pred_dfs, models, quantile_col, spike_z, output_dir):
+def plot_temporal_proximity_combined(pred_dfs, models, quantile_col, spike_z, output_dir, eps_dir=None):
     K = 10
     bins = np.arange(-K - 0.5, K + 1.5, 1)
     bin_centers = np.arange(-K, K + 1)
@@ -696,10 +696,10 @@ def plot_temporal_proximity_combined(pred_dfs, models, quantile_col, spike_z, ou
         ax.legend(fontsize=9)
         ax.grid(alpha=0.3, linestyle='--')
         plt.tight_layout()
-        if quantile_col == 'q0.5':
-            fname_eps = f'{output_dir}/temporal_proximity_{key}_{quantile_col}.eps'
-            plt.savefig(fname_eps, bbox_inches='tight', format='eps')
-            print(f"Saved: {fname_eps}")
+        _eps_dir = eps_dir if eps_dir is not None else output_dir
+        fname_eps = f'{_eps_dir}/temporal_proximity_{key}_{quantile_col}_z{spike_z}.eps'
+        plt.savefig(fname_eps, bbox_inches='tight', format='eps')
+        print(f"Saved: {fname_eps}")
         fname_png = f'{output_dir}/temporal_proximity_{key}_{quantile_col}.png'
         plt.savefig(fname_png, dpi=300, bbox_inches='tight')
         print(f"Saved: {fname_png}")
@@ -842,10 +842,14 @@ print("=" * 60)
 paper_dir = 'metric_comparison'
 proximity_table_data = {}
 proximity_bin_centers = None
-for q in QUANTILES:
-    bc, td = plot_temporal_proximity_combined(pred_dfs, models, q, CHAR_Z, paper_dir)
-    proximity_bin_centers = bc
-    proximity_table_data[q] = td
+for spike_z in SPIKE_ZSCORES:
+    spike_dir = f'{paper_dir}/z{spike_z}'
+    os.makedirs(spike_dir, exist_ok=True)
+    for q in QUANTILES:
+        bc, td = plot_temporal_proximity_combined(pred_dfs, models, q, spike_z, spike_dir, eps_dir=paper_dir)
+        if spike_z == CHAR_Z:
+            proximity_bin_centers = bc
+            proximity_table_data[q] = td
 latex_prox = generate_latex_temporal_proximity_table(
     proximity_bin_centers, proximity_table_data, models, QUANTILES
 )
@@ -857,14 +861,14 @@ with open(f'{paper_dir}/figure_temporal_proximity.tex', 'w') as f:
     f.write(
         '\\begin{figure}[t]\n'
         '\\centering\n'
-        '\\includegraphics[width=\\linewidth]{temporal_proximity_fp_q0.5.eps}\n'
+        '\\includegraphics[width=\\linewidth]{temporal_proximity_fp_q0.5_z2.0.eps}\n'
         '\\caption{キャプション（FP）．}\n'
         '\\label{Fig:temporal_proximity_fp}\n'
         '\\end{figure}\n'
         '\n'
         '\\begin{figure}[t]\n'
         '\\centering\n'
-        '\\includegraphics[width=\\linewidth]{temporal_proximity_fn_q0.5.eps}\n'
+        '\\includegraphics[width=\\linewidth]{temporal_proximity_fn_q0.5_z2.0.eps}\n'
         '\\caption{キャプション（FN）．}\n'
         '\\label{Fig:temporal_proximity_fn}\n'
         '\\end{figure}\n'
