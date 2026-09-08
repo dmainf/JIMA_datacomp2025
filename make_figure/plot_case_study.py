@@ -68,49 +68,54 @@ def plot_book(book_key, suffix, models, stem):
         series.append((q05, f'{label} (MAE={mae:.2f})', color, ls, lw))
 
     ceil = actual.max() * CEIL_FACTOR
+    nb = ceil * 0.10                       # 主パネルの負側余白（0と波線の間隔）
     qmax = max(s[0].max() for s in series)
     qmin = min(s[0].min() for s in series)
+
     need_top = qmax > ceil * 1.02
-    need_bot = qmin < -ceil * 0.05
+    deep_bot = qmin < -ceil                # 負が天井を超えて深い時だけ波線で省略
+    if deep_bot:
+        main_bottom = -nb
+    elif qmin < 0:                         # 浅い負は波線を使わず主パネルにそのまま含める
+        main_bottom = qmin * 1.1
+    else:
+        main_bottom = 0
 
     ratios, kinds = [], []
     if need_top:
         ratios.append(2.2); kinds.append('top')
     ratios.append(4.0); kinds.append('main')
-    if need_bot:
+    if deep_bot:
         ratios.append(2.2); kinds.append('bot')
 
-    fig_h = 3.2 + 1.5 * (need_top + need_bot)
+    fig_h = 3.2 + 1.5 * (need_top + deep_bot)
     fig, axes = plt.subplots(len(kinds), 1, sharex=True, figsize=(8, fig_h),
                              gridspec_kw={'height_ratios': ratios, 'hspace': 0.08})
     axes = np.atleast_1d(axes)
     ax_by = dict(zip(kinds, axes))
     ax_main = ax_by['main']
 
-    def draw_series(ax):
+    for ax in axes:
         for q05, lbl, color, ls, lw in series:
             ax.plot(days, q05, color=color, linestyle=ls, linewidth=lw, label=lbl, zorder=3)
         ax.plot(days, actual, color='black', linewidth=2.0, label=ACTUAL_LABEL, zorder=4)
         ax.grid(alpha=0.3, linestyle='--')
         ax.set_xlim(0, maxx)
 
-    for ax in axes:
-        draw_series(ax)
-
-    nb = ceil * 0.10                      # 主パネルの負側余白（0と波線の間隔）
-    main_bottom = -nb if need_bot else 0
     ax_main.set_ylim(main_bottom, ceil)
-    if need_top:
-        ax_by['top'].set_ylim(ceil, ceil + (qmax - ceil) * 1.18)
-        ax_by['top'].spines['bottom'].set_visible(False)
+    if need_top:                           # 上パネルは全時点の上振れを圧縮表示
+        ax_t = ax_by['top']
+        ax_t.set_ylim(ceil, ceil + (qmax - ceil) * 1.18)
+        ax_t.spines['bottom'].set_visible(False)
         ax_main.spines['top'].set_visible(False)
-        ax_by['top'].tick_params(labelbottom=False, bottom=False)
-        ax_by['top'].yaxis.set_major_locator(plt.MaxNLocator(3))
-    if need_bot:
-        ax_by['bot'].set_ylim(qmin * 1.18, main_bottom)
-        ax_by['bot'].spines['top'].set_visible(False)
+        ax_t.tick_params(labelbottom=False, bottom=False)
+        ax_t.yaxis.set_major_locator(plt.MaxNLocator(3))
+    if deep_bot:                           # 下パネルは全時点の下振れを圧縮表示
+        ax_b = ax_by['bot']
+        ax_b.set_ylim(qmin * 1.18, main_bottom)
+        ax_b.spines['top'].set_visible(False)
         ax_main.spines['bottom'].set_visible(False)
-        ax_by['bot'].yaxis.set_major_locator(plt.MaxNLocator(3))
+        ax_b.yaxis.set_major_locator(plt.MaxNLocator(3))
 
     axes[-1].set_xlabel('予測日', fontsize=9)
     fig.supylabel('販売冊数', fontsize=9, x=0.04)
@@ -120,14 +125,10 @@ def plot_book(book_key, suffix, models, stem):
                framealpha=0.9, columnspacing=1.2)
 
     fig.canvas.draw()
-    if need_bot:  # 主パネルは 0 以上のみ表示、下パネルは境界(負)より下のみ表示
-        ax_main.set_yticks([t for t in ax_main.get_yticks() if -1e-6 <= t <= ceil])
-        ax = ax_by['bot']
-        ax.set_yticks([t for t in ax.get_yticks() if qmin * 1.18 <= t < main_bottom])
     if need_top:
         wave_at(ax_main, 1.0)
         wave_at(ax_by['top'], 0.0)
-    if need_bot:
+    if deep_bot:
         wave_at(ax_main, 0.0)
         wave_at(ax_by['bot'], 1.0)
 
@@ -135,21 +136,29 @@ def plot_book(book_key, suffix, models, stem):
     fig.savefig(os.path.join(EPS_DIR, f'{name}.eps'), format='eps', dpi=300, bbox_inches='tight')
     fig.savefig(os.path.join(PNG_DIR, f'{name}.png'), dpi=200, bbox_inches='tight')
     plt.close(fig)
-    print(f"Saved: {name}  (top={need_top}, bottom={need_bot})")
+    print(f"Saved: {name}  (top={need_top}, bottom={deep_bot})")
 
 
 def print_mae_summary():
     all_models = MODELS_BASE + [SARIMA, PROPHET]
-    headers = [b[1] for b in BOOKS] + ['全書名']
-    print(f"\n{'Model':<10} " + " ".join(f"{h:>26}" for h in headers))
-    for mf, label, *_ in all_models:
-        df = model_dfs[mf]
-        maes = []
-        for book_key, _ in BOOKS:
-            sub = df[df['書名'] == book_key]
-            maes.append(np.abs(sub['actual'] - sub['q0.5']).mean())
-        maes.append(np.abs(df['actual'] - df['q0.5']).mean())
-        print(f"{label:<10} " + " ".join(f"{m:>26.4f}" for m in maes))
+    scopes = [(b[0].split('_')[0], b[0]) for b in BOOKS] + [('全書名', None)]
+    for scope_name, book_key in scopes:
+        for mf, *_ in [MODELS_BASE[0]]:
+            base_df = model_dfs[mf]
+            sub = base_df if book_key is None else base_df[base_df['書名'] == book_key]
+            pos = sub['actual'].sum()
+        print(f"\n=== {scope_name}  (POS販売冊数={pos:.0f}) ===")
+        print(f"{'Model':<10}{'過剰入荷':>12}{'入荷数':>12}{'返本率':>11}"
+              f"{'機会損失':>12}{'機会損失率':>12}")
+        for mf, label, *_ in all_models:
+            df = model_dfs[mf]
+            sub = df if book_key is None else df[df['書名'] == book_key]
+            err = sub['q0.5'] - sub['actual']
+            over = err.clip(lower=0).sum()        # 過剰入荷（返本の素）= Σmax(q0.5−実測,0)
+            short = (-err).clip(lower=0).sum()     # 機会損失       = Σmax(実測−q0.5,0)
+            nyuka = pos + over
+            print(f"{label:<10}{over:>12.1f}{nyuka:>12.1f}{over/nyuka*100:>10.2f}%"
+                  f"{short:>12.1f}{short/pos*100:>11.2f}%")
     print()
 
 
