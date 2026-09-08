@@ -1,0 +1,188 @@
+%----- style file (Japanese) -----
+%
+%  Style file for JORSJ sumitted papers in Japanese
+%  File name jjorsj-s2.sty  Modified July 29, 2005
+%
+%  This is only valid for LaTeX2e.
+%  Please use jjorsj-s2-209.sty for LaTeX2.09.
+%
+%  g¢û F ±Ìt@Cð ``jjorsj-s2.sty'' ÅZ[uµÄC
+%            \documentclass[12pt]{jarticle}
+%            \usepackage{jjorsj-s2}
+%            ÆÇÝñÅº³¢D
+%
+% ®Ôð (ÍÔE®ÔjÌtH[}bgÉÏX·éÆ«ÍA
+% preamble Å
+%   \eqswitchon
+% Æ¢Äº³¢B
+%
+%  Ó F ±ÌX^Ct@CÍ\ÈµÉC³³êé±Æª
+%           èÜ·D
+%          ±ÌX^Ct@CÉÖ·é²¿âCRgCoO
+%          ÈÇÍ e-mail Å jorsj@orsj.or.jp ¶É¨èº³¢D
+%
+
+% set lengths
+\textheight 24.4cm
+\textwidth 16.4cm
+% \baselineskip 14pt
+\topmargin 0.0cm
+\headheight 0.0cm
+\headsep 0.0cm
+\footskip 1.0cm
+%\footheight 0.0cm
+\oddsidemargin 0.0cm
+\evensidemargin 0.0cm
+\parindent 1em
+
+% pagestyle
+\pagestyle{plain}
+
+% title
+\def\maketitle{\par
+ \begingroup
+ \def\thefootnote{\fnsymbol{footnote}}
+ \def\@makefnmark{\hbox 
+ to 0pt{$^{\@thefnmark}$\hss}} 
+ \if@twocolumn 
+ \twocolumn[\@maketitle] 
+ \else \newpage
+ \global\@topnum\z@ \@maketitle \fi \@thanks
+ \endgroup
+ \setcounter{footnote}{0}
+ \let\maketitle\relax
+ \let\@maketitle\relax
+ \gdef\@thanks{}\gdef\@author{}\gdef\@title{}\let\thanks\relax}
+\def\@maketitle{\newpage
+ \null
+ \noindent
+ \vspace{0mm}
+ \begin{center}
+%  {\bf \gt \@title \baselineskip=16pt \par}
+  {\bf \bf \@title \baselineskip=16pt \par}
+  \vspace{10mm}
+  {\footnotesize\begin{tabular}[t]{c}\@author\end{tabular}\par} 
+  \vspace{7mm}
+  {\footnotesize\@date}
+ \end{center}\par}
+
+\def\vol#1{\def\fromvol{#1}}
+\def\fromvol{}
+\def\no#1{\def\fromno{#1}}
+\def\fromno{}
+\def\month#1{\def\frommonth{#1}}
+\def\frommonth{}
+\def\year#1{\def\fromyear{#1}}
+\def\fromyear{}
+
+%\def\abstract{\vspace{3mm}\footnotesize
+\def\abstract{\vspace{4mm}\@setsize\footnotesize{14pt}\xpt\@xpt
+ \noindent
+% {\gt a¶Tv}\hspace{6mm}}
+ {\bf a¶Tv}\hspace{6mm}}
+\def\endabstract{\par}
+
+\newcommand{\keyword}[1]{ \vspace{6mm} %\bigskip
+ 
+ \begin{minipage}{0.9\linewidth}
+  \small {\bf L[[h}: #1
+ \end{minipage} \vspace{1mm}}
+
+% section title
+\def\section{\@startsection {section}{1}{\z@}%
+{15.0pt plus 1.0pt minus  1.0pt}%
+{2.0pt plus 1.0pt minus 0.0pt}{\normalsize\bf}}
+\def\subsection{\@startsection{subsection}{2}{\z@}%
+{2.0pt plus 1.0pt minus 0.0pt}%
+{2.0pt plus 1.0pt minus 0.0pt}{\normalsize\bf}}
+\def\subsubsection{\@startsection{subsubsection}{3}{\z@}%
+{2.0pt plus 1.0pt minus 0.0pt}%
+{2.0pt plus 1.0pt}{\normalsize\bf}}
+\def\paragraph{\@startsection{paragraph}{4}{\z@}%
+{2.0pt plus 1.0pt minus 0.0pt}{2.0pt plus 1.0pt}%
+{\normalsize\bf}}
+\def\subparagraph{\@startsection{subparagraph}{4}%
+{\parindent}{2.0pt plus 1.0pt minus 0.0pt}{2.0pt plus
+1.0pt}{\normalsize\bf}}
+
+% equations
+\newif\ifequationnumber
+\def\eqswitchon{\equationnumbertrue
+\@addtoreset{equation}{section}
+%\def\@eqnnum{\hbox to .01pt{}%
+%\rlap{\rm \hskip -\displaywidth(\theequation)}}
+\def\theequation{\arabic{section}.\arabic{equation}}
+}
+
+% lists
+\def\@listI{\leftmargin\leftmargini 
+\parsep 1.5pt plus 0.5pt minus 0.5pt\topsep
+0.5pt plus 0.5pt minus 0.5pt\itemsep 0.5pt 
+plus 0.5pt minus 0.5pt}
+\let\@listi\@listI
+\@listi
+\def\@listii{\leftmargin\leftmarginii
+ \labelwidth\leftmarginii\advance\labelwidth-\labelsep
+ \topsep 0.5pt plus 0.5pt minus 0.5pt
+ \parsep 1.5pt plus 0.5pt minus 0.5pt
+ \itemsep \topsep}
+\def\@listiii{\leftmargin\leftmarginiii
+ \labelwidth\leftmarginiii\advance\labelwidth-\labelsep
+ \topsep 0.5pt plus 0.5pt minus 0.5pt 
+ \parsep \z@ \partopsep 0.5pt plus 0pt minus 0.5pt
+ \itemsep \topsep}
+\def\@listiv{\leftmargin\leftmarginiv
+ \labelwidth\leftmarginiv\advance\labelwidth-\labelsep}
+\def\@listv{\leftmargin\leftmarginv
+ \labelwidth\leftmarginv\advance\labelwidth-\labelsep}
+\def\@listvi{\leftmargin\leftmarginvi
+ \labelwidth\leftmarginvi\advance\labelwidth-\labelsep}
+
+% section number
+\makeatletter
+
+\def\@sect#1#2#3#4#5#6[#7]#8{\ifnum #2>\c@secnumdepth
+     \def\@svsec{}\else 
+     \refstepcounter{#1}
+     \edef\@svsec{\csname the#1\endcsname.\hskip 1em }\fi
+     \@tempskipa #5\relax
+      \ifdim \@tempskipa>\z@ 
+        \begingroup #6\relax
+          \@hangfrom{\hskip #3\relax\@svsec}%
+                   {\interlinepenalty \@M #8\par}%
+        \endgroup
+       \csname #1mark\endcsname{#7}\addcontentsline
+         {toc}{#1}{\ifnum #2>\c@secnumdepth \else
+          \protect\numberline{\csname the#1\endcsname.}\fi
+                    #7}\else
+    \def\@svsechd{#6\hskip #3%
+           \@svsec #8\csname #1mark\endcsname
+                   {#7}\addcontentsline
+             {toc}{#1}{\ifnum #2>\c@secnumdepth \else
+       \protect\numberline{\csname the#1\endcsname.}\fi
+                       #7}}\fi
+     \@xsect{#5}}
+\makeatother
+
+% references
+\def\thebibliography#1{\section*{{\normalsize 
+{\bf Ql¶£}}\markboth
+ {Q l ¶ £}{Q l ¶ £}}\vspace*{4.0pt}\list
+ {[\arabic{enumi}]}{\settowidth\labelwidth{[#1]}
+\leftmargin\labelwidth
+ \advance\leftmargin\labelsep
+ \usecounter{enumi}}
+ \def\newblock{\hskip .11em plus .33em minus .07em}
+ \sloppy
+ \sfcode`\.=1000\relax}
+\let\endthebibliography=\endlist
+
+% appendix
+\def\appendix{\par
+ \setcounter{section}{0}
+ \setcounter{subsection}{0}
+ \def\thesection{\Alph{section}}
+\ifequationnumber
+ \def\theequation{\Alph{section}.\arabic{equation}}
+\fi}
+%----- JORSJ (Japanese) -----

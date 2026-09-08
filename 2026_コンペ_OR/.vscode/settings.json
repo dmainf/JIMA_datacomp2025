@@ -1,0 +1,6 @@
+{
+  // このプロジェクトは \documentclass{jarticle}（pLaTeX）のため、
+  // upLaTeX ではなく pLaTeX を使うレシピを既定にする。
+  // （グローバル設定の "first"=uplatex を、このフォルダだけ上書き）
+  "latex-workshop.latex.recipe.default": "latexmk (tex to PDF)"
+}

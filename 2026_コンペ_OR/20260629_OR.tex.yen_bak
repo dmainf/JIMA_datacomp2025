@@ -1,0 +1,265 @@
+¥documentclass[12pt]{jarticle}
+
+¥usepackage{jjorsj-s2}
+
+¥usepackage{amsmath,amssymb,amsfonts,amsthm}
+¥usepackage{graphicx}
+%(節,式番号) 形式で式の番号を表します
+¥eqswitchon 
+%定理環境の定義
+¥newtheorem{theorem}{定理}[section]
+¥newtheorem{lemma}{補題}[section]
+¥newtheorem{definition}{定義}[section]
+
+%タイトル
+¥title{TORSJ 投稿原稿の作成について}
+%著者名，所属
+¥author{
+¥begin{tabular}{ccc}
+山田 太郎 & 木村 花子 & 鈴木 次郎¥¥
+%¥multicolumn{2}{c}{日本OR大学} & {オーアール株式会社}¥¥
+¥end{tabular}}
+%
+¥date{}
+
+¥begin{document}
+
+¥maketitle
+
+%アブストラクト
+¥begin{abstract}
+このファイルは，日本オペレーションズ・リサーチ学会和文論文誌
+（英文名：Transactions of the Operations Research Society of Japan，略称TORSJ）への
+投稿論文の¥LaTeX による原稿作成例です．
+%¥LaTeXe 文書で原稿を投稿される場合は，本例を参考に学会が用意したスタイルファイル{¥tt jjorsj-s2.sty}を使用して原稿を作成してください．
+%キーワードは¥verb$¥keyword$コマンドを使用して，日本語で記入してください．
+%なお，最初のキーワードは，TORSJのキーワードリストより選択してください．
+%2番目以降については，キーワード表にないものでも結構です．キーワードの数は3から6個程度が標準的です．
+¥end{abstract}
+
+%キーワード
+¥keyword{マーケティング, アルゴリズム, 最適化, 非線形計画}
+
+%%%%%%%%%%%%%%%%%%
+¥section{はじめに}
+%%%%%%%%%%%%%%%%%%
+このファイルは，日本オペレーションズ・リサーチ学会和文論文誌
+（英文名：Transactions of the Operations Research Society of Japan，略称TORSJ）に
+投稿する論文の¥LaTeX による原稿作成例です．
+%
+TORSJへ投稿する原稿は，必ずしも¥LaTeX 文書でなくても構いませんが，
+論文が採択された場合は¥LaTeX で作成された最終原稿を提出していただきます．
+ただし，¥LaTeX 原稿を自ら準備する代わりに，実費負担の上，学会に依頼することもできます．
+
+原稿を¥LaTeXe （または，¥LaTeX）文書で作成する場合は，
+学会が用意したスタイル設定ファイル{¥tt jjorsj-s2.sty}を使用してください．
+スタイル設定ファイルは学会のホームページ
+¥begin{center}
+{¥tt http://www.orsj.or.jp/ronbunshi/jRule.html }
+¥end{center}
+よりダウンロードできます．
+
+学会が用意するスタイル設定ファイルは，¥LaTeX の標準的コマンドを変更していません．
+したがって，¥verb#¥begin{document}#の前のプリアンブル部分に新しいコマンドを定義して使用することが可能です．
+%定理や補題などは¥verb#theorem#環境を使って，
+%¥begin{center}
+%¥verb#¥newtheorem{theorem}{定理}[section]#
+%¥end{center}
+%のようにコマンドを定義し，標準的な使い方をしてください．
+ただし，新しいコマンドを定義する際には，¥textbf{マージン，スペース，文字の大きさの変更は避けてください}．
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+¥section{¥LaTeX による原稿作成における注意事項}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+原稿を作成する際には，次のことに注意してください．
+%%%%%
+¥subsection{用紙サイズ，フォント}
+¥begin{itemize}
+¥item A4で12ptを使用してください．
+¥end{itemize}
+%%%%%%
+¥subsection{タイトルページ}
+¥begin{itemize}
+¥item タイトルは，¥verb#¥title#コマンドを使用してください．
+¥item 著者名は，¥verb#¥author#コマンドを使い，標準体とします．姓と名の間に半角スペースを入れてください．
+¥item 所属は大学，会社，団体等の名称のみで標準体としてください．
+¥item アブストラクトは，¥verb#abstract#環境を使って記述してください．
+¥item キーワードは¥verb#¥keyword{ }#コマンドを使い3から6個程度のキーワードを記入してください．
+その際，¥textbf{最初のキーワードはTORSJのキーワードリスト（表¥ref{tbl:keyword}）
+から選んでください}．
+最初のキーワード以外は，必要に応じて独自のキーワードを加えても結構です．
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+¥begin{table}[hbtp]
+¥caption{TORSJのキーワードリスト}
+¥begin{center}
+¥begin{tabular}{cl}¥hline
+A〜Z & AHP，DEA ¥¥
+あ行 & アルゴリズム，意思決定，エネルギー，ORの実施 ¥¥
+か行 & 確率過程，確率的最適化，確率モデル，環境間題，教育，金融， 組合せ最適化，¥¥& グラフ理論，経営，計算機，経済，ゲーム理論， 公共サービス，交通¥¥
+さ行 & 最適化，最適制御，在庫，施設計画，シミュレーション，信頼性，情報技術，¥¥& 数埋計画，数理モデル，スケジューリング，線形計画，組織論¥¥
+た行 & 探索，通信，データ解析，統計，動的計画¥¥
+な行 & ネットワークフロー¥¥
+は行 & 非線形計画，品質管理，ファジー，プロジェクト計画，保健¥¥
+ま行 & マーケティング，待ち行列，マルコフ過程¥¥
+や行 & 予測¥¥
+ら行 & 離散最適化，リスク管理，ロジスティック¥¥
+¥hline
+¥end{tabular}
+¥end{center}
+¥label{tbl:keyword}
+¥end{table}
+¥end{itemize}
+%%%%%
+¥subsection{節と小節の見出し}
+¥begin{itemize}
+¥item 節及び小節は，それぞれ¥verb#¥section{}#及び¥verb#¥subsection{}#を使用してください．
+¥end{itemize}
+%%%%%
+¥subsection{数式}
+¥begin{itemize}
+¥item 数式の記述には¥verb#¥[ ¥]，equation，eqnarray，align，alignat#環境等を用いて基本的に中央揃えとします．
+ただし，（不）等号などが続く場合は（不）等号の位置を揃えてください．
+¥item 式番号は通し番号(1)，(2)，(3) $¥cdots$または，2段落の番号(1.1)，(1.2)，(1.3) $¥cdots$として式の右側に置きます．
+¥end{itemize}
+%%%%%
+¥subsection{図}
+¥begin{itemize}
+¥item ¥textbf{図はできる限りEPS形式で用意してください．}
+¥item 図は可能な限り小さくまとめ，本文中の適切なスペースに¥verb#figure#環境を用いて配置します．
+¥item 図番号は図1，図2 $¥cdots$というように通し番号をつけてください．
+¥item キャプションは¥verb#¥caption{}#コマンドを使用し，図の下側に配置します．
+その際，キャプションはできるだけ完結性の高い内容にし，キャプションの最後にピリオドはつけません．
+¥item ¥textbf{図は白黒で印刷されても理解できるように作成してください．}
+¥end{itemize}
+%%%%%
+¥subsection{表}
+¥begin{itemize}
+¥item 表は可能な限り小さくまとめ，本文中の適切なスペースに¥verb#table#環境を用いて配置します．
+¥item 表番号は表1，表2 $¥cdots$というように通し番号をつけてください．
+¥item キャプションは¥verb#¥caption{}#コマンドを使用し，表の上側に配置します．
+その際，キャプションはできるだけ完結性の高い内容にし，キャプションの最後にピリオドはつけません．
+¥end{itemize}
+%%%%%
+¥subsection{参考文献}
+¥begin{itemize}
+¥item ¥textbf{参考文献は著者名のアルファベット順}に通し番号を[1]，[2] $¥cdots$のように付けます．
+¥item 同一の第1著者を持つ文献が複数ある場合は，2番目以降の著者のアルファベット順に並べます．
+さらに，同一著者の文献が複数ある場合には，発表年の古い順に並べます．
+¥item ¥textbf{本文中で参考文献を引用する場合は}¥verb#cite#¥textbf{コマンドを使用}してください．
+例えば茨木¥cite{Iba99}ならば¥verb#茨木¥cite{Iba99}#などとなります．
+¥item 参考文献は下記のように記述してください．¥medskip¥¥
+¥begin{tabular}{ll}
+書籍&
+著者名: ¥textit{書籍名} (発行所, 発行年). 
+¥hfill¥cite{BB91,Iba99}¥¥
+報文集&
+著者名: 標題. 編者名 (eds.): ¥textit{報文集名} (発行所, 発行年), ページ. 
+¥hfill¥cite{Fu89,WAC00}¥¥
+雑誌&
+著者名: 標題. ¥textit{雑誌名}, ¥textbf{巻} (年), ページ. 
+¥hfill¥cite{KM00,Se07,FLT01,To01}
+¥end{tabular}
+¥end{itemize}
+
+¥par¥vspace{3ex}¥par
+3節と4節では¥LaTeX コマンドと環境を用いて実際の例を記載します．
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+¥section{2次錐相補性問題}¥label{sec:SOCCP}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+$¥dots¥dots$
+以下に2次錐の定義を与える．
+¥begin{definition}¥label{def:SOC}{¥rm
+以下によって与えられる$¥mathbb{R}^n$の部分集合$¥mathcal{K}^n$:
+¥[
+¥mathcal{K}^n := ¥left¥{ ¥left. ¥left(z_1, z_2^¥top¥right)^¥top ¥in ¥mathbb{R} ¥times ¥mathbb{R}^{n-1} 
+¥, ¥right| ¥, ¥| z_2 ¥| ¥le z_1 ¥right¥} 
+¥]
+を$n$次の2次錐と呼ぶ．}
+¥end{definition}
+$¥dots¥dots$
+2次錐相補性問題とは, 非線形相補性問題や2次錐計画問題を拡張した次のような問題である: Find $(x,y) ¥in ¥mathbb{R}^n ¥times ¥mathbb{R}^n$ such that 
+¥begin{eqnarray}
+  x ¥in ¥mathcal{K}, ¥quad y ¥in ¥mathcal{K}, ¥quad  x^¥top y = 0, ¥quad y = F(x). ¥label{eq:SOCCP}
+¥end{eqnarray}
+ここで，$F:¥mathbb{R}^n ¥to ¥mathbb{R}^n$ は連続微分可能とし，
+$¥mathcal{K}$ は直積 $¥mathcal{K} = ¥mathcal{K}^{n_1} ¥times ¥mathcal{K}^{n_2} ¥times ¥cdots ¥times ¥mathcal{K}^{n_m} ¥ (n_1+¥cdots+n_m=n)$
+で定義された凸錐とする．$¥dots¥dots$
+Fukushima‾et‾al.‾¥cite{FLT01}は以下で与えられる
+Fischer-Burmeister関数を定義し, 
+SOC関数になることを示した: 
+¥begin{eqnarray*}
+  ¥phi_{FB}(x, y) &:=& x + y - (x^2  + y^2)^{1/2}. 
+¥end{eqnarray*}
+図¥ref{fig:FB}は$n_1=¥cdots=n_m=1$の場合のFischer-Burmeister関数である．
+
+¥begin{figure}[htbp]
+¥begin{center}
+¥includegraphics[width=0.5¥linewidth,keepaspectratio]{fig1torsj.eps}
+¥caption{Fischer-Burmeister関数 ($n_1=¥cdots=n_m=1$)}
+¥label{fig:FB}
+¥end{center}
+¥end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+¥section{大域的収束性}¥label{sec:GlobalConv}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+$¥dots¥dots$以上のことより以下の大域的収束性を得る．
+¥begin{theorem}¥label{thm:GlobalConv}{¥rm 
+仮定1が成立しているとし，$¥{(x_k, y_k)¥}$ をアルゴリズム1によって生成される点列とする．
+このとき，$¥{(x_k, y_k)¥}$は少なくとも一つの集積点を持ち, 
+任意の集積点$(x^*, y^*)$はSOCCP(¥ref{eq:SOCCP})の解である．
+}
+¥end{theorem}
+¥noindent
+¥textbf{証明}¥qquad 
+背理法により証明する．$¥dots¥dots$¥¥
+$¥dots¥dots$以上より定理は証明された．
+¥hfill$¥Box$
+
+¥begin{thebibliography}{99}
+¥bibitem{BB91} F. Baccelli and P. Bremaud: 
+¥textit{Elements of Queueing Theory} (Springer-Verlag, Berlin, 1991).
+
+¥bibitem{Fu89} S. Fujishige: 
+Linear and nonlinear optimization problems with submodular constraints. 
+In M. Iri and K. Tanabe (eds.): 
+¥textit{Mathematical Programming --- Recent Development and Applications} 
+(KTK Scientific Publishers, Tokyo, 1989), 203--225.
+
+¥bibitem{FLT01} M.‾Fukushima, Z.-Q.‾Luo, and P.‾Tseng: 
+Smoothing functions for second-order-cone complementarity problems. 
+¥textit{SIAM Journal on Optimization}, ¥textbf{12} (2001), 436--460.
+
+¥bibitem{Iba99} 茨木俊秀: 
+Cによるアルゴリズムとデータ構造 (昭晃堂, 1999). 
+
+¥bibitem{KM00} H. Kengaku and M. Miyazawa: 
+A regenerative cycle approach to an M/G/1 queue with exceptional service. 
+¥textit{Journal of the Operations Research Society of Japan}, ¥textbf{43} (2000), 486--504. 
+
+¥bibitem{Se07} 関谷和之: 
+例解 ANP. オペレーションズ・リサーチ, ¥textbf{52} (2007), 567--571. 
+
+¥bibitem{WAC00} W. Whitt, J. Abate, and G.L. Choudhury: 
+An introduction to numerical transform inversion and its application to probability models. In W.K. Grassmann (ed.): 
+¥textit{Computational Probability} (Kluwer Academic Publishers, New York, 2000). 
+
+¥bibitem{To01} K. Tone: A slacks-based measure of efficiency in data envelopment analysis. 
+¥textit{European Journal of Operational Research}, ¥textbf{130} (2001), 498--509. ¥¥
+¥texttt{doi:10.1016/S0377-2217(99)00407-5}.
+¥end{thebibliography}
+
+
+¥vspace{15pt}
+{¥leftskip 8.5cm ¥parindent 0mm
+山田太郎¥¥
+日本OR大学¥¥オペレーションズ・リサーチ研究科¥¥ 
+〒101-0032東京都千代田区岩本町1-13-5¥¥
+サン・チカビル7F¥¥ 
+E-mail: ¥texttt{taro-yamada@orsj.or.jp}
+¥par}
+
+
+¥end{document}

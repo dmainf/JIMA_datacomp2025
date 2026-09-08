@@ -1,0 +1,578 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% オペレーションズ・リサーチ　各種記事ひな形LaTeX2eファイル　2015-08-31版 %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[twocolumn, lastpage]{jarticle}
+
+% nidanfloat（2段抜きフロートの[tb]配置）と新しいLaTeXのmarks機構の非互換による
+% 「! LaTeX mark Error: Infinite shrinkage found in 'column'.」を抑制する。
+% このテンプレートのヘッダは固定文字列でmarksを使わないため、組版への実害はない。
+\ExplSyntaxOn
+\msg_redirect_name:nnn { mark } { infinite-shrinkage } { none }
+\ExplSyntaxOff
+
+\overfullrule=5pt
+
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{bm}
+\usepackage{placeins}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\renewcommand{\thesubfigure}{(\alph{subfigure})}
+\captionsetup[subfigure]{labelformat=simple}
+\usepackage{nidanfloat}
+\usepackage[numbers,sort]{natbib}
+\usepackage{color}
+\usepackage{url}
+\usepackage{comment}
+
+\usepackage{or}
+\AtBeginDvi{\special{papersize=210mm,297mm}}
+
+\vol{}
+\vnum{}
+\vyear{2026}
+
+\jtitle{Gate Retrieval-Augmented Forecastingによる\\書籍需要予測}
+% \jauthor{奈良原 俊誠，斎藤 陽，橋本 朋樹，三川 健太}
+\jauthor{}
+% \autfuri{ならはら　しゅんせい，さいとう　はる，はしもと　ともき，みかわ　けんた}
+\autfuri{}
+\shozoku{}
+%\shozoku{東京都市大学メディア情報学部情報システム学科}
+%\shozoku{〒224--0015\enspace 神奈川県横浜市都筑区牛久保西3-3-1}
+
+\begin{comment}
+% 複数のメールアドレスは，見栄えに応じて改行を挿入すること
+\shozoku{or-taro@sankaku.maru.ac.jp,\\ or-hanako@sankaku.maru.ac.jp}
+% 住所のみ記載の例
+\autfuri{おーあーる　じろう}
+\shozoku{□□（株）☆☆☆☆部}
+\shozoku{〒000--0000\enspace ■■県★★市◆◆区▼▼▼▼0--0--0}
+% メールアドレスのみ記載の例
+\autfuri{おーあーる　さぶろう}
+\shozoku{◇◇大学▽▽学部}
+\shozoku{or-saburo@shitasankaku.hishi.ac.jp}
+% 外国所属で，住所のみ記載の例
+\autfuri{ヤン　ヤンセン}
+\shozoku{Department of AAA, BBB University of Technology}
+\shozoku{P.O. Box 1111, 2222 GA Delft, The Netherlands}
+% “論文・事例研究”・“論文・研究レポート”の場合，
+% この位置に論文受付・採録に関係する日付が記載される
+%\shozoku{受付 15.8.15　採択 15.8.15}
+% “学生論文賞受賞論文”の場合↓
+%\shozoku{
+%○○大学大学院△△研究科 \\
+%（現所属：□□（株）☆☆☆☆部） \\
+%指導教員：尾有太郎　教授
+%}
+% “特集にあたって”の場合は，なし
+\end{comment}
+
+
+\begin{comment}
+%% あらまし
+% “特集記事”の場合に限り，必ず使用すること↓
+\jabstract{
+これは，オペレーションズ・リサーチ誌の各種記事の
+ひな形（2015年8月31日版）である．
+“特集記事”・“論文・事例研究”・“論文・研究レポート”
+・“ORメモランダム”の場合に限り，サブタイトルを記載してもよい．
+“特集記事”の場合に限り，あらましをここに，280字以内で記載し，
+その下にキーワードを記載する．
+}
+
+\jkeywords{
+特集記事キーワード1，キーワード2，
+キーワードは三つ以上（指定のキーワードは特になし）
+}
+\end{comment}
+
+
+\begin{document}
+\special{papersize=210mm,297mm}
+\normalsize
+\setcounter{page}{1}
+\setcounter{secondpage}{1}
+\maketitle
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{はじめに}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+出版物は，個々の販売規模が小さく品目数が多いという多品種少量生産の性質をもつ．こうした多様な出版物の流通を支えるため，出版業界では再販売価格維持制度と委託販売制度が広く用いられている．前者は出版社が定価を定めて小売店に定価での販売を求める制度であり，価格競争による淘汰から多様な出版物を守る~\cite{JBPA.2001}．後者は，小売店が売れ残った在庫を出版社へ返品できる委託仕入れの制度であり，小売店の在庫リスクを抑える一方で，返本を構造的に生み出す．
+需要に基づかない発注や配本は，この返本をさらに増大させる．返本の増加は物流コストや流通効率の面で出版業界全体の課題となっており~\cite{Shuppan.2024}，返本率の低減には需要に即した配本が不可欠である．したがって，書籍の販売冊数を適切に予測することは，出版流通の効率化における重要な課題である．
+
+一般に，書籍の需要予測は，過去の販売冊数に基づく時系列予測問題として位置づけられる．しかし多品種少量生産という特性上，需要の多くはゼロや少数にとどまる一方で，初版発行やイベントなどにより突発的な需要増加が生じる．通常の予測モデルはこうした需要を平坦に予測しやすく，単一系列の履歴だけでは稀にしか起こらないスパイクのパターンを学習しにくい．
+
+時系列予測問題に対し，自然言語処理のRetrieval-Augmented Generation（RAG）~\cite{Lewis.2020}を時系列予測へ拡張したRetrieval-Augmented Forecasting（以下，RAF）が提案されている~\cite{Tire.2024}．RAFは，予測対象の直近の変動パターンに類似する過去の部分系列（以下，参照ウィンドウ）をデータベースから検索し，予測モデルへの追加情報として利用する．これにより類似事例を系列横断的に活用できるため，予測対象系列のみを用いる単一系列モデルでは捉えにくい情報を補うことができる．
+しかしながら従来のRAFは，参照ウィンドウを予測対象の直近区間に時間軸方向へ連結して入力するため，主に二つの問題を抱える．
+第一に，参照ウィンドウと直近区間では値の水準や端部の変化が必ずしも一致せず，両者の接続点に不連続が生じる可能性がある．
+第二に，近傍探索は相対的な類似順位で検索結果を選ぶため，予測に十分関連しない参照ウィンドウであっても一律に取り込まれてしまう．
+
+上記の議論を鑑み，本研究では従来のRAFの持つ問題を解決し，
+書籍の販売冊数を高精度に予測する手法の構築を目的とする．
+このために，上記の問題に対処したゲート付き融合型RAFであるGateRAFを提案する．
+GateRAFでは，ローカルコンテキストと各参照ウィンドウを同一のエンコーダで独立に処理するマルチストリームエンコードを導入し，入力系列の接合に伴う不連続性を排除する．さらに，ローカル要約ベクトルと各参照パッチとの関連度をスカラーゲートによって評価することで，予測対象との関連性が低い参照情報の混入を動的に抑制する．
+
+提案手法の有効性を，経営科学系研究部会連合協議会が主催する令和7年度データ解析コンペティションより提供された書籍POSデータを用いた実験により検証する．
+実験を通じて，GateRAFが従来手法に対して予測精度を改善すること，平常時の過大予測の抑制とスパイク近傍の予測の時間的な改善にそれぞれ寄与することを示す．
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{準備}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{問題設定}
+本研究では，経営科学系研究部会連合協議会が主催する令和7年度データ解析コンペティションより提供いただいた書籍POSデータを使用する．本データは2024年の1年間にわたる全国35店舗分の書籍・雑誌の販売実績であり，約20万書名・約400万件の販売記録から構成される．各記録は販売日，店舗，書名，販売冊数等の情報を持つ．
+
+前述の通り，書籍の販売冊数は，平常時には少数にとどまることが多い一方，イベントなどに起因して短期間だけ販売冊数が急増する場合がある．以下では，このような一時的な需要増加をスパイクと呼ぶ．
+需要を過小に見積もればスパイクが発生した際に機会損失が生じ，逆に過大に見積もれば在庫や返本の増加につながる．
+したがって本研究では，平常時の少数需要とスパイクが混在する販売冊数を，過不足なく予測することを課題とする．
+その際，書籍の販売特性を踏まえ，需要を平均的に均して予測するのではなく，平常時とスパイクが混在する需要構造に対応できる予測を目指す．
+
+\subsection{関連研究}
+
+スパイク需要の捕捉と少数系列からの学習に関連する手法は，主に時系列予測の基盤手法，間欠・突発需要予測，検索拡張型予測に分けられる．
+
+時系列予測の基盤手法としては，PatchTST~\cite{Nie.2023}などのTransformerベースの深層学習手法，確率的予測手法であるDeepAR~\cite{Salinas.2020}やTFT~\cite{Lim.2021}，大規模事前学習基盤モデルであるChronos~\cite{Ansari.2024}が代表的な手法として挙げられる．
+また，間欠・突発需要予測についても数多くの研究が存在し，Croston法~\cite{Croston.1972}が基準手法として広く参照されている．
+
+RAG~\cite{Lewis.2020}を時系列予測へ拡張したRAFは，予測対象のローカルコンテキストに類似した過去のウィンドウを検索データベースから取得し，予測に活用する手法である．
+これにより，単一系列からは捕捉が困難な稀なスパイクパターンを，系列横断的に参照できる．
+代表的な手法として，Chronos~\cite{Ansari.2024}を基盤とし，検索した参照ウィンドウをローカルコンテキストへ時間軸方向に連結して，一つの拡張シーケンスとしてエンコードするProtoRAF~\cite{Tire.2024}がある．
+また，TS-RAG~\cite{Ning.2025}やTimeRAF~\cite{Zhang.2024}では，それぞれ潜在空間での融合やChannel Promptingによって，検索情報の活用方法を改善している．
+
+\section{従来手法}
+提案手法の基礎となるProtoRAF~\cite{Tire.2024}は，参照ウィンドウを以下の手順で取得する．
+まず，学習データの系列を長さ$L$のウィンドウに区切り，各ウィンドウを$\bm{w}_i \in \mathbb{R}^{L}$として過去のウィンドウ集合$\mathcal{D} = \{\bm{w}_i\}_{i=1}^{N}$を構成する．ただし，$N$をウィンドウ数とする．また，予測対象の直近$L$時点をローカルコンテキスト$\bm{x} \in \mathbb{R}^{L}$とおく．
+ProtoRAFによる予測では，$\bm{x}$と$\mathcal{D}$の各ウィンドウ$\bm{w}_i$を互いに標準化したもとで比較する．
+すなわち，$\bm{x}$を標準化した$\tilde{\bm{x}}$と，$\bm{w}_i$を標準化した$\tilde{\bm{w}}_i$の距離$d(\tilde{\bm{x}},\, \tilde{\bm{w}}_i)$を算出し，このうち距離の小さい上位$K$件を参照ウィンドウ$\bm{r}_k \in \mathbb{R}^{L}$（$k = 1, \dots, K$）として取得する：
+    \begin{equation}
+        \{\bm{r}_k\}_{k=1}^{K}
+        = \operatorname*{Top\text{-}K_{\mathrm{min}}}_{\bm{w}_i \in \mathcal{D}}\;
+        d(\tilde{\bm{x}},\, \tilde{\bm{w}}_i)
+    \end{equation}
+ここで，$\operatorname{Top\text{-}K_{\mathrm{min}}}$は距離$d$が小さい順に上位$K$件を選ぶ操作であり，その計算には近傍検索を用いる．また，データリークを防ぐためウィンドウ集合$\mathcal{D}$は予測時点より前のウィンドウのみで構成する．この検索は$\mathcal{D}$の中で相対的に類似した上位$K$件を返すため，予測対象に真に似た事例があるか否かによらず，常に$K$件が選出される．
+
+図~\ref{fig:protoraf}に示すように，ProtoRAFはローカルコンテキスト$\bm{x}$の前方に参照ウィンドウ$\bm{r}_1, \dots, \bm{r}_K$をそのまま連結して拡張コンテキスト$\bm{x}^{\mathrm{proto}}\in \mathbb{R}^{(K+1)L} $を構成し，これを単一シーケンスとしてエンコーダに入力してパッチ表現$H^{\mathrm{proto}}\in \mathbb{R}^{(K+1)P \times D}$を得る．パッチ数を$P$，エンコーダの埋め込み次元を$D$とすると，これらは以下のように表される：
+    \begin{align}
+        \bm{x}^{\mathrm{proto}} &= \mathrm{Concat}(\bm{r}_1,\, \bm{r}_2,\, \dots,\, \bm{r}_K,\, \bm{x})\\
+        H^{\mathrm{proto}} &= \mathrm{Encode}(\bm{x}^{\mathrm{proto}})
+    \end{align}
+ここで$\mathrm{Concat}(\cdot)$は，与えられたベクトルまたは行列を行方向（時間軸方向）に連結する操作を表す．また$H^{\mathrm{proto}}$は，$\bm{x}^{\mathrm{proto}}$をパッチごとに区切って各パッチを$D$次元ベクトルへ変換し，これら$(K+1)P$個のベクトルを行方向に積み上げた$(K+1)P \times D$の行列である．
+このエンコーダ$\mathrm{Encode}(\cdot)$は，入力系列をその平均と標準偏差で標準化してからパッチ表現へ変換する~\cite{Kim.2022}．
+ProtoRAFでは，この標準化に用いる平均と標準偏差を，ローカルコンテキストだけでなく参照ウィンドウまで連結した$\bm{x}^{\mathrm{proto}}$全体から計算する．
+    \begin{figure*}[t]
+        \centering
+        \includegraphics[width=0.75\linewidth]{figure/architecture/architecture_ProtoRAF.eps}
+        \caption{ProtoRAFのアーキテクチャ概要}
+        \label{fig:protoraf}
+    \end{figure*}
+
+ProtoRAFは，参照ウィンドウとローカルコンテキストを1本の系列として連結する構造に起因して，接合部の不連続性と無関係な参照ウィンドウの混入という2つの問題を持つ．
+前者について，$\bm{x}^{\mathrm{proto}}$では性質の異なる参照ウィンドウとローカルコンテキストが結合されるため，その境界で値の水準や形状が大きく異なりうる．エンコーダはこの不自然な結合を，データに実際に起きた変化と区別できないまま学習し，予測精度を低下させる．
+加えて，この連結は標準化の基準にも影響を及ぼす．エンコーダは平均と標準偏差を$\bm{x}^{\mathrm{proto}}$全体から計算するため，大きく外れた観測値を含む参照ウィンドウが混在すると，ローカルコンテキストが本来とは異なるスケールで標準化される．
+後者について，前述の通りProtoRAFは，予測対象に似た事例があるか否かによらず常に上位$K$件を返す．そのため，似た事例が乏しい場合には，関連の薄いウィンドウまで参照として連結される．ProtoRAFはこれらをローカルコンテキストと区別せず一括で符号化するため，無関係な情報も予測に取り込まれ，精度が低下する可能性が存在する．
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{提案手法}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{概要}
+前述の通り，ProtoRAFには接合部の不連続性と無関係な参照ウィンドウの混入という問題が存在する．
+提案手法では，ProtoRAFの2つの問題がいずれも参照ウィンドウとローカルコンテキストを単一の系列として一括で符号化することに起因する点に着目し，
+これらをそれぞれ独立に符号化し，予測に役立つ参照だけを選んで組み合わせることで改善を図る．
+具体的には，マルチストリームエンコードとゲート機構の2つをProtoRAFに導入する．
+マルチストリームエンコードは，ローカルコンテキストと各参照ウィンドウを個別に標準化し，共通のエンコーダで独立に符号化を行う．
+これにより，系列の連結境界をデータの変化と取り違える問題と，スケール差の影響を抑える．
+ゲート機構は，ローカルコンテキストとの関連性に応じて各参照への寄与を調整し，関連性の低い参照が予測に与える影響を抑制する．
+以下では提案手法をGateRAFと呼ぶこととし，その概要を図~\ref{fig:gateraf}に示す．
+
+    \begin{figure*}[t]
+        \centering
+        \includegraphics[width=0.75\linewidth]{figure/architecture/architecture_GateRAF.eps}
+        \caption{GateRAF（提案手法）のアーキテクチャ概要}
+        \label{fig:gateraf}
+    \end{figure*}
+
+\subsection{マルチストリームエンコードとゲート機構}
+GateRAFは次の5つのステップから構成される．
+    \begin{description}
+        \item[Step 1）] ローカルコンテキストのエンコード
+        \item[Step 2）] 参照ウィンドウの独立エンコード
+        \item[Step 3）] ローカル要約ベクトルの計算
+        \item[Step 4）] ゲートの計算
+        \item[Step 5）] ゲート付き融合
+    \end{description}
+
+Step 1ではローカルコンテキストだけを符号化し，参照ウィンドウに影響されない標準化の基準を確保する．
+まず，予測対象のローカルコンテキスト$\bm{x}$だけをエンコーダに入力し，そのパッチ表現$H^{\mathrm{loc}} \in \mathbb{R}^{P \times D}$を式~\eqref{eq:loc-encode}より得る：
+        \begin{equation}\label{eq:loc-encode}
+            H^{\mathrm{loc}} = \mathrm{Encode}(\bm{x})
+        \end{equation}
+ここではローカルコンテキスト$\bm{x}$のみを入力し，その平均と標準偏差で標準化するため，参照ウィンドウに含まれるスパイクの影響を受けない．
+
+Step 2では各参照ウィンドウを独立に符号化し，連結による接合部の作成を回避する．
+すなわち，各参照ウィンドウ$\bm{r}_k$をローカルコンテキストと同じエンコーダで個別に符号化し，参照ブロック$H^{\mathrm{ret}}_k \in \mathbb{R}^{P \times D}$を得る：
+    \begin{equation}\label{eq:ret-encode}
+        H^{\mathrm{ret}}_k = \mathrm{Encode}(\bm{r}_k)
+    \end{equation}
+これにより連結部分が生じず，接合部の不連続性も避けられる．この段階では各参照を独立なブロック$H^{\mathrm{ret}}_k$として保持し，ローカルコンテキストとも他の参照とも結合しない．
+
+Step 3ではローカルコンテキストの表現を1本のベクトルにまとめ，参照の基準とする．
+$H^{\mathrm{loc}}$をパッチ方向に平均プーリングし，ローカル要約ベクトル$\bar{\bm{h}}^{\mathrm{loc}} \in \mathbb{R}^{D}$を次の通り得る：
+    \begin{equation}
+        \bar{\bm{h}}^{\mathrm{loc}} = \mathrm{Pool}(H^{\mathrm{loc}})
+    \end{equation}
+ここで$\mathrm{Pool}(\cdot)$はパッチ方向の平均プーリングを表す．
+
+Step 4では各参照パッチを予測にどれだけ反映させるかを，ローカルコンテキストとの関連の強さに応じて決める．
+具体的には，Step 3で得たローカル要約ベクトル$\bar{\bm{h}}^{\mathrm{loc}}$と，各参照ブロックの第$p$パッチ$\bm{h}^{\mathrm{ret}}_{k,p} \in \mathbb{R}^{D}$を多層パーセプトロン$\mathrm{GateMLP}$に入力し，両者の関連の強さを$0$から$1$の値$g_{k,p}$として出力する：
+    \begin{equation}
+        g_{k,p} = \mathrm{GateMLP}(\bar{\bm{h}}^{\mathrm{loc}},\, \bm{h}^{\mathrm{ret}}_{k,p})
+    \end{equation}
+$g_{k,p}$は参照パッチの重みであり，$1$に近いほどその参照を予測に強く反映し，$0$に近いほど影響を抑える．関連の薄い参照を自動的に弱めることで，無関係なウィンドウの混入を防ぐことを意図する．
+また，無関係な参照に影響を受けないよう，ゲートは学習の初期にはほぼ閉じた状態，すなわち出力が$0$に近い状態から始まるよう初期化する．これにより，モデルはまず信頼できるローカルコンテキストに基づいて予測を学習し，役立つ参照だけを学習の進行とともに取り込む．
+
+Step 5ではゲートで重み付けした参照表現をローカルコンテキストの表現と統合し，予測に用いる．
+まず，各参照ブロック$H^{\mathrm{ret}}_k$の各パッチに，対応する重み$g_{k,p}$を掛け，重み付き参照ブロック$\tilde{H}^{\mathrm{ret}}_k \in \mathbb{R}^{P \times D}$を得る．次に，ローカル表現と重み付けした全参照ブロックを結合して融合表現$H^{\mathrm{gate}} \in \mathbb{R}^{(1+K)P \times D}$とする：
+  \begin{align}
+        \tilde{H}^{\mathrm{ret}}_k &= \bm{g}_k \odot H^{\mathrm{ret}}_k \\
+        H^{\mathrm{gate}} &= \mathrm{Concat}(H^{\mathrm{loc}},\,
+        \tilde{H}^{\mathrm{ret}}_1,\, \cdots,\,
+        \tilde{H}^{\mathrm{ret}}_K)
+  \end{align}
+ここで$\bm{g}_k = (g_{k,1}, \ldots, g_{k,P})^\top$は参照ブロック$k$の各パッチのゲート値を並べたベクトルであり，$\odot$は各パッチ$p$の表現全体に同じ重み$g_{k,p}$を掛ける演算を表す．関連の薄い参照ほど重みが小さくなるため，無関係なウィンドウの混入が抑えられる．参照表現とローカル表現を結合するのはStep 5のみであり，それまでは互いに干渉しない．
+
+
+\subsection{予測}
+最後に，融合表現$H^{\mathrm{gate}}$から将来の販売冊数を予測する．$H^{\mathrm{gate}}$には，ローカルコンテキストとゲートで重み付けした参照の情報がまとめられている．これをデコーダに渡して各分位点の予測を出力し，符号化の際に施した標準化を元に戻す．分位点の集合を$Q$，予測する日数を$F$，標準化したスケールを元に戻す操作を$\mathrm{RevNorm}$とすると，予測値$\hat{Y} \in \mathbb{R}^{|Q| \times F}$は以下のように表される：
+    \begin{equation}
+        \hat{Y} = \mathrm{RevNorm}(\mathrm{Decode}(H^{\mathrm{gate}}),\, \mu,\, \sigma)
+    \end{equation}
+ここで$\mu, \sigma$はローカルコンテキスト$\bm{x}$から計算した平均と標準偏差である．
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{実験}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{実験概要}
+提案手法GateRAFが書籍の需要予測に有効であるかを検証する．
+このため，平常時のわずかな需要から突発的なスパイクまでを含めた予測全体の精度が，従来手法と比べて向上するか確認を行う．
+加えて，GateRAFを構成する2つの工夫，すなわちマルチストリームエンコードとゲート機構が，予測のどの側面をそれぞれ改善するかを切り分ける．
+
+このため，過去の類似事例を一切参照しない基盤モデルそのものであるBaseline，参照ウィンドウを入力系列にそのまま連結する従来手法ProtoRAF，Baselineにマルチストリームエンコードを加えたMulti-RAF，さらにゲート機構を加えた提案手法GateRAFの4手法によりその性能比較を行う．ProtoRAFとMulti-RAFの比較からマルチストリームエンコードの寄与が，Multi-RAFとGateRAFの比較からゲート機構の寄与を把握することが可能となる．
+
+以上の枠組みのもとで，予測精度の算出（実験1），スパイク強度別の予測精度（実験2），時間近接性（実験3），予測区間幅の比較（実験4），代表系列の事例分析（実験5）の5つの実験を行う．
+
+
+\subsection{データ整形}
+本研究では書名ごとの需要推移を予測対象とする．まず店舗間の差異を捨象し，同一の書名・日付に対する販売冊数を全店舗にわたって合算することで，POS販売冊数の時系列を構築した．その上で，予測に適した系列を得るため，以下の前処理を施した．第一に，年間総販売冊数が366冊に満たない，すなわち一日あたり平均でおよそ1冊に満たない書籍は，予測に必要な販売実績の情報量を欠くため除外した．第二に，巻数違いなど同一作品をシリーズ単位へ統合し，一つの需要系列として扱うものとした．第三に，販売記録の存在しない日を欠測ではなくゼロ需要とみなして補完し，全書名と全日付を網羅する完全パネルデータを構築した．以上により，最終的に約40万件のデータを得た．
+
+得られたデータでは，POS販売冊数の平均が約3.68冊であるのに対し標準偏差は13.65冊と大きく，さらにゼロ販売日の割合が42.9\%に達する．これは，平常時の間欠的なゼロ需要と突発的なスパイク需要が混在するという，本研究が対象とする需要構造を端的に表している．
+
+
+\subsection{実験設定}
+比較する4手法は，時系列予測の基盤モデルをファインチューニングすることで構築した．基盤モデルにはChronos~\cite{Ansari.2024}の軽量・高速版であるChronosBoltを用いた．ファインチューニングには，モデル全体ではなく少数の追加パラメータのみを調整するDoRA~\cite{Liu.2024}を用い，追加パラメータの規模を定めるランクは事前の予備実験により$8$とした．なお事例分析（実験5）では，古典的な比較対象として，時系列を傾向・季節性・休日効果の和へ分解する加法モデルProphet~\cite{Taylor.2018}を併せて用いるものとした．
+
+データは，各系列の終盤$64$日分を評価用とし，残りを9対1の割合で学習用と検証用に分割した．予測時には，対象系列の直近$L=128$日分を切り出してローカルコンテキストとし，これを基に続く$F=64$日分の販売冊数を予測する．参照ウィンドウは，1回の予測ごとにローカルコンテキストと形の似たものを上位$K=3$件まで検索して用いる．
+
+予測値は単一の値ではなく分位点として出力する．分位点$\tau$は予測を幅をもって表すための水準であり，たとえば$\tau=0.5$は中央の予測値を，$\tau=0.1$と$\tau=0.9$はそれぞれ予測の下限と上限を表す．上側と下側の分位点の差は予測の幅を表し，幅が広いほど将来の予測が難しく，不確実性が高いことを意味する．本研究では$\tau \in \{0.1,\, 0.5,\, 0.9\}$を出力し，学習にはこれら3つの分位点に対するピンボール損失~\cite{Koenker.1978}を用いる．
+
+予測精度の基本指標としては，実績と予測の平均絶対誤差（以下，MAE）と二乗平均平方根誤差（以下，RMSE）を分位点ごとに用いる．
+
+実験1では，全系列・全予測期間を対象に，分位点ごとのMAEとRMSEを算出し，予測全体の精度を比較する．
+
+実験2では，需要の大きさによって各手法の性能がどう変化するのか確認する．このため，各時点の実績値をその系列全体の平均と標準偏差で標準化した$z$スコアへ変換する．$z$スコアは，その時点の需要が系列の平常水準からどれだけ離れているかを表し，負であれば平常より低い需要を，正で大きいほど強い急増を意味する．
+この$z$スコアの大小で時点を区分し，区分ごとに分位点別のMAEとRMSEを集計する．なお，以下では需要が平常を大きく下回る$z<-1$の区分を静穏域，需要が急増した$z$の大きい区分をスパイク域と呼ぶこととする．
+
+実験3では，$\tau=0.5$の予測を対象に，$z$スコアが$2.0$以上となる時点をスパイクと定義し，予測したスパイクと実際のスパイクが時間的にどれだけ近いかを評価する．
+予測した各スパイクについては最も近い実スパイクとの時間差を，実際の各スパイクについては最も近い予測スパイクとの時間差を符号付きの日数$\Delta$として求める．$\Delta$は予測が実スパイクより前なら正，後なら負とし，$|\Delta|$が小さいほど時間的に近く捉えられていることを意味する．前者の分布を誤検知，後者の分布を見逃しと呼ぶ．評価では$\Delta$を$-10$〜$+10$日の範囲で集計し（両端は$|\Delta|\geq10$としてまとめる），誤検知は予測スパイク，見逃しは実スパイクの総数に対する割合として算出する．
+
+実験4では，上側分位点$\tau=0.9$と下側分位点$\tau=0.1$の予測値の差を予測区間の幅とし，その幅が実際の需要変動と対応するかをみる．全時点を予測区間の幅の順に十分位へ分け，区分ごとに実績の$z$スコアの平均を求める．
+
+実験5では，平均的な指標では捉えられない個々の挙動を確認するため，現れ方の異なる代表的な2系列を取り上げ，$\tau=0.5$の予測を実績と重ねて比較する．
+
+
+\subsection{実験結果と考察}
+\subsubsection{実験1：予測精度の算出}
+全系列・全予測期間を対象に，分位点ごとのMAEとRMSEで予測全体の精度を比較した結果を表~\ref{tab:metric_comparison}に示す．GateRAFは6指標中5指標で最小の誤差を示し，従来手法のProtoRAF・Baselineを全分位点で下回った．改善は中央・上側の分位点で大きく，たとえば$\tau=0.9$のRMSEは約$27$から約$13$へと半減している．構成要素ごとにみると，参照を単に連結するProtoRAFはBaselineとほぼ変わらず，連結だけでは精度が改善していない．マルチストリームエンコードを加えたMulti-RAFで中央・上側の誤差が大きく下がる一方，下側（$\tau=0.1$）はわずかに悪化しており，ゲート機構を加えたGateRAFで下側の誤差が改善していることがわかる．
+
+この分位点ごとの寄与の違いは，2つの工夫が異なる問題に対処していることを示唆する．Baselineの上側分位点が大きいのは，スパイクの発生時点を単一系列からは判別できず，モデルがその発生に備えて上側分位点を恒常的に高く見積もるためと考えられる．Multi-RAFでは，類似局面の参照事例が，同様の局面でスパイクが起きたか否かの証拠を与えるため，平常局面では上側分位点を下げられる．一方，ProtoRAFがBaselineとほぼ同等にとどまることは，参照を時間軸方向に連結するだけでは参照情報がほとんど活用されないことを示す．また，関連の薄い参照が混入すると本来低いはずの下側分位点が高い値へ引き上げられうるが，ゲート機構がそうした参照を弱めるため，下側の誤差が改善したと解釈できる．
+    \begin{table*}[t]
+        \caption{各モデルおよび分位点レベルにおけるMAEおよびRMSEの比較}
+        \label{tab:metric_comparison}
+        \centering
+        \begin{tabular}{lrrrrrr}
+            \hline
+            & \multicolumn{6}{c}{分位点} \\
+            \cline{2-3} \cline{4-5} \cline{6-7}
+            \multicolumn{1}{c}{モデル} & \multicolumn{2}{c}{$\tau=0.1$} & \multicolumn{2}{c}{$\tau=0.5$} & \multicolumn{2}{c}{$\tau=0.9$} \\
+            \cline{2-3} \cline{4-5} \cline{6-7}
+            & \multicolumn{1}{c}{MAE} & \multicolumn{1}{c}{RMSE} & \multicolumn{1}{c}{MAE} & \multicolumn{1}{c}{RMSE} & \multicolumn{1}{c}{MAE} & \multicolumn{1}{c}{RMSE} \\
+            \hline\hline
+            \textbf{GateRAF} & \textbf{3.6339} & \textbf{13.5293} & \textbf{2.7452} & \textbf{12.2025} & 5.0136 & \textbf{13.3030} \\
+            \textbf{Multi-RAF} & 3.7766 & 13.6118 & 2.8117 & 12.2594 & \textbf{4.9745} & 13.3570 \\
+            \textbf{ProtoRAF} & 3.6604 & 13.7593 & 3.0467 & 12.9622 & 6.8549 & 27.0196 \\
+            \textbf{Baseline} & 3.6501 & 13.7476 & 3.0460 & 12.9603 & 6.8512 & 27.0050 \\
+            \hline
+        \end{tabular}
+    \end{table*}
+
+
+\subsubsection{実験2：スパイク強度別の予測精度}
+需要の大きさを表す$z$スコアの区分ごとにMAEとRMSEを集計し，需要水準による精度の違いを比較した結果を表~\ref{tab:mae_rmse_vs_zscore}に示す．GateRAFの改善は，需要が平常を下回る静穏域で最も大きい．
+%
+とりわけProtoRAFは，上側分位点（$\tau=0.9$）を実需の大きさによらず高く出力する．
+そのため，実需の低い静穏域では予測が実績を大きく上回り，$\tau=0.9$のRMSEは他モデルの3倍近くに達する．この傾向は静穏域に限らず，実需が中程度までの区分にわたって続く．
+%
+これに対し，マルチストリームエンコードを加えるとこの上側の過大予測が解消され，さらにゲート機構が静穏域の下側分位点（$\tau=0.1$）の誤差を下げていることがわかる．
+
+一方，スパイク域でも，GateRAFの中央値（$\tau=0.5$）のMAEは全モデル中で最小であった．すなわち，静穏域での過大予測の抑制がスパイクの見逃しを招くことはなく，平常時の精度とスパイクの捕捉が両立できていると考えられる．
+    \begin{table*}[t]
+        \caption{系列内$z$スコアビン別のMAEおよびRMSE}
+        \label{tab:mae_rmse_vs_zscore}
+
+        \centering
+        \resizebox{\textwidth}{!}{
+        \begin{tabular}{lrrrrrrrrrrrrrrrr}
+            \hline
+            & \multicolumn{2}{c}{$<$-1} & \multicolumn{2}{c}{-1--0} & \multicolumn{2}{c}{0--0.5} & \multicolumn{2}{c}{0.5--1} & \multicolumn{2}{c}{1--1.5} & \multicolumn{2}{c}{1.5--2} & \multicolumn{2}{c}{2--3} & \multicolumn{2}{c}{$>$3} \\
+            \cline{2-17}
+            \multicolumn{1}{c}{モデル} & MAE & RMSE & MAE & RMSE & MAE & RMSE & MAE & RMSE & MAE & RMSE & MAE & RMSE & MAE & RMSE & MAE & RMSE \\
+            \hline\hline
+            \multicolumn{17}{l}{$\tau=0.1$} \\
+            \quad \textbf{GateRAF} & \textbf{0.85} & \textbf{2.88} & 1.57 & 4.57 & \textbf{4.65} & \textbf{9.48} & \textbf{5.98} & \textbf{11.86} & \textbf{7.18} & \textbf{15.81} & \textbf{8.42} & \textbf{17.66} & \textbf{14.72} & \textbf{39.32} & \textbf{28.08} & 63.94 \\
+            \quad \textbf{Multi-RAF} & 1.03 & 3.01 & 1.71 & 4.67 & 4.77 & 9.56 & 6.15 & 12.00 & 7.36 & 15.92 & 8.59 & 17.80 & 14.84 & 39.68 & 28.24 & \textbf{63.94} \\
+            \quad \textbf{ProtoRAF} & 0.89 & 3.09 & 1.47 & 4.39 & 4.77 & 9.79 & 6.20 & 12.22 & 7.51 & 16.47 & 8.79 & 18.36 & 15.45 & 40.54 & 28.58 & 64.37 \\
+            \quad \textbf{Baseline} & 0.89 & 3.08 & \textbf{1.46} & \textbf{4.38} & 4.76 & 9.77 & 6.19 & 12.21 & 7.50 & 16.45 & 8.78 & 18.35 & 15.44 & 40.51 & 28.56 & 64.35 \\
+            \hline
+            \multicolumn{17}{l}{$\tau=0.5$} \\
+            \quad \textbf{GateRAF} & \textbf{1.84} & \textbf{3.15} & \textbf{1.21} & 3.78 & \textbf{2.96} & 7.32 & \textbf{3.92} & \textbf{9.90} & \textbf{4.94} & \textbf{13.12} & \textbf{6.05} & \textbf{14.98} & \textbf{11.28} & \textbf{35.30} & \textbf{24.76} & 61.12 \\
+            \quad \textbf{Multi-RAF} & 1.94 & 3.23 & 1.26 & \textbf{3.77} & 3.01 & \textbf{7.29} & 4.03 & 9.95 & 5.07 & 13.14 & 6.19 & 15.17 & 11.47 & 35.98 & 24.84 & \textbf{61.00} \\
+            \quad \textbf{ProtoRAF} & 2.66 & 6.21 & 1.40 & 5.13 & 3.14 & 8.22 & 4.22 & 10.73 & 5.39 & 13.82 & 6.50 & 15.74 & 12.42 & 36.57 & 26.26 & 62.31 \\
+            \quad \textbf{Baseline} & 2.66 & 6.21 & 1.40 & 5.14 & 3.13 & 8.22 & 4.22 & 10.73 & 5.39 & 13.82 & 6.50 & 15.75 & 12.41 & 36.55 & 26.25 & 62.29 \\
+            \hline
+            \multicolumn{17}{l}{$\tau=0.9$} \\
+            \quad \textbf{GateRAF} & \textbf{6.19} & 9.70 & 4.52 & 9.50 & 4.47 & 8.98 & 4.74 & \textbf{10.04} & 4.56 & \textbf{10.64} & 4.89 & \textbf{12.42} & \textbf{8.39} & \textbf{30.16} & 18.81 & 55.93 \\
+            \quad \textbf{Multi-RAF} & 6.27 & \textbf{9.64} & \textbf{4.46} & \textbf{9.43} & \textbf{4.41} & \textbf{8.92} & \textbf{4.73} & 10.18 & \textbf{4.51} & 10.65 & \textbf{4.88} & 12.59 & 8.57 & 31.39 & \textbf{18.73} & \textbf{55.86} \\
+            \quad \textbf{ProtoRAF} & 9.48 & 29.11 & 6.57 & 27.12 & 6.33 & 24.03 & 5.75 & 25.13 & 4.79 & 11.83 & 5.39 & 15.07 & 9.56 & 33.12 & 20.74 & 58.00 \\
+            \quad \textbf{Baseline} & 9.49 & 29.17 & 6.56 & 27.09 & 6.33 & 24.02 & 5.75 & 25.16 & 4.80 & 11.83 & 5.39 & 15.08 & 9.56 & 33.15 & 20.72 & 57.99 \\
+            \hline
+        \end{tabular}}
+    \end{table*}
+
+
+\subsubsection{実験3：時間近接性}
+予測したスパイクと実際のスパイクが時間的にどれだけ近いかを，誤検知と見逃しの$\Delta$の分布として集計した結果を表~\ref{tab:temporal_proximity}に示す．GateRAFは誤検知・見逃しのいずれでも，実際のスパイクから大きく外れた誤り（$|\Delta| \geq 10$）の割合がProtoRAFより低く，逆に$3$日以内で対応づく割合が高い．すなわち，予測したスパイクも見逃したスパイクも，実際のスパイクの近くに集中する．
+
+この違いは各手法の予測の出方を反映していると考えられる．ProtoRAFはスパイクが過ぎた後も高い予測を出し続けるため，誤検知が実際のスパイクより後方へ偏る．マルチストリームエンコードはこの過大予測を抑え，誤検知を実際のスパイク近傍へ引き戻す．ただしマルチストリームエンコードだけでは，予測を立ち上げてもその位置が実スパイクからずれやすく，見逃しはProtoRAFと同程度となっている．ここにゲート機構が加わることで，スパイク近傍に予測のピークが絞り込まれ，見逃しが減少していると考えられる．
+結果として，GateRAFの誤りは無関係な時点に突然生じるのではなく，実際のスパイクから数日のずれに収まるものが多く，発生日を正確に当てにくい突発需要において，備えるべき時期の目安を与える点で有用と考えられる．
+    \begin{table*}[t]
+        \caption{$\Delta$日ごとの誤検知および見逃しの割合}
+        \label{tab:temporal_proximity}
+        \centering
+        \resizebox{\textwidth}{!}{
+        \begin{tabular}{lrrrrrrrrrrrrrrrrrrrrr}
+            \hline
+            モデル & $-10$ & $-9$ & $-8$ & $-7$ & $-6$ & $-5$ & $-4$ & $-3$ & $-2$ & $-1$ & $0$ & $+1$ & $+2$ & $+3$ & $+4$ & $+5$ & $+6$ & $+7$ & $+8$ & $+9$ & $+10$ \\
+            \hline\hline
+            \multicolumn{22}{l}{誤検知} \\
+            \quad \textbf{GateRAF} & 0.289 & 0.012 & 0.014 & 0.033 & 0.014 & 0.018 & 0.020 & 0.025 & 0.041 & 0.078 & 0.000 & 0.055 & 0.031 & 0.031 & 0.031 & 0.025 & 0.016 & 0.027 & 0.014 & 0.018 & 0.207 \\
+            \quad \textbf{Multi-RAF} & 0.350 & 0.018 & 0.020 & 0.045 & 0.011 & 0.014 & 0.016 & 0.030 & 0.041 & 0.070 & 0.000 & 0.057 & 0.032 & 0.027 & 0.030 & 0.020 & 0.020 & 0.030 & 0.014 & 0.016 & 0.139 \\
+            \quad \textbf{ProtoRAF} & 0.544 & 0.021 & 0.024 & 0.029 & 0.024 & 0.024 & 0.022 & 0.025 & 0.028 & 0.050 & 0.000 & 0.044 & 0.029 & 0.028 & 0.015 & 0.012 & 0.012 & 0.010 & 0.006 & 0.007 & 0.047 \\
+            \quad \textbf{Baseline} & 0.543 & 0.021 & 0.024 & 0.030 & 0.025 & 0.025 & 0.022 & 0.025 & 0.028 & 0.050 & 0.000 & 0.043 & 0.028 & 0.028 & 0.015 & 0.012 & 0.010 & 0.010 & 0.006 & 0.007 & 0.047 \\
+            \hline
+            \multicolumn{22}{l}{見逃し} \\
+            \quad \textbf{GateRAF} & 0.179 & 0.000 & 0.006 & 0.043 & 0.000 & 0.025 & 0.012 & 0.043 & 0.043 & 0.086 & 0.000 & 0.068 & 0.037 & 0.025 & 0.037 & 0.037 & 0.012 & 0.093 & 0.019 & 0.000 & 0.235 \\
+            \quad \textbf{Multi-RAF} & 0.191 & 0.013 & 0.007 & 0.046 & 0.007 & 0.000 & 0.000 & 0.033 & 0.033 & 0.072 & 0.000 & 0.072 & 0.026 & 0.020 & 0.026 & 0.007 & 0.013 & 0.066 & 0.013 & 0.020 & 0.336 \\
+            \quad \textbf{ProtoRAF} & 0.319 & 0.000 & 0.007 & 0.042 & 0.014 & 0.021 & 0.014 & 0.007 & 0.007 & 0.035 & 0.000 & 0.062 & 0.042 & 0.035 & 0.021 & 0.021 & 0.035 & 0.069 & 0.014 & 0.014 & 0.222 \\
+            \quad \textbf{Baseline} & 0.326 & 0.000 & 0.007 & 0.043 & 0.014 & 0.021 & 0.014 & 0.007 & 0.007 & 0.035 & 0.000 & 0.057 & 0.043 & 0.035 & 0.021 & 0.021 & 0.028 & 0.071 & 0.014 & 0.014 & 0.220 \\
+            \hline
+        \end{tabular}}
+    \end{table*}
+
+
+\subsubsection{実験4：予測区間幅の比較}
+予測区間の幅ごとに実績の$z$スコアの平均を求め，区間幅と実際の需要変動との対応を調べた結果を図~\ref{Fig:interval_calibration}に示す．GateRAFとMulti-RAFでは，予測区間の幅が広い区分ほど実績の$z$スコアの平均が高く，幅の広い区間が実際のスパイク発生時点に対応している．一方ProtoRAFでは，この対応がほとんどみられない．
+
+この対応がGateRAFとMulti-RAFでほぼ一致することから，区間幅と需要変動の連動は主にマルチストリームエンコードによるスケールの安定化によると考えられる．標準化の基準を正したことで，連結による歪みで頭打ちとなっていた上側分位点が，実際の需要変動へ応答できるようになったと解釈できる．稀に発生し予測の難しいスパイクにおいて，不確実性を区間の幅として示せることは，スパイクの到来を事前に示唆する手がかりとして意義をもつと言える．
+    \begin{figure}
+        \centering
+        \includegraphics[width=\linewidth]{figure/interval_calibration.eps}
+        \caption{予測区間の幅ごとの実績$z$スコア平均}
+        \label{Fig:interval_calibration}
+    \end{figure}
+
+
+\subsubsection{実験5：代表系列の事例分析}
+現れ方の異なる代表的な2系列について，各手法の$\tau=0.5$の予測を実績と重ねて比較した結果を図~\ref{fig:book_examples}に示す．このうち，図~\ref{fig:book_bocchi}に示す書籍Aは，高い需要が時間とともに減衰する系列である．GateRAFは実績の減衰にほぼ沿って予測を下げるのに対し，ProtoRAF・Baselineは需要が下がった後も高い予測を維持している．
+これは，ProtoRAFが連結系列全体で標準化するため予測のスケールが過大なまま保たれるためであると考えられ，標準化を局所化するGateRAFではこの高止まりが避けられている．
+
+図~\ref{fig:book_crossword}に示す書籍Bは，平常はほぼゼロの需要が突発的に急増する系列である．
+GateRAFとMulti-RAFは販売冊数の急増に合わせて予測値も上昇しているのに対し，
+ProtoRAF, Baselineはほぼゼロのまま反応せず，加法モデルのProphetも構造上この急増を表現できていない．
+GateRAF, Multi-RAF共に同様の傾向が見られることから，スパイクの捕捉は主にマルチストリームエンコードの働きによると考えられる．
+
+これら2例は，いずれもマルチストリームエンコードの効果，すなわち標準化の局所化による過大予測の抑制と，参照の個別取り込みによる他系列スパイクの捕捉を示している．ゲート機構の寄与はこれとは異なり，実験1・2の平常時（下側分位点・静穏域）の精度向上と，実験3のスパイク近傍への時間的な絞り込みに現れる．
+        \begin{figure*}[tb]
+            \centering
+            \begin{subfigure}[t]{0.8\textwidth}
+                \centering
+                \includegraphics[width=\linewidth]{figure/figure_book/bocchi/figure_book_bocchi_prophet.eps}
+                \caption{書籍A}
+                \label{fig:book_bocchi}
+            \end{subfigure}
+            \begin{subfigure}[t]{0.8\textwidth}
+                \centering
+                \includegraphics[width=\linewidth]{figure/figure_book/crossword/figure_book_crossword_prophet.eps}
+                \caption{書籍B}
+                \label{fig:book_crossword}
+            \end{subfigure}
+            \caption{各系列における予測と実績の比較}
+            \label{fig:book_examples}
+        \end{figure*}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{返本と機会損失の観点からの評価}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+以下では，予測誤差が出版流通にもたらす損失を，返本と販売機会の損失という実務的な観点から評価する．需要を上回る入荷は売れ残りとなって返本を生み，過剰な返本は出版流通全体の課題となっている．一方で，需要のスパイクに見合う入荷ができなければ機会損失が生じる．
+そこで，各手法が予測した販売冊数をそのまま入荷量とみなし，提案手法GateRAFが返本と販売機会の損失をどの程度抑えられるかを，他手法との比較により見積もる．
+MAEやRMSEといった精度指標は，予測の良し悪しを数値としては示すものの，それが出版流通の現場でどれだけの負担や損失につながるのかを直接には表さない．そこで以下では，予測精度の違いを返本と機会損失という実務的な指標へと結び付けることで，提案手法が出版流通の効率化にもたらす意義を明らかにする．なお本評価は，発注リードタイムや在庫の繰り越しといった実際の流通過程を含まない簡易的なシミュレーションであり，損失量そのものではなく手法間の相対的な差を把握することを目的とする．比較対象には，基盤モデルそのものであるBaselineに加え，古典的な予測手法であるSARIMA~\cite{Box.1970}とProphet~\cite{Taylor.2018}を用いる．
+
+評価指標は，過剰入荷$O$，返本率$R$，機会損失$U$の3つである．評価対象とする全書名について，評価期間である$F=64$日にわたり，時点$t$の実際の販売冊数を$y_t$，予測した販売冊数の中央値（$\tau=0.5$）を$\hat{y}_t$とし，$\hat{y}_t$をその時点の入荷量とみなす．入荷量が実際の販売を上回った分を売れ残りとして合計したものが過剰入荷$O$であり，これがそのまま返本となる．
+一方，入荷量が実際の販売に届かなかった分を合計したものが機会損失$U$である．返本率$R$は，実際の総販売冊数$S=\sum_t y_t$と過剰入荷の和に対し，過剰入荷が占める割合とする．以上をまとめると，3つの指標は次のように表される．
+    \begin{align}
+        O &= \sum_t \max(\hat{y}_t - y_t,\, 0) \\
+        U &= \sum_t \max(y_t - \hat{y}_t,\, 0) \\
+        R &= \frac{O}{S + O}
+    \end{align}
+返本率$R$が高いほど返品にともなう物流の負担が大きく，機会損失$U$が大きいほど，入荷が需要に満たず，本来得られたはずの販売機会を多く逸失していることを意味する．
+集計結果を表~\ref{tab:return_loss}に示す．
+    \begin{table}[t]
+        \caption{予測値を入荷量とみなした場合の過剰入荷，返本率，機会損失}
+        \label{tab:return_loss}
+        \centering
+        \begin{tabular}{lrrr}
+            \hline
+            \multicolumn{1}{c}{モデル} & \multicolumn{1}{c}{過剰入荷} & \multicolumn{1}{c}{返本率} & \multicolumn{1}{c}{機会損失} \\
+            \hline\hline
+            \textbf{GateRAF} & \textbf{41{,}182} & \textbf{12.33\%} & 162{,}098 \\
+            \textbf{Baseline} & 57{,}383 & 16.39\% & 168{,}171 \\
+            \textbf{SARIMA} & 124{,}588 & 29.85\% & \textbf{150{,}440} \\
+            \textbf{Prophet} & 331{,}923 & 53.13\% & 317{,}997 \\
+            \hline
+        \end{tabular}
+    \end{table}
+
+まず，参照を用いないBaselineとの比較から，提案手法の効果を確認する．GateRAFはBaselineに対し，返本率を$16.4\%$から$12.3\%$へ下げ，機会損失も$168{,}171$から$162{,}098$へと同時に減らした．予測精度の改善が，売れ残りと売り逃しの双方の削減として現れている．次に古典的手法と比較すると，GateRAFの返本率はSARIMAの$29.9\%$，Prophetの$53.1\%$を大きく下回る．過剰入荷の冊数で比較しても，GateRAFはSARIMAの約3分の1，Prophetの約8分の1にとどまる．一方で機会損失はSARIMAが最小であり，GateRAFはこれを約$8\%$上回る$162{,}098$冊であった．
+
+返本と機会損失は，本来両立の難しい指標である．売り逃しを減らそうとして入荷を増やせば，売れ残りが増えて返本が増大するためである．SARIMAは入荷量を多めに見積もることで機会損失を最小に抑えるが，過剰入荷はGateRAFの約3倍に達し，返本率もGateRAFの2倍を超える．これに対しGateRAFは，機会損失の増加を最小手法であるSARIMAに対して約$8\%$にとどめつつ，返本を大幅に抑えている．返本の抑制が出版流通全体の課題であることを踏まえると，GateRAFは販売機会の損失を低い水準に保ったまま返本を抑えており，実務上望ましい特性を備えていることが示唆された．
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{おわりに}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+本研究では，平常時とスパイクが混在する書籍の需要予測を目的に，GateRAFを提案した．GateRAFは，従来のRAFがもつ接合部の不連続性をマルチストリームエンコードによって構造的に取り除き，無関係な参照の混入をゲート機構によって動的に抑制する．実験の結果，GateRAFは全体の予測精度でProtoRAFとBaselineを上回り，2つの機構が予測の異なる側面を改善することを確認した．
+
+今後の課題として，形状以外の観点も取り入れた類似尺度，参照を組み合わせたゲート機構の検討などが挙げられる．
+
+%% 謝辞
+%\shaji
+%貴重なデータをご提供いただいた企業様を始め，データ解析コンペティション関係者の皆様にお礼申し上げます．　
+
+
+%%%%%%%% 参考文献 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{thebibliography}{99}
+
+\bibitem[日本書籍出版協会(2001)]{JBPA.2001}
+日本書籍出版協会,
+「再販制度」,
+\url{https://www.jbpa.or.jp/resale/}, 2001（2026年6月26日閲覧）.
+
+\bibitem[全国出版協会・出版科学研究所(2024)]{Shuppan.2024}
+全国出版協会・出版科学研究所,
+『出版指標年報 2024年版』,
+全国出版協会, 2024.
+
+\bibitem[Lewis~et~al.(2020)]{Lewis.2020}
+P.~Lewis, E.~Perez, A.~Piktus, F.~Petroni, V.~Karpukhin, N.~Goyal, H.~K\"{u}ttler, M.~Lewis, W.-T.~Yih, T.~Rockt\"{a}schel, S.~Riedel and D.~Kiela,
+``Retrieval-Augmented Generation for Knowledge-Intensive {NLP} Tasks,''
+in \textit{Advances in Neural Information Processing Systems}, vol.~33, pp.~9459--9474, 2020.
+
+\bibitem[Tire~et~al.(2024)]{Tire.2024}
+K.~Tire, E.~O.~Taga, M.~E.~Ildiz and S.~Oymak,
+``Retrieval Augmented Time Series Forecasting,''
+arXiv:2411.08249, 2024.
+
+\bibitem[Nie~et~al.(2023)]{Nie.2023}
+Y.~Nie, N.~H.~Nguyen, P.~Sinthong and J.~Kalagnanam,
+``A Time Series is Worth 64 Words: Long-term Forecasting with Transformers,''
+in \textit{Proceedings of the International Conference on Learning Representations}, 2023.
+
+\bibitem[Salinas~et~al.(2020)]{Salinas.2020}
+D.~Salinas, V.~Flunkert, J.~Gasthaus and T.~Januschowski,
+``{DeepAR}: Probabilistic Forecasting with Autoregressive Recurrent Networks,''
+\textit{International Journal of Forecasting}, vol.~36, no.~3, pp.~1181--1191, 2020.
+
+\bibitem[Lim~et~al.(2021)]{Lim.2021}
+B.~Lim, S.~\"{O}.~Ar{\i}k, N.~Loeff and T.~Pfister,
+``Temporal Fusion Transformers for Interpretable Multi-Horizon Time Series Forecasting,''
+\textit{International Journal of Forecasting}, vol.~37, no.~4, pp.~1748--1764, 2021.
+
+\bibitem[Ansari~et~al.(2024)]{Ansari.2024}
+A.~F.~Ansari, L.~Stella, C.~Turkmen, X.~Zhang, P.~Mercado, H.~Shen, O.~Shchur,
+S.~S.~Rangapuram, S.~P.~Arango, S.~Kapoor, J.~Zschiegner, D.~C.~Maddix,
+H.~Wang, M.~W.~Mahoney, K.~Torkkola, A.~G.~Wilson, M.~Bohlke-Schneider and Y.~Wang,
+``Chronos: Learning the Language of Time Series,''
+arXiv:2403.07815, 2024.
+
+\bibitem[Croston(1972)]{Croston.1972}
+J.~D.~Croston,
+``Forecasting and Stock Control for Intermittent Demands,''
+\textit{Operational Research Quarterly}, vol.~23, no.~3, pp.~289--303, 1972.
+
+\bibitem[Ning~et~al.(2025)]{Ning.2025}
+K.~Ning, Z.~Pan, Y.~Liu, Y.~Jiang, J.~Y.~Zhang, K.~Rasul, A.~Schneider, L.~Ma, Y.~Nevmyvaka and D.~Song,
+``TS-RAG: Retrieval-Augmented Generation based Time Series Foundation Models are Stronger Zero-Shot Forecaster,''
+arXiv:2503.07649, 2025.
+
+\bibitem[Zhang~et~al.(2024)]{Zhang.2024}
+H.~Zhang, C.~Xu, Y.-F.~Zhang, Z.~Zhang, L.~Wang, J.~Bian and T.~Tan,
+``{TimeRAF}: Retrieval-Augmented Foundation Model for Zero-Shot Time Series Forecasting,''
+arXiv:2412.20810, 2024.
+
+%\bibitem[Johnson~et~al.(2019)]{Johnson.2019}
+%J.~Johnson, M.~Douze and H.~J\'{e}gou,
+%``Billion-Scale Similarity Search with {GPU}s,''
+%\textit{IEEE Transactions on Big Data}, vol.~7, no.~3, pp.~535--547, 2019.
+
+\bibitem[Kim~et~al.(2022)]{Kim.2022}
+T.~Kim, J.~Kim, Y.~Tae, C.~Park, J.-H.~Choi and J.~Choo,
+``Reversible Instance Normalization for Accurate Time-Series Forecasting against Distribution Shift,''
+in \textit{Proceedings of the International Conference on Learning Representations}, 2022.
+
+\bibitem[Liu~et~al.(2024)]{Liu.2024}
+S.-Y.~Liu, C.-Y.~Wang, H.~Yin, P.~Molchanov, Y.-C.~F.~Wang, K.-T.~Cheng and M.-H.~Chen,
+``{DoRA}: Weight-Decomposed Low-Rank Adaptation,''
+in \textit{Proceedings of the International Conference on Machine Learning}, 2024.
+
+\bibitem[Taylor~\&~Letham(2018)]{Taylor.2018}
+S.~J.~Taylor and B.~Letham,
+``Forecasting at Scale,''
+\textit{The American Statistician}, vol.~72, no.~1, pp.~37--45, 2018.
+
+\bibitem[Koenker~\&~Bassett(1978)]{Koenker.1978}
+R.~Koenker and G.~W.~Bassett,
+``Regression Quantiles,''
+\textit{Econometrica}, vol.~46, no.~1, pp.~33--50, 1978.
+
+\bibitem[Box~\&~Jenkins(1970)]{Box.1970}
+G.~E.~P.~Box and G.~M.~Jenkins,
+\textit{Time Series Analysis: Forecasting and Control},
+Holden-Day, 1970.
+
+\end{thebibliography}
+
+\end{document}
