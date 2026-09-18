@@ -1,0 +1,21 @@
+\begin{table}[t]
+    \revAcolor
+    \caption{参照件数$K$を変えた場合の予測精度（推論時のみ$K$を変更）}
+    \label{tab:topk_sensitivity}
+    \centering
+    \setlength{\tabcolsep}{4pt}%
+    \begin{tabular}{lrrrrrr}
+        \hline
+        & \multicolumn{2}{c}{$\tau=0.1$} & \multicolumn{2}{c}{$\tau=0.5$} & \multicolumn{2}{c}{$\tau=0.9$} \\
+        \cline{2-3} \cline{4-5} \cline{6-7}
+        \multicolumn{1}{c}{$K$} & MAE & RMSE & MAE & RMSE & MAE & RMSE \\
+        \hline\hline
+        1 & \textbf{3.5978} & \textbf{13.5063} & 2.7533 & 12.2612 & \textbf{4.8157} & \textbf{13.0221} \\
+        2 & 3.6140 & 13.5152 & 2.7496 & 12.2316 & 4.9177 & 13.1424 \\
+        3$^{*}$ & 3.6339 & 13.5293 & 2.7452 & 12.2025 & 5.0136 & 13.3030 \\
+        5 & 3.6565 & 13.5242 & \textbf{2.7445} & 12.1581 & 5.1744 & 13.5542 \\
+        8 & 3.6846 & 13.5361 & 2.7548 & \textbf{12.1453} & 5.3636 & 13.9132 \\
+        \hline
+    \end{tabular}
+    \\[2pt] \footnotesize $^{*}$学習時に用いた設定．
+\end{table}

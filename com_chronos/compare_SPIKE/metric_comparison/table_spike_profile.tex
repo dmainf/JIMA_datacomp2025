@@ -1,0 +1,36 @@
+\begin{table*}[t]
+    \revAcolor
+    \caption{スパイクの発生頻度により層別したMAEおよびRMSE}
+    \label{tab:spike_profile}
+    \centering
+    \setlength{\tabcolsep}{3pt}%
+    \begin{tabular}{lrrrrrrrrrrrr}
+        \hline
+        & \multicolumn{12}{c}{発生頻度［回］} \\
+        \cline{2-13}
+        \multicolumn{1}{c}{モデル} & \multicolumn{2}{c}{1} & \multicolumn{2}{c}{2} & \multicolumn{2}{c}{3} & \multicolumn{2}{c}{4} & \multicolumn{2}{c}{5} & \multicolumn{2}{c}{6以上} \\
+        \cline{2-3} \cline{4-5} \cline{6-7} \cline{8-9} \cline{10-11} \cline{12-13}
+         & MAE & RMSE & MAE & RMSE & MAE & RMSE & MAE & RMSE & MAE & RMSE & MAE & RMSE \\
+        \hline
+        \multicolumn{1}{c}{対象書名数} & \multicolumn{2}{c}{104} & \multicolumn{2}{c}{253} & \multicolumn{2}{c}{337} & \multicolumn{2}{c}{264} & \multicolumn{2}{c}{102} & \multicolumn{2}{c}{72} \\
+        \hline\hline
+        \multicolumn{13}{l}{$\tau=0.1$} \\
+        \quad \textbf{GateRAF} & 2.10 & \textbf{8.55} & \textbf{4.04} & \textbf{13.62} & \textbf{3.53} & \textbf{10.56} & \textbf{3.61} & 13.15 & \textbf{4.15} & \textbf{18.90} & 4.92 & \textbf{22.71} \\
+        \quad \textbf{Multi-RAF} & 2.27 & 8.63 & 4.22 & 13.71 & 3.65 & 10.57 & 3.68 & \textbf{13.07} & 4.34 & 19.12 & 5.07 & 23.10 \\
+        \quad \textbf{ProtoRAF} & 2.08 & 8.56 & 4.10 & 14.09 & 3.55 & 10.62 & 3.67 & 13.25 & 4.31 & 19.47 & 4.70 & 22.88 \\
+        \quad \textbf{Baseline} & \textbf{2.07} & 8.56 & 4.09 & 14.08 & 3.54 & 10.61 & 3.66 & 13.24 & 4.29 & 19.45 & \textbf{4.67} & 22.85 \\
+        \hline
+        \multicolumn{13}{l}{$\tau=0.5$} \\
+        \quad \textbf{GateRAF} & \textbf{1.61} & 8.17 & \textbf{3.06} & \textbf{11.59} & \textbf{2.70} & 9.67 & \textbf{2.85} & 12.31 & \textbf{3.24} & 17.20 & \textbf{2.92} & \textbf{20.23} \\
+        \quad \textbf{Multi-RAF} & 1.65 & \textbf{8.17} & 3.15 & 11.71 & 2.78 & \textbf{9.66} & 2.87 & \textbf{12.22} & 3.32 & \textbf{17.19} & 2.99 & 20.71 \\
+        \quad \textbf{ProtoRAF} & 1.80 & 8.32 & 3.29 & 12.20 & 2.90 & 9.81 & 3.10 & 12.46 & 3.53 & 18.04 & 4.49 & 24.35 \\
+        \quad \textbf{Baseline} & 1.80 & 8.32 & 3.29 & 12.21 & 2.90 & 9.81 & 3.09 & 12.46 & 3.52 & 18.03 & 4.49 & 24.34 \\
+        \hline
+        \multicolumn{13}{l}{$\tau=0.9$} \\
+        \quad \textbf{GateRAF} & 4.53 & 11.97 & 5.17 & \textbf{11.73} & \textbf{4.63} & 10.64 & 4.69 & 12.27 & \textbf{5.68} & \textbf{18.18} & \textbf{7.56} & \textbf{24.26} \\
+        \quad \textbf{Multi-RAF} & \textbf{3.84} & \textbf{9.80} & \textbf{5.14} & 11.93 & 4.66 & \textbf{10.63} & \textbf{4.67} & \textbf{12.26} & 5.82 & 18.73 & 7.81 & 25.12 \\
+        \quad \textbf{ProtoRAF} & 4.65 & 11.66 & 6.34 & 13.70 & 5.65 & 11.44 & 6.12 & 13.58 & 10.50 & 44.15 & 16.40 & 82.56 \\
+        \quad \textbf{Baseline} & 4.65 & 11.67 & 6.34 & 13.70 & 5.65 & 11.45 & 6.12 & 13.58 & 10.45 & 43.83 & 16.40 & 82.71 \\
+        \hline
+    \end{tabular}
+\end{table*}

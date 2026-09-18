@@ -268,6 +268,8 @@ PAPER_MARKER_MAP = {
     'noRAF':    'D',
 }
 
+PAPER_LABEL_MAP = {'noRAF': 'Baseline'}
+
 COLOR_MAP = {
     'GateRAF':  '#e63946',
     'Multi-RAF':'#2a9d8f',
@@ -313,7 +315,7 @@ def plot_interval_calibration(pred_dfs, models, quantile_col, spike_z, output_di
                 marker='o', linewidth=1.8,
                 linestyle=LS_MAP.get(model_name, '-'),
                 color=COLOR_MAP.get(model_name, None),
-                label=model_name)
+                label=PAPER_LABEL_MAP.get(model_name, model_name))
     ax.set_xlabel('Prediction interval width (q0.9 − q0.1)', fontsize=12)
     ax.set_ylabel(r'Mean actual $z$-score', fontsize=12)
     ax.set_title(f'Mean $z$-score by interval width  [{quantile_col}]',
@@ -422,7 +424,7 @@ def plot_cv_vs_f1(pred_dfs, models, quantile_col, spike_z, output_dir):
                     marker='o', linewidth=1.8,
                     linestyle=LS_MAP.get(model_name, '-'),
                     color=COLOR_MAP.get(model_name, None),
-                    label=model_name)
+                    label=PAPER_LABEL_MAP.get(model_name, model_name))
         ax.set_xlabel('Per-series CV (std / mean)', fontsize=12)
         ax.set_ylabel(f'Mean {ylabel}', fontsize=12)
         ax.set_title(f'{ylabel} vs series CV  [z>{spike_z}, {quantile_col}]',
@@ -477,8 +479,9 @@ for quantile in QUANTILES:
     plot_temporal_proximity(pred_dfs, models, quantile, CHAR_Z, char_dir)
     plot_cv_vs_f1(pred_dfs, models, quantile, CHAR_Z, char_dir)
 
-Z_BIN_EDGES  = [-np.inf, -1.0, 0.0, 0.5, 1.0, 1.5, 2.0, 3.0, np.inf]
-Z_BIN_LABELS = ['<-1', '-1–0', '0–0.5', '0.5–1', '1–1.5', '1.5–2', '2–3', '>3']
+# 論文の表2は区分を1刻みにしている（誌面で表が縮小されすぎないようにするため）．
+Z_BIN_EDGES  = [-np.inf, -1.0, 0.0, 1.0, 2.0, 3.0, np.inf]
+Z_BIN_LABELS = ['<-1', '-1–0', '0–1', '1–2', '2–3', '>3']
 
 
 def plot_mae_vs_zscore(pred_dfs, models, colors, markers, quantiles, output_dir):
@@ -689,7 +692,7 @@ def plot_temporal_proximity_combined(pred_dfs, models, quantile_col, spike_z, ou
             norm, marker, ls, color, n = entry
             ax.plot(bin_centers, norm, marker=marker, linewidth=1.6, markersize=4,
                     linestyle=ls, color=color, markevery=2,
-                    label=f'{model_name} ($n={n}$)')
+                    label=f'{PAPER_LABEL_MAP.get(model_name, model_name)} ($n={n}$)')
         ax.axvline(0, color='black', linestyle='--', linewidth=1.0)
         ax.set_xlabel(xlabels[key], fontsize=11)
         ax.set_ylabel('相対頻度', fontsize=11)
@@ -782,7 +785,7 @@ def plot_interval_calibration_paper(pred_dfs, models, spike_z, output_dir):
                 linewidth=1.8, markersize=6,
                 linestyle=LS_MAP.get(model_name, '-'),
                 color=COLOR_MAP.get(model_name, '#333333'),
-                label=model_name)
+                label=PAPER_LABEL_MAP.get(model_name, model_name))
     ax.set_xlabel(r'予測区間幅（$q_{0.9} - q_{0.1}$）', fontsize=12)
     ax.set_ylabel(r'実績値の$z$スコア平均', fontsize=12)
     ax.legend(fontsize=10)
