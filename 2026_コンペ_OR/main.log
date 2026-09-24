@@ -1,4 +1,4 @@
-This is e-upTeX, Version 3.141592653-p4.1.2-u2.02-251130-2.6 (utf8.euc) (TeX Live 2026) (preloaded format=platex 2026.4.29)  11 SEP 2026 01:24
+This is e-upTeX, Version 3.141592653-p4.1.2-u2.02-251130-2.6 (utf8.euc) (TeX Live 2026) (preloaded format=platex 2026.4.29)  21 SEP 2026 22:55
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -30,20 +30,25 @@ LaTeX Font Info:    Overwriting symbol font `mincho' in version `bold'
 \@lnumwidth=\dimen167
 \bibindent=\dimen168
 \heisei=\count283
-) (/usr/local/texlive/2026/texmf-dist/tex/latex/amsmath/amsmath.sty
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/amsmath/amsmath.sty
 Package: amsmath 2025/07/09 v2.17z AMS math features
 \@mathmargin=\skip51
+
 For additional information on amsmath, use the `?' option.
 (/usr/local/texlive/2026/texmf-dist/tex/latex/amsmath/amstext.sty
 Package: amstext 2024/11/17 v2.01 AMS text
+
 (/usr/local/texlive/2026/texmf-dist/tex/latex/amsmath/amsgen.sty
 File: amsgen.sty 1999/11/30 v2.0 generic functions
 \@emptytoks=\toks18
 \ex@=\dimen169
-)) (/usr/local/texlive/2026/texmf-dist/tex/latex/amsmath/amsbsy.sty
+))
+(/usr/local/texlive/2026/texmf-dist/tex/latex/amsmath/amsbsy.sty
 Package: amsbsy 1999/11/29 v1.2d Bold Symbols
 \pmbraise@=\dimen170
-) (/usr/local/texlive/2026/texmf-dist/tex/latex/amsmath/amsopn.sty
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/amsmath/amsopn.sty
 Package: amsopn 2022/04/08 v2.04 operator names
 )
 \inf@bad=\count284
@@ -93,8 +98,10 @@ LaTeX Info: Redefining \Relbar on input line 970.
 \mathdisplay@stack=\toks22
 LaTeX Info: Redefining \[ on input line 2950.
 LaTeX Info: Redefining \] on input line 2951.
-) (/usr/local/texlive/2026/texmf-dist/tex/latex/amsfonts/amssymb.sty
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/amsfonts/amssymb.sty
 Package: amssymb 2013/01/14 v3.01 AMS font symbols
+
 (/usr/local/texlive/2026/texmf-dist/tex/latex/amsfonts/amsfonts.sty
 Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
 \symAMSa=\mathgroup5
@@ -102,7 +109,8 @@ Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
 LaTeX Font Info:    Redeclaring math symbol \hbar on input line 98.
 LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
 (Font)                  U/euf/m/n --> U/euf/b/n on input line 106.
-)) (/usr/local/texlive/2026/texmf-dist/tex/latex/tools/bm.sty
+))
+(/usr/local/texlive/2026/texmf-dist/tex/latex/tools/bm.sty
 Package: bm 2025/10/21 v1.2g Bold Symbol Support (DPC/FMi)
 \symboldoperators=\mathgroup7
 \symboldletters=\mathgroup8
@@ -112,30 +120,40 @@ Package bm Info: No bold for \OMX/cmex/m/n, using \pmb.
 Package bm Info: No bold for \U/msa/m/n, using \pmb.
 Package bm Info: No bold for \U/msb/m/n, using \pmb.
 LaTeX Font Info:    Redeclaring math alphabet \mathbf on input line 149.
-) (/usr/local/texlive/2026/texmf-dist/tex/latex/placeins/placeins.sty
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/placeins/placeins.sty
 Package: placeins 2005/04/18  v 2.2
-) (/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/graphicx.sty
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/graphicx.sty
 Package: graphicx 2024/12/31 v1.2e Enhanced LaTeX Graphics (DPC,SPQR)
+
 (/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/keyval.sty
 Package: keyval 2022/05/29 v1.15 key=value parser (DPC)
 \KV@toks@=\toks23
-) (/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/graphics.sty
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/graphics.sty
 Package: graphics 2024/08/06 v1.4g Standard LaTeX Graphics (DPC,SPQR)
+
 (/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/trig.sty
 Package: trig 2023/12/02 v1.11 sin cos tan (DPC)
-) (/usr/local/texlive/2026/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
 File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
 )
 Package graphics Info: Driver file: dvips.def on input line 106.
+
 (/usr/local/texlive/2026/texmf-dist/tex/latex/graphics-def/dvips.def
 File: dvips.def 2025/01/21 v3.2a Graphics/color driver for dvips
 ))
 \Gin@req@height=\dimen178
 \Gin@req@width=\dimen179
-) (/usr/local/texlive/2026/texmf-dist/tex/latex/caption/subcaption.sty
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/caption/subcaption.sty
 Package: subcaption 2023/07/28 v1.6b Sub-captions (AR)
+
 (/usr/local/texlive/2026/texmf-dist/tex/latex/caption/caption.sty
 Package: caption 2023/08/05 v3.6o Customizing captions (AR)
+
 (/usr/local/texlive/2026/texmf-dist/tex/latex/caption/caption3.sty
 Package: caption3 2023/07/31 v2.4d caption3 kernel (AR)
 \caption@tempdima=\dimen180
@@ -176,28 +194,35 @@ olumn mode
 \@fixht=\dimen190
 \@rightfixht=\dimen191
 \@combinebox=\box72
-) (/usr/local/texlive/2026/texmf-dist/tex/latex/natbib/natbib.sty
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/natbib/natbib.sty
 Package: natbib 2010/09/13 8.31b (PWD, AO)
 \bibhang=\skip54
 \bibsep=\skip55
 LaTeX Info: Redefining \cite on input line 694.
 \c@NAT@ctr=\count302
-) (/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/color.sty
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/color.sty
 Package: color 2025/01/14 v1.3e Standard LaTeX Color (DPC)
+
 (/usr/local/texlive/2026/texmf-dist/tex/latex/graphics-cfg/color.cfg
 File: color.cfg 2016/01/02 v1.6 sample color configuration
 )
 Package color Info: Driver file: dvips.def on input line 149.
+
 (/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/dvipsnam.def
 File: dvipsnam.def 2016/06/17 v3.0m Driver-dependent file (DPC,SPQR)
-) (/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/mathcolor.ltx)) (/usr/
-local/texlive/2026/texmf-dist/tex/latex/url/url.sty
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/mathcolor.ltx))
+(/usr/local/texlive/2026/texmf-dist/tex/latex/url/url.sty
 \Urlmuskip=\muskip18
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
-) (/usr/local/texlive/2026/texmf-dist/tex/latex/comment/comment.sty
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/comment/comment.sty
 \CommentStream=\write3
-Excluding comment 'comment') (/usr/local/texlive/2026/texmf-dist/tex/latex/mult
-irow/multirow.sty
+
+Excluding comment 'comment')
+(/usr/local/texlive/2026/texmf-dist/tex/latex/multirow/multirow.sty
 Package: multirow 2024/11/12 v2.9 Span multiple rows of a table
 \multirow@colwidth=\skip56
 \multirow@cntb=\count303
@@ -242,15 +267,16 @@ LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
 \@leftcolumnfootnote=\box78
 \@rightcolumnfootnote=\box79
 \Q=\dimen263
-) Excluding 'comment' comment. Excluding 'comment' comment. (/usr/local/texlive
-/2026/texmf-dist/tex/latex/l3backend/l3backend-dvips.def
+) Excluding 'comment' comment. Excluding 'comment' comment.
+(/usr/local/texlive/2026/texmf-dist/tex/latex/l3backend/l3backend-dvips.def
 File: l3backend-dvips.def 2026-02-18 L3 backend support: dvips
 \l__pdfannot_backend_content_box=\box80
 \l__pdfannot_backend_model_box=\box81
 \g__pdfannot_backend_int=\count307
 \g__pdfannot_backend_link_int=\count308
 \g__pdfannot_backend_link_sf_int=\count309
-) (./main.aux)
+)
+(./main.aux)
 \openout1 = `main.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 118.
@@ -291,11 +317,12 @@ LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
 (Font)              scaled to size 4.92783pt on input line 152.
 LaTeX Font Info:    Trying to load font information for U+msa on input line 152
 .
-(/usr/local/texlive/2026/texmf-dist/tex/latex/amsfonts/umsa.fd
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
 LaTeX Font Info:    Trying to load font information for U+msb on input line 152
 .
+
 (/usr/local/texlive/2026/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
@@ -308,86 +335,96 @@ ignored: Infinite glue shrinkage found in box being split [1
 
 
 ]
+ignored: Infinite glue shrinkage found in box being split [2]
 File: figure/architecture/architecture_ProtoRAF.eps Graphic file (type eps)
+
 <figure/architecture/architecture_ProtoRAF.eps>
-ignored: Infinite glue shrinkage found in
- box being split [2]
 File: figure/architecture/architecture_GateRAF.eps Graphic file (type eps)
+
 <figure/architecture/architecture_GateRAF.eps>
 ignored: Infinite glue shrinkage found in 
 box being split [3]
 ignored: Infinite glue shrinkage found in box being split [4]
 ignored: Infinite
  glue shrinkage found in box being split [5]
+ignored: Infinite glue shrinkage found in bo
+x being split [6]
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 7.88452pt on input line 379.
+(Font)              scaled to size 7.88452pt on input line 417.
 LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <8> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 387.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 425.
 LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <8> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 387.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 425.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 7.88452pt on input line 387.
+(Font)              scaled to size 7.88452pt on input line 425.
 
-ignored: Infinite glue shrinkage found in box being split [6]
+ignored: Infinite glue shrinkage found in box being split [7]
+ignored: Infinite glue shrinkage fou
+nd in box being split [8]
+ignored: Infinite glue shrinkage found in box being split [9]
 File: figure/interval_calibration.eps Graphic file (type eps)
+
 <figure/interval_calibration.eps>
-ignored: Infinite glue shrinkage found in box being spl
-it [7]
-ignored: Infinite glue shrinkage found in box being split [8]
 File: figure/figure_book/bocchi/figure_book_bocchi_prophet.eps Graphic file (ty
 pe eps)
+
 <figure/figure_book/bocchi/figure_book_bocchi_prophet.eps>
 File: figure/figure_book/crossword/figure_book_crossword_prophet.eps Graphic fi
 le (type eps)
+
 <figure/figure_book/crossword/figure_book_crossword_prophet.eps>
 ignored: Infinite glue s
-hrinkage found in box being split [9]
-ignored: Infinite glue shrinkage found in box being
- split [10]
+hrinkage found in box being split [10]
+ignored: Infinite glue shrinkage found in box bein
+g split
+ignored: Infinite glue shrinkage found in box being split [11]
+ignored: Infinite glue shrin
+kage found in box being split
+[12]
 LaTeX Font Info:    Font shape `JT1/mc/m/it' in size <8> not available
-(Font)              Font shape `JT1/mc/m/n' tried instead on input line 682.
+(Font)              Font shape `JT1/mc/m/n' tried instead on input line 764.
 LaTeX Font Info:    Font shape `JY1/mc/m/it' in size <8> not available
-(Font)              Font shape `JY1/mc/m/n' tried instead on input line 682.
+(Font)              Font shape `JY1/mc/m/n' tried instead on input line 764.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 7.88452pt on input line 682.
+(Font)              scaled to size 7.88452pt on input line 764.
 
-Underfull \hbox (badness 4193) in paragraph at lines 680--683
+Underfull \hbox (badness 4193) in paragraph at lines 762--765
 []\OT1/cmr/m/n/8 P. Lewis, E. Perez, A. Pik-tus, F. Petroni,
  []
 
 
-Underfull \hbox (badness 4429) in paragraph at lines 680--683
+Underfull \hbox (badness 4429) in paragraph at lines 762--765
 \OT1/cmr/m/n/8 ``Retrieval-Augmented Gen-er-a-tion for Knowledge-
  []
 
 
-Underfull \hbox (badness 4441) in paragraph at lines 685--688
+Underfull \hbox (badness 4441) in paragraph at lines 767--770
 \OT1/cmr/m/n/8 ``Re-trieval Aug-mented Time Se-ries Fore-cast-ing,''
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 690--693
+Underfull \hbox (badness 10000) in paragraph at lines 772--775
 []\OT1/cmr/m/n/8 Y. Nie, N. H. Nguyen, P. Sinthong and
  []
 
 
-Underfull \hbox (badness 8000) in paragraph at lines 695--698
+Underfull \hbox (badness 8000) in paragraph at lines 777--780
 []\OT1/cmr/m/n/8 D. Sali-nas, V. Flunkert, J. Gasthaus and
  []
 
 
-Underfull \hbox (badness 7256) in paragraph at lines 695--698
+Underfull \hbox (badness 7256) in paragraph at lines 777--780
 \OT1/cmr/m/n/8 T. Januschowski, ``DeepAR: Prob-a-bilis-tic Fore-
  []
 
-[11] [12] (./main.aux) ) 
+[13] (./main.aux) ) 
 Here is how much of TeX's memory you used:
- 4964 strings out of 467995
- 79168 string characters out of 5431125
- 567442 words of memory out of 5000000
- 33989 multiletter control sequences out of 15000+600000
+ 4971 strings out of 467995
+ 79276 string characters out of 5431125
+ 567571 words of memory out of 5000000
+ 33996 multiletter control sequences out of 15000+600000
  644253 words of font info for 113 fonts, out of 8000000 for 9000
  929 hyphenation exceptions out of 8191
- 67i,13n,77p,678b,591s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 67i,13n,77p,791b,591s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on main.dvi (12 pages, 99040 bytes).
+Output written on main.dvi (13 pages, 110680 bytes).

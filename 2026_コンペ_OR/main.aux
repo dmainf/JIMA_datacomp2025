@@ -13,13 +13,16 @@
 \citation{Tire.2024}
 \citation{Ning.2025}
 \citation{Zhang.2024}
+\citation{Lee.2026}
 \citation{Tire.2024}
+\citation{Lee.2026}
+\newlabel{eq:distance}{{2}{2}{}{equation.2}{}}
 \citation{Kim.2022}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces ProtoRAFのアーキテクチャ概要}}{3}{}\protected@file@percent }
+\newlabel{eq:loc-encode}{{5}{3}{}{equation.5}{}}
+\newlabel{eq:ret-encode}{{6}{3}{}{equation.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces ProtoRAFのアーキテクチャ概要}}{4}{}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{fig:protoraf}{{1}{3}{}{figure.1}{}}
-\newlabel{eq:loc-encode}{{4}{3}{}{equation.4}{}}
-\newlabel{eq:ret-encode}{{5}{3}{}{equation.5}{}}
+\newlabel{fig:protoraf}{{1}{4}{}{figure.1}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces GateRAF（提案手法）のアーキテクチャ概要}}{4}{}\protected@file@percent }
 \newlabel{fig:gateraf}{{2}{4}{}{figure.2}{}}
 \citation{Ansari.2024}
@@ -27,42 +30,47 @@
 \citation{Taylor.2018}
 \citation{Johnson.2019}
 \citation{Koenker.1978}
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces 各モデルおよび分位点レベルにおけるMAEおよびRMSEの比較}}{7}{}\protected@file@percent }
-\newlabel{tab:metric_comparison}{{1}{7}{}{table.1}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces 系列内$z$スコアビン別のMAEおよびRMSE．}}{8}{}\protected@file@percent }
-\newlabel{tab:mae_rmse_vs_zscore}{{2}{8}{}{table.2}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces スパイクの発生頻度により層別したMAEおよびRMSE}}{8}{}\protected@file@percent }
-\newlabel{tab:spike_profile}{{3}{8}{}{table.3}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces $\Delta $日ごとの誤検知および見逃しの割合}}{8}{}\protected@file@percent }
-\newlabel{tab:temporal_proximity}{{4}{8}{}{table.4}{}}
+\newlabel{eq:delta}{{12}{6}{}{equation.12}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces 各モデルおよび分位点レベルにおけるMAEおよびRMSEの比較}}{8}{}\protected@file@percent }
+\newlabel{tab:metric_comparison}{{1}{8}{}{table.1}{}}
+\newlabel{eq:capture}{{15}{8}{}{equation.15}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces 系列内$z$スコアビン別のMAEおよびRMSE．}}{9}{}\protected@file@percent }
+\newlabel{tab:mae_rmse_vs_zscore}{{2}{9}{}{table.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces スパイクの発生頻度により層別したMAEおよびRMSE}}{9}{}\protected@file@percent }
+\newlabel{tab:spike_profile}{{3}{9}{}{table.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces $\Delta $日ごとの誤検知および見逃しの割合}}{9}{}\protected@file@percent }
+\newlabel{tab:temporal_proximity}{{4}{9}{}{table.4}{}}
 \citation{Box.1970}
 \citation{Taylor.2018}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces 予測区間の幅ごとの実績$z$スコア平均}}{9}{}\protected@file@percent }
-\newlabel{Fig:interval_calibration}{{3}{9}{}{figure.3}{}}
-\newlabel{fig:book_bocchi}{{4(a)}{10}{}{subfigure.4.1}{}}
-\newlabel{sub@fig:book_bocchi}{{(a)}{10}{}{subfigure.4.1}{}}
-\newlabel{fig:book_crossword}{{4(b)}{10}{}{subfigure.4.2}{}}
-\newlabel{sub@fig:book_crossword}{{(b)}{10}{}{subfigure.4.2}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces 各系列における予測と実績の比較}}{10}{}\protected@file@percent }
-\newlabel{fig:book_examples}{{4}{10}{}{figure.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces 予測区間の幅ごとの実績$z$スコア平均}}{10}{}\protected@file@percent }
+\newlabel{Fig:interval_calibration}{{3}{10}{}{figure.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces 予測区間幅の十分位ごとの実績$z$スコアの標準偏差とスパイクの割合}}{11}{}\protected@file@percent }
+\newlabel{tab:interval_dispersion}{{5}{11}{}{table.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces 予測値{\color  {red}（$\tau =0.5$）}を入荷量とみなした場合の返本率\color  {blue}と損失額（本体価格による換算）}}{11}{}\protected@file@percent }
+\newlabel{tab:return_loss}{{7}{11}{}{table.7}{}}
+\newlabel{fig:book_bocchi}{{4(a)}{12}{}{subfigure.4.1}{}}
+\newlabel{sub@fig:book_bocchi}{{(a)}{12}{}{subfigure.4.1}{}}
+\newlabel{fig:book_crossword}{{4(b)}{12}{}{subfigure.4.2}{}}
+\newlabel{sub@fig:book_crossword}{{(b)}{12}{}{subfigure.4.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces 各系列における予測と実績の比較}}{12}{}\protected@file@percent }
+\newlabel{fig:book_examples}{{4}{12}{}{figure.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces 入荷量に用いる分位点$\tau $を変えた場合の過剰入荷および機会損失［冊］}}{12}{}\protected@file@percent }
+\newlabel{tab:quantile_sensitivity}{{6}{12}{}{table.6}{}}
 \bibcite{JBPA.2001}{{1}{2001}{{日本書籍出版協会}}{{}}}
 \bibcite{Shuppan.2024}{{2}{2024}{{全国出版協会・出版科学研究所}}{{}}}
 \bibcite{Lewis.2020}{{3}{2020}{{Lewis~et~al.}}{{}}}
 \bibcite{Tire.2024}{{4}{2024}{{Tire~et~al.}}{{}}}
 \bibcite{Nie.2023}{{5}{2023}{{Nie~et~al.}}{{}}}
 \bibcite{Salinas.2020}{{6}{2020}{{Salinas~et~al.}}{{}}}
-\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces 入荷量に用いる分位点$\tau $を変えた場合の過剰入荷および機会損失［冊］}}{11}{}\protected@file@percent }
-\newlabel{tab:quantile_sensitivity}{{5}{11}{}{table.5}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces 予測値{\color  {red}（$\tau =0.5$）}を入荷量とみなした場合の返本率\color  {blue}と損失額（本体価格による換算）}}{11}{}\protected@file@percent }
-\newlabel{tab:return_loss}{{6}{11}{}{table.6}{}}
 \bibcite{Lim.2021}{{7}{2021}{{Lim~et~al.}}{{}}}
 \bibcite{Ansari.2024}{{8}{2024}{{Ansari~et~al.}}{{}}}
 \bibcite{Croston.1972}{{9}{1972}{{Croston}}{{}}}
 \bibcite{Ning.2025}{{10}{2025}{{Ning~et~al.}}{{}}}
 \bibcite{Zhang.2024}{{11}{2024}{{Zhang~et~al.}}{{}}}
-\bibcite{Johnson.2019}{{12}{2019}{{Johnson~et~al.}}{{}}}
-\bibcite{Kim.2022}{{13}{2022}{{Kim~et~al.}}{{}}}
-\bibcite{Liu.2024}{{14}{2024}{{Liu~et~al.}}{{}}}
-\bibcite{Taylor.2018}{{15}{2018}{{Taylor~\&~Letham}}{{}}}
-\bibcite{Koenker.1978}{{16}{1978}{{Koenker~\&~Bassett}}{{}}}
-\bibcite{Box.1970}{{17}{1970}{{Box~\&~Jenkins}}{{}}}
+\bibcite{Lee.2026}{{12}{2026}{{Lee~et~al.}}{{}}}
+\bibcite{Johnson.2019}{{13}{2019}{{Johnson~et~al.}}{{}}}
+\bibcite{Kim.2022}{{14}{2022}{{Kim~et~al.}}{{}}}
+\bibcite{Liu.2024}{{15}{2024}{{Liu~et~al.}}{{}}}
+\bibcite{Taylor.2018}{{16}{2018}{{Taylor~\&~Letham}}{{}}}
+\bibcite{Koenker.1978}{{17}{1978}{{Koenker~\&~Bassett}}{{}}}
+\bibcite{Box.1970}{{18}{1970}{{Box~\&~Jenkins}}{{}}}

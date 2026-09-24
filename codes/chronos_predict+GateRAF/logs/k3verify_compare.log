@@ -1,0 +1,8 @@
+new: GateRAF-k3verify/predictions_all.csv  (74048, 6)  books=1157
+ref: ../../make_figure/GateRAF.csv  (74048, 6)  books=1157
+actual max|Δ|=0  mean|Δ|=0  max rel=0  完全一致=True
+q0.1   max|Δ|=0  mean|Δ|=0  max rel=0  完全一致=True
+q0.5   max|Δ|=0  mean|Δ|=0  max rel=0  完全一致=True
+q0.9   max|Δ|=0  mean|Δ|=0  max rel=0  完全一致=True
+
+MAE(q0.5)  new=2.745243  ref=2.745243  Δ=+0.000000
