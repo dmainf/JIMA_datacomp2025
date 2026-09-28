@@ -135,10 +135,6 @@ INPUT ./figure/architecture/architecture_ProtoRAF.eps
 INPUT ./figure/architecture/architecture_ProtoRAF.eps
 INPUT ./figure/architecture/architecture_ProtoRAF.eps
 INPUT figure/architecture/architecture_ProtoRAF.eps
-INPUT ./figure/architecture/architecture_GateRAF.eps
-INPUT ./figure/architecture/architecture_GateRAF.eps
-INPUT ./figure/architecture/architecture_GateRAF.eps
-INPUT figure/architecture/architecture_GateRAF.eps
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/cm/cmmi8.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/cm/cmsy8.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex8.tfm
@@ -148,6 +144,10 @@ INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/cm/cmbx8.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmmib8.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmbsy8.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/ptex-fonts/jis/jisg.tfm
+INPUT ./figure/architecture/architecture_GateRAF.eps
+INPUT ./figure/architecture/architecture_GateRAF.eps
+INPUT ./figure/architecture/architecture_GateRAF.eps
+INPUT figure/architecture/architecture_GateRAF.eps
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/ptex-fonts/standard/tgoth8.tfm
 INPUT ./figure/interval_calibration.eps
 INPUT ./figure/interval_calibration.eps

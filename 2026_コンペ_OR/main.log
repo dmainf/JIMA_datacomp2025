@@ -1,4 +1,4 @@
-This is e-upTeX, Version 3.141592653-p4.1.2-u2.02-251130-2.6 (utf8.euc) (TeX Live 2026) (preloaded format=platex 2026.4.29)  24 SEP 2026 22:00
+This is e-upTeX, Version 3.141592653-p4.1.2-u2.02-251130-2.6 (utf8.euc) (TeX Live 2026) (preloaded format=platex 2026.4.29)  27 SEP 2026 01:33
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -335,28 +335,27 @@ ignored: Infinite glue shrinkage found in box being split [1
 
 
 ]
-ignored: Infinite glue shrinkage found in box being split [2]
 File: figure/architecture/architecture_ProtoRAF.eps Graphic file (type eps)
 
 <figure/architecture/architecture_ProtoRAF.eps>
+ignored: Infinite glue shrinkage found in
+ box being split [2]
+LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
+(Font)              scaled to size 7.88452pt on input line 238.
 File: figure/architecture/architecture_GateRAF.eps Graphic file (type eps)
 
-<figure/architecture/architecture_GateRAF.eps>
-ignored: Infinite glue shrinkage found in 
-box being split [3]
-ignored: Infinite glue shrinkage found in box being split [4]
-ignored: Infinite
- glue shrinkage found in box being split [5]
-ignored: Infinite glue shrinkage found in bo
-x being split [6]
-LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 7.88452pt on input line 415.
+<figure/architecture/architecture_GateRAF.eps> [3]
+ignored: Infinite glue shrinkage found
+ in box being split [4]
+ignored: Infinite glue shrinkage found in box being split [5]
+ignored: Infi
+nite glue shrinkage found in box being split [6]
 LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <8> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 423.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 420.
 LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <8> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 423.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 420.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 7.88452pt on input line 423.
+(Font)              scaled to size 7.88452pt on input line 420.
 
 ignored: Infinite glue shrinkage found in box being split [7]
 ignored: Infinite glue shrinkage fou
@@ -365,6 +364,8 @@ ignored: Infinite glue shrinkage found in box being split [9]
 File: figure/interval_calibration.eps Graphic file (type eps)
 
 <figure/interval_calibration.eps>
+ignored: Infinite glue shrinkage found in box being spl
+it [10]
 File: figure/figure_book/bocchi/figure_book_bocchi_prophet.eps Graphic file (ty
 pe eps)
 
@@ -374,57 +375,61 @@ le (type eps)
 
 <figure/figure_book/crossword/figure_book_crossword_prophet.eps>
 ignored: Infinite glue s
-hrinkage found in box being split [10]
+hrinkage found in box being split [11]
 ignored: Infinite glue shrinkage found in box bein
-g split
-ignored: Infinite glue shrinkage found in box being split [11]
+g split [12]
+ignored: Infinite glue shrinkage found in box being split
 ignored: Infinite glue shrin
 kage found in box being split
-[12]
+[13]
 LaTeX Font Info:    Font shape `JT1/mc/m/it' in size <8> not available
-(Font)              Font shape `JT1/mc/m/n' tried instead on input line 760.
+(Font)              Font shape `JT1/mc/m/n' tried instead on input line 808.
 LaTeX Font Info:    Font shape `JY1/mc/m/it' in size <8> not available
-(Font)              Font shape `JY1/mc/m/n' tried instead on input line 760.
+(Font)              Font shape `JY1/mc/m/n' tried instead on input line 808.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 7.88452pt on input line 760.
+(Font)              scaled to size 7.88452pt on input line 808.
 
-Underfull \hbox (badness 4193) in paragraph at lines 758--761
+Underfull \hbox (badness 4193) in paragraph at lines 806--809
 []\OT1/cmr/m/n/8 P. Lewis, E. Perez, A. Pik-tus, F. Petroni,
  []
 
 
-Underfull \hbox (badness 4429) in paragraph at lines 758--761
+Underfull \hbox (badness 4429) in paragraph at lines 806--809
 \OT1/cmr/m/n/8 ``Retrieval-Augmented Gen-er-a-tion for Knowledge-
  []
 
 
-Underfull \hbox (badness 4441) in paragraph at lines 763--766
+Underfull \hbox (badness 4441) in paragraph at lines 811--814
 \OT1/cmr/m/n/8 ``Re-trieval Aug-mented Time Se-ries Fore-cast-ing,''
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 768--771
+Underfull \hbox (badness 10000) in paragraph at lines 816--819
 []\OT1/cmr/m/n/8 Y. Nie, N. H. Nguyen, P. Sinthong and
  []
 
 
-Underfull \hbox (badness 8000) in paragraph at lines 773--776
+Underfull \hbox (badness 8000) in paragraph at lines 821--824
 []\OT1/cmr/m/n/8 D. Sali-nas, V. Flunkert, J. Gasthaus and
  []
 
 
-Underfull \hbox (badness 7256) in paragraph at lines 773--776
+Underfull \hbox (badness 7256) in paragraph at lines 821--824
 \OT1/cmr/m/n/8 T. Januschowski, ``DeepAR: Prob-a-bilis-tic Fore-
  []
 
-[13] (./main.aux) ) 
+
+Overfull \vbox (78.09998pt too high) has occurred while \output is active []
+
+
+[14] (./main.aux) ) 
 Here is how much of TeX's memory you used:
- 4971 strings out of 467995
- 79276 string characters out of 5431125
- 567571 words of memory out of 5000000
- 33996 multiletter control sequences out of 15000+600000
+ 4977 strings out of 467995
+ 79401 string characters out of 5431125
+ 567627 words of memory out of 5000000
+ 34002 multiletter control sequences out of 15000+600000
  644253 words of font info for 113 fonts, out of 8000000 for 9000
  929 hyphenation exceptions out of 8191
- 67i,13n,77p,791b,591s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 67i,15n,77p,1097b,591s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on main.dvi (13 pages, 111432 bytes).
+Output written on main.dvi (14 pages, 121748 bytes).
