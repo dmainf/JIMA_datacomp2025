@@ -1,10 +1,10 @@
 # Fdb version 4
-["dvipdf"] 1790440395.24939 "main.dvi" "main.pdf" "main" 1790440395.99796 0
-  "main.dvi" 1790440395.23479 121748 3bcf20c6badddd6b059cd889499bb35c "latex"
+["dvipdf"] 1790659530.57009 "main.dvi" "main.pdf" "main" 1790659531.39303 0
+  "main.dvi" 1790659530.55627 129652 93ed330bf3a8d9f308d334d3554557c9 "latex"
   (generated)
   "main.pdf"
   (rewritten before read)
-["latex"] 1790440394.98729 "main.tex" "main.dvi" "main" 1790440395.99741 0
+["latex"] 1790659530.30132 "main.tex" "main.dvi" "main" 1790659531.39246 0
   "/usr/local/texlive/2026/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/ptex-fonts/jis/jis.tfm" 1463434352 468 53f854284f6afa6c36aaa2d1090ecc12 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/ptex-fonts/jis/jisg.tfm" 1463434352 468 53f854284f6afa6c36aaa2d1090ecc12 ""
@@ -87,8 +87,8 @@
   "figure/figure_book/bocchi/figure_book_bocchi_prophet.eps" 1788967532.82791 144307 b87d6ec32a97bc098c2a2724f7c5261a ""
   "figure/figure_book/crossword/figure_book_crossword_prophet.eps" 1788967532.82859 53158 1cffd0a663815bd9c711ede5ed5ae178 ""
   "figure/interval_calibration.eps" 1789055025.46163 51955 08f5a679efac39962cb68926a929cf79 ""
-  "main.aux" 1790440395.23425 4939 02520f5969b60e96a8ecc9fc5b72c765 "latex"
-  "main.tex" 1790440394.92198 93067 48378d71134432bd957e94b70215fe20 ""
+  "main.aux" 1790659530.55572 5213 20472cadbe8e82cd8c3a68a7fd0736e2 "latex"
+  "main.tex" 1790659530.14099 98466 8ea864881b922c47ee1b0bab12462bc1 ""
   "or.sty" 1788850324 47504 e1c3ea6005c434a0d41230d823fb5983 ""
   (generated)
   "main.aux"

@@ -22,7 +22,7 @@ for fname, label in MODELS:
     p = df['書名'].map(price)
     sales = df['actual'].sum()
     for q in QUANTILES:
-        err = df[q] - df['actual']
+        err = df[q].clip(lower=0) - df['actual']
         over = err.clip(lower=0)          # 過剰入荷（返本）
         short = (-err).clip(lower=0)      # 機会損失
         rows.append({
